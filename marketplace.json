@@ -15,8 +15,7 @@
       "description": "Enforces Clean Architecture layering for TypeScript factory-based codebases. Use when creating, refactoring, or reviewing handlers, services, domains, and repositories.",
       "version": "1.0.0",
       "author": {
-        "name": "Marco Turi",
-        "email": "marco.turi@nearform.com"
+        "name": "Marco Turi"
       },
       "keywords": [
         "architecture",
