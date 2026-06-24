@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nearform Plugins — Marketplace for Claude Code, Cursor and Copilot CLI</title>
+  <meta name="description" content="Browse the Nearform plugin marketplace — plugins bundling skills, commands, agents, hooks and MCP servers for Claude Code, Cursor, and GitHub Copilot CLI." />
+  <link rel="icon" type="image/svg+xml" href="assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <h1>
+        <picture class="brand-logo">
+          <source srcset="assets/NF_Logo_Reverse.svg" media="(prefers-color-scheme: dark)" />
+          <img src="assets/NF_Logo_Color.svg" alt="Nearform" />
+        </picture>
+        <span class="hero-title">Plugins</span>
+      </h1>
+      <p class="tagline" id="market-description">Plugins for Claude Code, Cursor and Copilot CLI. Built by Nearform. Open to the community.</p>
+      <div class="hero-links">
+        <a href="https://github.com/nearform/skills">View on GitHub</a>
+        <a href="https://github.com/nearform/skills/blob/main/CONTRIBUTING.md">Contributing guide</a>
+        <a href="https://docs.claude.com/en/docs/claude-code/plugin-marketplaces">What are plugins?</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="install">
+      <h2>Install the marketplace</h2>
+      <div class="install-grid"><div class="install-card"><h3>Claude Code</h3>
+      <p class="platform-label">CLI</p>
+      <pre><code>claude plugin marketplace add nearform/skills</code><button class="copy-btn" data-copy="claude plugin marketplace add nearform/skills">Copy</button></pre>
+      <p class="platform-label">In Claude</p>
+      <pre><code>/plugin marketplace add nearform/skills</code><button class="copy-btn" data-copy="/plugin marketplace add nearform/skills">Copy</button></pre></div><div class="install-card"><h3>Cursor</h3><p class="platform">Open File → Cursor Settings → Plugins, then add <code>nearform/skills</code>.</p></div><div class="install-card"><h3>Copilot CLI</h3><pre><code>copilot plugin marketplace add nearform/skills</code><button class="copy-btn" data-copy="copilot plugin marketplace add nearform/skills">Copy</button></pre></div></div>
+      <p class="browse-tip">Browse from your client too: <code>/plugin</code> in Claude Code · <code>copilot plugin marketplace browse nearform-skills</code> in Copilot CLI · the Plugins panel in Cursor.</p>
+    </section>
+
+    <section id="update">
+      <h2>Stay up to date</h2>
+      <div class="install-grid"><div class="install-card"><h3>Claude Code</h3><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="install-card"><h3>Cursor</h3><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="install-card"><h3>Copilot CLI</h3><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div></div>
+    </section>
+
+    <section id="plugins">
+      <h2>Plugins <span class="count" id="plugin-count"></span></h2>
+      <div class="controls">
+        <label for="search" class="visually-hidden">Search plugins</label>
+        <input type="search" id="search" class="search-box" placeholder="Search plugins by name, description, or keyword…" autocomplete="off" />
+        <div class="filter-chips" id="filter-chips"></div>
+      </div>
+      <div class="plugin-grid" id="plugin-grid"></div>
+      <div class="empty" id="empty" hidden>No plugins match your filters.</div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script id="marketplace-data" type="application/json">{"name":"nearform-skills","owner":{"name":"Nearform","email":"services@nearform.com"},"metadata":{"description":"A curated, public subset of the Nearform skills registry.","version":"1.1.0"},"plugins":[{"name":"clean-architecture","source":"./plugins/clean-architecture","description":"Enforces Clean Architecture layering for TypeScript factory-based codebases. Use when creating, refactoring, or reviewing handlers, services, domains, and repositories.","version":"1.0.0","author":{"name":"Marco Turi","email":"marco.turi@nearform.com"},"keywords":["architecture","clean-architecture","typescript","ddd","factory"],"category":"engineering"}]}</script>
+  <script>
+    (function () {
+      const data = JSON.parse(document.getElementById("marketplace-data").textContent);
+      const plugins = data.plugins || [];
+
+      if (data.metadata && data.metadata.description) {
+        document.getElementById("market-description").textContent = data.metadata.description;
+      }
+
+      const grid = document.getElementById("plugin-grid");
+      const empty = document.getElementById("empty");
+      const search = document.getElementById("search");
+      const chipsEl = document.getElementById("filter-chips");
+      const countEl = document.getElementById("plugin-count");
+
+      const categories = Array.from(new Set(plugins.map(p => p.category).filter(Boolean))).sort();
+      let activeCategory = "all";
+
+      function makeChip(label, value) {
+        const btn = document.createElement("button");
+        btn.className = "chip" + (value === activeCategory ? " active" : "");
+        btn.textContent = label;
+        btn.dataset.value = value;
+        btn.addEventListener("click", () => {
+          activeCategory = value;
+          chipsEl.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.value === value));
+          render();
+        });
+        return btn;
+      }
+
+      chipsEl.appendChild(makeChip("All", "all"));
+      categories.forEach(c => chipsEl.appendChild(makeChip(c, c)));
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+      }
+
+      function pluginCard(p) {
+        const card = document.createElement("a");
+        card.className = "plugin-card";
+        card.href = `plugins/${encodeURIComponent(p.name)}/`;
+        const authorName = p.author && p.author.name ? p.author.name : "";
+        const keywordsHtml = (p.keywords || []).map(k => `<span class="keyword">${escapeHtml(k)}</span>`).join("");
+        card.innerHTML = `
+          <h3>${escapeHtml(p.name)}${p.version ? `<span class="version">v${escapeHtml(p.version)}</span>` : ""}</h3>
+          <p class="description">${escapeHtml(p.description || "")}</p>
+          <div class="keywords">${keywordsHtml}</div>
+          <div class="plugin-meta">
+            ${p.category ? `<span class="category">${escapeHtml(p.category)}</span>` : ""}
+            ${authorName ? `<span class="author">${escapeHtml(authorName)}</span>` : ""}
+          </div>
+        `;
+        return card;
+      }
+
+      function render() {
+        const q = search.value.trim().toLowerCase();
+        const filtered = plugins.filter(p => {
+          if (activeCategory !== "all" && p.category !== activeCategory) return false;
+          if (!q) return true;
+          const haystack = [
+            p.name,
+            p.description,
+            p.category,
+            (p.keywords || []).join(" "),
+            p.author && p.author.name
+          ].filter(Boolean).join(" ").toLowerCase();
+          return haystack.includes(q);
+        });
+
+        grid.innerHTML = "";
+        filtered.forEach(p => grid.appendChild(pluginCard(p)));
+        empty.hidden = filtered.length !== 0;
+        countEl.textContent = filtered.length === plugins.length
+          ? `(${plugins.length})`
+          : `(${filtered.length} of ${plugins.length})`;
+      }
+
+      search.addEventListener("input", render);
+
+      document.addEventListener("click", e => {
+        const btn = e.target.closest(".copy-btn");
+        if (!btn) return;
+        e.preventDefault();
+        const text = btn.dataset.copy;
+        navigator.clipboard.writeText(text).then(() => {
+          const original = btn.textContent;
+          btn.textContent = "Copied";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.classList.remove("copied");
+          }, 1500);
+        });
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
