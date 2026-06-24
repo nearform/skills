@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-cypress — Nearform Plugins</title>
+  <meta name="description" content="Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests." />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-cypress</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-cypress <span class="version">v1.0.0</span></h1>
+      <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Greg Duckworth</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">cypress</span><span class="keyword">e2e</span><span class="keyword">automation</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-cypress</h3><p class="content-description">Use this skill when writing or reviewing Cypress tests to apply Cypress-specific best practices for reliable, idiomatic test code.</p></header><div class="content-body"><p>Use this skill when working with Cypress tests.</p>
+<h2>Requires</h2>
+<ul>
+<li>test-automation-guidelines</li>
+</ul>
+<hr />
+<h2>Cypress Rules</h2>
+<h3>Command Model</h3>
+<ul>
+<li>Use Cypress command chaining</li>
+<li>Do not use async/await</li>
+<li>Avoid excessive use of <code>cy.then()</code></li>
+</ul>
+<hr />
+<h3>Selectors</h3>
+<p>Prefer stable, intentional selectors (attributes or accessibility hooks) as your primary choice. Text-based selectors are brittle — they can break with copy changes, translations, or small wording edits — so treat them as a fallback only when no stable attributes exist.</p>
+<p><strong>Primary (preferred):</strong></p>
+<pre><code class="language-javascript">cy.get('[data-testid="..."]');
+cy.get("#elementId");
+</code></pre>
+<p><strong>Fallback (use only if no stable attributes are available):</strong></p>
+<pre><code class="language-javascript">cy.contains("Submit"); // text selector - brittle
+</code></pre>
+<hr />
+<h3>Waiting</h3>
+<p>Do not use:</p>
+<pre><code class="language-javascript">cy.wait(1000);
+</code></pre>
+<p>Use:</p>
+<ul>
+<li><code>cy.wait('@alias')</code></li>
+<li><code>.should(...)</code></li>
+<li>DOM assertions</li>
+</ul>
+<hr />
+<h3>Network Control</h3>
+<ul>
+<li>Use <code>cy.intercept()</code> for spying and stubbing</li>
+<li>Prefer stubbing for deterministic tests</li>
+<li>Always use aliases for intercepted requests</li>
+</ul>
+<pre><code class="language-javascript">cy.intercept("GET", "/api/...", { fixture: "user.json" }).as("getUsers");
+cy.wait("@getUsers");
+</code></pre>
+<hr />
+<h3>Authentication</h3>
+<ul>
+<li>Prefer programmatic login</li>
+<li>Use <code>cy.session()</code></li>
+<li>Avoid UI login in every test</li>
+</ul>
+<pre><code class="language-javascript">cy.session("user", () =&gt; {
+  cy.login();
+});
+</code></pre>
+<hr />
+<h3>State Management</h3>
+<ul>
+<li>Use <code>Cypress.env</code> for configuration and static data</li>
+<li>Do not use <code>Cypress.env</code> to share mutable state between tests</li>
+<li>Reset cookies/localStorage when required</li>
+</ul>
+<hr />
+<h3>Assertions</h3>
+<pre><code class="language-javascript">cy.get('[data-testid="cart-count"]').should("have.text", "1");
+</code></pre>
+<hr />
+<h3>Custom Commands &amp; Fixtures</h3>
+<ul>
+<li>Use custom commands sparingly for repetitive actions</li>
+<li>Use <code>cy.fixture()</code> to manage large data sets</li>
+</ul>
+<hr />
+<h3>API Waiting Pattern</h3>
+<pre><code class="language-javascript">cy.intercept("POST", "/checkout").as("checkout");
+cy.wait("@checkout");
+</code></pre>
+<hr />
+<h3>Anti-Patterns</h3>
+<ul>
+<li>Mixing async/await with Cypress</li>
+<li>Overusing <code>cy.then()</code></li>
+<li>UI login in every test</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-cypress@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-cypress@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-cypress</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-cypress@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-cypress@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-cypress">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(8)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bdd/">
+          <h3>test-bdd</h3>
+          <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-refactor/">
+          <h3>test-refactor</h3>
+          <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

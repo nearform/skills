@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-bdd — Nearform Plugins</title>
+  <meta name="description" content="Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature fi" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-bdd</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-bdd <span class="version">v1.0.0</span></h1>
+      <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Greg Duckworth</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">bdd</span><span class="keyword">cucumber</span><span class="keyword">gherkin</span><span class="keyword">automation</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-bdd</h3><p class="content-description">Use this skill when writing or reviewing BDD/Cucumber feature files and step definitions. It keeps Gherkin declarative and behaviour-focused, keeps step definitions thin, and delegates all framework mechanics (selectors, waiting, network, assertions) to the matching framework skill.</p></header><div class="content-body"><p>Use this skill when writing, reviewing, or maintaining Behaviour-Driven Development (BDD) tests — Gherkin feature files and their step definitions.</p>
+<p>This is a <strong>methodology</strong> skill. It owns the <strong>specification layer</strong> (how scenarios are written) and the <strong>glue layer</strong> (how step definitions are organised). It does <strong>not</strong> own framework mechanics. Selectors, waiting, network control, and assertions are delegated to whichever framework skill matches the project.</p>
+<h2>Requires</h2>
+<ul>
+<li>test-automation-guidelines</li>
+</ul>
+<hr />
+<h2>Composes With (framework delegation)</h2>
+<p>BDD sits <strong>above</strong> the framework. Detect the framework from the step-definition code and apply its skill for everything that happens <strong>inside</strong> a step:</p>
+<ul>
+<li>If steps use <code>cy.</code> → use <strong>test-cypress</strong></li>
+<li>If steps use <code>@playwright/test</code>, <code>page.</code>, or <code>playwright-bdd</code> → use <strong>test-playwright</strong></li>
+<li>If steps use <code>browser.</code> or <code>@wdio/globals</code> → use <strong>test-webdriverio</strong></li>
+</ul>
+<pre><code>test-automation-guidelines   (determinism, independence, stable selectors)
+          ▲ requires
+      test-bdd                (Gherkin quality + step-definition structure)
+          ▲ delegates in-step mechanics to
+test-cypress / test-playwright / test-webdriverio   (cy.* / page.* / browser.*)
+</code></pre>
+<p><strong>Rule of thumb:</strong> BDD owns the <code>.feature</code> file and the <em>shape</em> of each step. The framework skill owns the <em>code inside</em> each step. Never restate framework rules here — defer to the framework skill so there is a single source of truth.</p>
+<hr />
+<h2>Gherkin Rules</h2>
+<h3>Write declarative scenarios, not imperative scripts</h3>
+<p>Describe <strong>what</strong> the user is trying to achieve and <strong>why</strong>, never the mechanical <strong>how</strong>. Imperative steps leak UI detail into the specification, break on redesigns, and are unreadable to non-technical stakeholders — which defeats the entire purpose of BDD.</p>
+<p><strong>Bad (imperative — UI mechanics in the feature file):</strong></p>
+<pre><code class="language-gherkin">Scenario: Login
+  Given I open "/login"
+  When I type "ada@example.com" into "#email"
+  And I type "hunter2" into "#password"
+  And I click "#submit"
+  Then the URL should be "/dashboard"
+</code></pre>
+<p><strong>Good (declarative — behaviour and intent):</strong></p>
+<pre><code class="language-gherkin">Scenario: Registered customer signs in
+  Given Ada is a registered customer
+  When she signs in with valid credentials
+  Then she lands on her dashboard
+</code></pre>
+<p>The selectors, typing, and URL assertions still exist — they live in the <strong>step definitions</strong>, governed by the framework skill, not in the feature file.</p>
+<hr />
+<h3>One behaviour per scenario</h3>
+<p>A scenario asserts a single, named behaviour. If the name needs "and" to be accurate, split it. Multiple unrelated assertions in one scenario make failures ambiguous and violate the independence principle from <code>test-automation-guidelines</code>.</p>
+<hr />
+<h3>Use <code>Background</code> for shared context only</h3>
+<p><code>Background</code> is for <strong>Given</strong> steps that establish common context every scenario needs. It must not contain <code>When</code>/<code>Then</code>, actions, or assertions. If a <code>Background</code> grows beyond a few lines, the scenarios are probably coupled — prefer explicit setup or a tag-scoped hook.</p>
+<pre><code class="language-gherkin">Background:
+  Given the store has the "Standard" catalogue
+  And Ada is signed in
+</code></pre>
+<hr />
+<h3>Use <code>Scenario Outline</code> for one behaviour with varying data</h3>
+<p>Reach for <code>Scenario Outline</code> + <code>Examples</code> only when the <strong>behaviour is identical</strong> and only the <strong>data</strong> changes. Do not use it to bolt together different behaviours.</p>
+<pre><code class="language-gherkin">Scenario Outline: Discounts apply at qualifying basket totals
+  Given Ada has a basket worth &lt;total&gt;
+  When she views the basket
+  Then the discount shown is &lt;discount&gt;
+
+  Examples:
+    | total | discount |
+    | 50    | 0%       |
+    | 100   | 5%       |
+    | 250   | 10%      |
+</code></pre>
+<hr />
+<h3>Avoid conjunction steps</h3>
+<p>A step that contains "and" is doing two things and cannot be reused cleanly. Split <code>Given the user is logged in and has an empty basket</code> into two <code>Given</code> steps.</p>
+<hr />
+<h3>Keep step phrasing reusable and unambiguous</h3>
+<ul>
+<li>Use business vocabulary (ubiquitous language), not UI labels.</li>
+<li>Prefer the third person and a consistent tense across the suite.</li>
+<li>Parameterise nouns (<code>"&lt;role&gt;"</code>, <code>&lt;amount&gt;</code>) so one step definition serves many scenarios.</li>
+<li>Two steps that read differently must not do the same thing; two steps that read the same must not do different things.</li>
+</ul>
+<hr />
+<h3>Tag strategy</h3>
+<p>Tags are for <strong>selection and lifecycle</strong>, not narration. Keep a small, documented vocabulary, e.g. <code>@smoke</code>, <code>@regression</code>, <code>@wip</code>, <code>@flaky</code>. Wire suite-wide concerns (auth, seeding) to <strong>tagged hooks</strong> rather than repeating setup in every scenario. Never ship <code>@wip</code>/<code>@flaky</code> to a blocking pipeline — quarantine, per <code>test-automation-guidelines</code>.</p>
+<hr />
+<h2>Step Definition Rules</h2>
+<h3>Keep steps thin</h3>
+<p>A step definition translates one line of business language into one behavioural action, then hands the mechanics to the framework. Business logic, loops, and conditionals do not belong in step code — push them into helpers, page objects, or fixtures (see <code>test-refactor</code>).</p>
+<h3>Share state through the World, never module globals</h3>
+<p>Within a scenario, share state via the Cucumber <strong>World</strong> (<code>this</code>). Across scenarios, share <strong>nothing</strong> — a fresh World per scenario is what keeps tests independent and parallel-safe. Module-level <code>let</code> variables create shared mutable state across scenarios and violate <code>test-automation-guidelines</code>.</p>
+<pre><code class="language-javascript">// Good — per-scenario state on the World
+Given("Ada has a basket worth {int}", function (total) {
+  this.basket = createBasketWorth(total); // isolated to this scenario
+});
+
+// Bad — module global leaks across scenarios
+let basket; // shared mutable state
+</code></pre>
+<h3>Map Gherkin to behaviour, delegate mechanics to the framework</h3>
+<p>The same feature file is satisfied by framework-specific glue. The step <strong>signature</strong> is identical; only the body changes, and the body obeys the framework skill.</p>
+<p><strong>Cypress glue (obeys test-cypress — chaining, <code>cy.session</code>, intercept aliases):</strong></p>
+<pre><code class="language-javascript">import { When, Then } from "@badeball/cypress-cucumber-preprocessor";
+
+When("she signs in with valid credentials", function () {
+  cy.session("ada", () =&gt; cy.login(this.user)); // programmatic login
+});
+
+Then("she lands on her dashboard", () =&gt; {
+  cy.get('[data-testid="dashboard"]').should("be.visible");
+});
+</code></pre>
+<p><strong>Playwright glue (obeys test-playwright — async/await, auto-waiting, <code>storageState</code>):</strong></p>
+<pre><code class="language-javascript">import { expect } from "@playwright/test";
+import { When, Then } from "playwright-bdd/decorators";
+
+When("she signs in with valid credentials", async function ({ page }) {
+  await loginViaApi(page, this.user); // programmatic login
+});
+
+Then("she lands on her dashboard", async ({ page }) =&gt; {
+  await expect(page.getByTestId("dashboard")).toBeVisible();
+});
+</code></pre>
+<p>Note what this skill does <strong>not</strong> dictate: whether to chain or await, how to wait, how to stub the network. Those are the framework skill's job.</p>
+<hr />
+<h2>When NOT to use BDD</h2>
+<p>BDD earns its overhead when non-technical stakeholders read or write scenarios, or when living documentation has real value. Be honest about when it is just ceremony:</p>
+<ul>
+<li><strong>Engineer-only suites</strong> with no business audience — plain framework tests are clearer and cheaper.</li>
+<li><strong>Unit and contract tests</strong> — Gherkin adds indirection with no readership benefit. Keep BDD for behaviour-level (E2E/acceptance) tests, consistent with the test pyramid in <code>test-automation-guidelines</code>.</li>
+<li><strong>Highly technical assertions</strong> (headers, status codes, schema) that no stakeholder will read.</li>
+</ul>
+<p>If you reach for BDD, commit to the declarative discipline above. Imperative Gherkin is worse than no Gherkin: it carries all the cost and none of the readability.</p>
+<hr />
+<h2>Anti-Patterns</h2>
+<ul>
+<li>Imperative, UI-coupled steps (clicks, selectors, URLs in the feature file)</li>
+<li>Conjunction steps (<code>Given … and …</code>)</li>
+<li>Scenarios that assert several unrelated behaviours</li>
+<li><code>Scenario Outline</code> used to merge different behaviours</li>
+<li>Logic, loops, or conditionals inside step definitions</li>
+<li>Shared mutable state via module globals instead of the World</li>
+<li>Restating framework rules in this skill instead of delegating</li>
+<li>Tags used as narration, or <code>@wip</code>/<code>@flaky</code> left in a blocking pipeline</li>
+</ul>
+<hr />
+<h2>References</h2>
+<p>For the full declarative-Gherkin style guide with worked before/after rewrites, see <code>references/gherkin-style.md</code>.</p>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-bdd@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-bdd@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-bdd</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-bdd@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-bdd@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-bdd">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(8)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-cypress/">
+          <h3>test-cypress</h3>
+          <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-refactor/">
+          <h3>test-refactor</h3>
+          <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prompt-engineering — Nearform Plugins</title>
+  <meta name="description" content="Rules and frameworks for writing high-quality LLM system prompts. Apply when authoring, reviewing, or optimizing a system prompt, system message, or LLM instruc" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>prompt-engineering</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>prompt-engineering <span class="version">v1.0.0</span></h1>
+      <p class="description">Rules and frameworks for writing high-quality LLM system prompts. Apply when authoring, reviewing, or optimizing a system prompt, system message, or LLM instructions.</p>
+      <div class="plugin-meta">
+        <span class="category">engineering</span><span class="author">Pasquale Carbone</span>
+      </div>
+      <div class="keywords"><span class="keyword">prompt-engineering</span><span class="keyword">llm</span><span class="keyword">system-prompt</span><span class="keyword">engineering</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>prompt-engineering</h3><p class="content-description">Rules and frameworks for writing high-quality LLM system prompts. Use this skill whenever you are authoring, reviewing, editing, or optimizing a system prompt — including when generating a system prompt as part of building an agent, tool, or workflow. Trigger on any task that involves writing instructions for an LLM, crafting a system message, tuning prompt wording, or reviewing an existing prompt for quality. Even if the user doesn&#39;t say &#39;system prompt&#39; explicitly, use this skill when the output will be consumed as LLM instructions.</p></header><div class="content-body"><h1>Prompt Engineering</h1>
+<p>Reference for writing and reviewing LLM system prompts.
+Based on Harada et al. (2024) — <a href="https://openreview.net/forum?id=R6q67CDBCH">Curse of Instructions</a>, EARS syntax, and ARQ pattern.</p>
+<hr />
+<h2>1. Minimize the Rule Count (Curse of Instructions)</h2>
+<p>The probability of the model following <strong>all</strong> rules simultaneously is approximately <strong>P = p^N</strong>, where N is the number of independently verifiable instructions and p is the per-rule adherence rate.</p>
+<table>
+<thead>
+<tr>
+<th>N rules</th>
+<th>p = 0.95</th>
+<th>p = 0.90</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5</td>
+<td>77%</td>
+<td>59%</td>
+</tr>
+<tr>
+<td>10</td>
+<td>60%</td>
+<td>35%</td>
+</tr>
+<tr>
+<td>20</td>
+<td>36%</td>
+<td>12%</td>
+</tr>
+<tr>
+<td>30</td>
+<td>21%</td>
+<td>4%</td>
+</tr>
+</tbody></table>
+<p><strong>Target: 10 or fewer distinct rules in the system prompt.</strong></p>
+<p>The math is unforgiving — every additional rule multiplicatively reduces the chance the model follows all of them. This is why minimizing rule count matters more than perfecting any single rule.</p>
+<ul>
+<li>Move procedural/structural rules (e.g., parameter formatting, count constraints) into <strong>tool descriptions</strong>, not the system prompt.</li>
+<li>Merge rules that protect the same invariant into one EARS statement.</li>
+<li>Delete rules already enforced by the tool schema or the agent framework.</li>
+</ul>
+<hr />
+<h2>2. Write Rules in EARS Syntax</h2>
+<p><strong>Easy Approach to Requirements Syntax</strong> produces unambiguous, testable rules. Free-form instructions invite misinterpretation because the model has to guess the scope and trigger condition. EARS removes that ambiguity.</p>
+<p>Four forms:</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Template</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ubiquitous</td>
+<td>The system shall [action].</td>
+<td>Rule always applies</td>
+</tr>
+<tr>
+<td>Event-driven</td>
+<td>When [trigger], the system shall [action].</td>
+<td>Rule fires on a condition</td>
+</tr>
+<tr>
+<td>State-driven</td>
+<td>While [condition], the system shall [action].</td>
+<td>Rule applies during a state</td>
+</tr>
+<tr>
+<td>Unwanted behaviour</td>
+<td>If [situation], the system shall [response].</td>
+<td>Error / boundary case</td>
+</tr>
+</tbody></table>
+<p><strong>Before (free-form):</strong> "NEVER output a URL that contains <code>{product_name}</code> as a literal string. Always make sure the product name is properly substituted before including any link."</p>
+<p><strong>After (EARS):</strong> "If a URL contains an unresolved template placeholder, the system shall omit the link and respond without it."</p>
+<p>The EARS version is shorter, has one clear trigger, and one clear action — no room for partial compliance.</p>
+<hr />
+<h2>3. Five Failure Patterns to Detect</h2>
+<p>When reviewing a prompt, check for structural signals of each pattern. These patterns emerge from how prompts grow organically over time — patches on patches — and each one has a telltale signature in the prompt text.</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>What happens</th>
+<th>Signal in the prompt</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Focus loss</strong></td>
+<td>Model satisfies some constraints but silently drops others</td>
+<td>Post-response self-check blocks; mandatory verification sections</td>
+</tr>
+<tr>
+<td><strong>Context misinterpretation</strong></td>
+<td>Query routed to wrong product or tool</td>
+<td>Same routing rule restated in 3+ sections with slightly different wording</td>
+</tr>
+<tr>
+<td><strong>Hallucination</strong></td>
+<td>Model invents values for parameters it cannot resolve</td>
+<td>Same constraint (e.g., "never output unresolved URLs") in both system prompt AND tool descriptions</td>
+</tr>
+<tr>
+<td><strong>Business protocol bypass</strong></td>
+<td>Access control, upsell, or boundary responses skipped</td>
+<td>Multiple alternative response templates for the same situation (Option A / B / C)</td>
+</tr>
+<tr>
+<td><strong>Instruction ignored</strong></td>
+<td>Specific operational rules (count, format, single call) repeatedly violated</td>
+<td>Rule exists only because the model kept breaking it — belongs in tool description, not system prompt</td>
+</tr>
+</tbody></table>
+<hr />
+<h2>4. ARQ Reasoning Scaffold (VERIFY Step)</h2>
+<p><strong>Attentive Reasoning Query pattern</strong>: include a numbered <code>VERIFY</code> checklist as the last step of the workflow. Each item maps 1:1 to one EARS rule, forcing instruction-level chain-of-thought before output.</p>
+<pre><code>VERIFY before responding:
+1. [EARS rule 1 — single sentence]
+2. [EARS rule 2 — single sentence]
+3. [EARS rule 3 — single sentence]
+...
+</code></pre>
+<p>This makes multi-instruction compliance explicit and testable. Per Harada et al. (2024), instruction-level chain-of-thought improves all-rules compliance by 2-3x on GPT-4o and Claude 3.5 Sonnet.</p>
+<p>Keep the VERIFY list to 8 items or fewer. If you need more, consolidate rules first — a long VERIFY list defeats the purpose.</p>
+<hr />
+<h2>5. Structural Rules</h2>
+<ul>
+<li><strong>One truth per rule.</strong> If the same invariant is stated in two places, pick the most authoritative location and delete the duplicate. Duplication is how hallucination patterns start (Section 3).</li>
+<li><strong>Urgency markers devalue each other.</strong> Use CRITICAL/MANDATORY for at most 2 rules per prompt. If everything is critical, nothing is.</li>
+<li><strong>Static before dynamic.</strong> Put the unchanging role/rules at the top. Inject dynamic context (product lists, user data) at the bottom. This enables prompt caching and keeps the model's attention on rules first.</li>
+<li><strong>Examples cost tokens.</strong> Include examples only for non-obvious rules. One positive + one negative example per rule is enough.</li>
+<li><strong>Patch-on-patch is a signal.</strong> If you find rule -&gt; exception -&gt; exception-to-exception chains, consolidate. Organic growth via successive fixes is the most common source of rule-count bloat.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install prompt-engineering@nearform-skills</code><button class="copy-btn" data-copy="/plugin install prompt-engineering@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable prompt-engineering</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install prompt-engineering@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install prompt-engineering@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/prompt-engineering">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in engineering <span class="count">(4)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../clean-architecture/">
+          <h3>clean-architecture</h3>
+          <p class="description">Enforces Clean Architecture layering for TypeScript factory-based codebases. Use when creating, refactoring, or reviewing handlers, services, domains, and repositories.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Marco Turi</span></div>
+        </a>
+        <a class="plugin-card" href="../understand-codebase/">
+          <h3>understand-codebase</h3>
+          <p class="description">Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Adaptively provisions only what you ask for: knowledge notes, a Quartz graph viewer, a query interface, or incremental git-hook re-analysis. Use when onboarding to a new or undocumented project.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Gabriele Magno</span></div>
+        </a>
+        <a class="plugin-card" href="../nearform-sql/">
+          <h3>nearform-sql</h3>
+          <p class="description">Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform&#39;s tagged-template library that produces SQL-injection-safe parameterized queries for pg, mysql, and mysql2. Covers installation, the SQL tag (.text/.sql/.values/.debug), helpers (glue, map, unsafe, quoteIdent), Fastify integration, dynamic/bulk queries, and security best practices.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Luca Del Puppo</span></div>
+        </a>
+        <a class="plugin-card" href="../init-python-project/">
+          <h3>init-python-project</h3>
+          <p class="description">Scaffold a new Python project following modern best practices — uv by default (with pip/venv, pipenv, or manual fallbacks), plus ruff, mypy, pre-commit, and pytest. Use when starting, creating, or bootstrapping a new Python project.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Dario Ruben Scanferlato</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

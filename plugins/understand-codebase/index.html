@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>understand-codebase — Nearform Plugins</title>
+  <meta name="description" content="Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Adaptively provisions only what you ask for: knowledge notes, a Quartz g" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>understand-codebase</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>understand-codebase <span class="version">v1.0.0</span></h1>
+      <p class="description">Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Adaptively provisions only what you ask for: knowledge notes, a Quartz graph viewer, a query interface, or incremental git-hook re-analysis. Use when onboarding to a new or undocumented project.</p>
+      <div class="plugin-meta">
+        <span class="category">engineering</span><span class="author">Gabriele Magno</span>
+      </div>
+      <div class="keywords"><span class="keyword">codebase</span><span class="keyword">onboarding</span><span class="keyword">knowledge-graph</span><span class="keyword">documentation</span><span class="keyword">quartz</span><span class="keyword">wikilinks</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>understand-codebase</h3><p class="content-description">Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Scans the project, extracts modules/functions/relationships, writes one-concept-per-note Obsidian/Quartz/Foam-compatible markdown with [[wikilinks]] and backlinks, maps architecture and domain, and offers a guided tour. Adaptively asks which capabilities you want — knowledge notes, a Quartz graph viewer, a query/explore interface, incremental re-analysis on commits — and provisions only those. Use when onboarding to a new project, reverse-engineering legacy or undocumented code, ramping a teammate, or answering &#39;how does this whole system fit together and where does X live?&#39;. Trigger on &#39;understand this codebase&#39;, &#39;map this repo&#39;, &#39;onboard me to&#39;, or &#39;build a knowledge base of this project&#39;.</p></header><div class="content-body"><h1>Understand Codebase</h1>
+<p>Help a developer understand an unfamiliar codebase by building a <strong>persistent, interlinked knowledge graph of markdown notes</strong> — one concept per note, cross-linked with <code>[[wikilinks]]</code> — and, optionally, by provisioning tools to explore that graph.</p>
+<p>The output is not a one-off chat summary that evaporates when the session ends. It is a durable set of notes that lives in the <em>target</em> project, opens in any markdown/wiki reader (Obsidian, Foam, Quartz), grows as the code grows, and lets the developer — or a future Claude session — answer "how does this fit together?" by traversing links instead of re-reading the whole repo.</p>
+<p>Synthesises three ideas: a staged <strong>scan → extract → link → tour</strong> analysis pipeline; the <strong>persistent-wiki</strong> discipline where the valuable work is the <em>bookkeeping</em> (cross-links, backlinks, freshness) and raw sources stay separate from generated notes; and a <strong>graph view</strong> front-end so the web of notes is browsable.</p>
+<h2>Two principles that govern everything below</h2>
+<ol>
+<li><strong>Portable first, viewer optional.</strong> Always produce plain markdown with <code>[[wikilinks]]</code> and YAML frontmatter. The <em>text</em> is readable anywhere, but <code>[[wikilinks]]</code> render as clickable links only in wiki-aware tools (Obsidian, Foam, Quartz) — <strong>GitHub's web view and standard doc generators (MkDocs/Docusaurus/VitePress/Hugo) show them as literal text</strong> unless converted or plugin-enabled. A graph viewer (Quartz) is an additive, opt-in convenience, never a dependency. See <code>references/note-format.md</code> → "Portability" for the support matrix and conversion guidance.</li>
+<li><strong>Adaptive, not a fixed pipeline.</strong> Do not bulldoze through a heavy end-to-end process. Ask which capabilities the user wants (see Step 2) and provision only those. A user who only wants notes should never get a git hook installed.</li>
+</ol>
+<p>This skill is <strong>read-only against the target's source code.</strong> It writes notes into a knowledge folder <em>inside</em> the target project; it never edits the project's source, and never writes into this skills repo.</p>
+<hr />
+<h2>Step 1 — When to use / when not to use</h2>
+<p><strong>Use it when</strong> the user is:</p>
+<ul>
+<li>Onboarding to a new, large, legacy, or undocumented repo.</li>
+<li>Reverse-engineering "how does this system actually work / where does X live / how does data flow through it?"</li>
+<li>Ramping a teammate and wants living architecture docs.</li>
+<li>Building a knowledge base that should persist and stay current.</li>
+</ul>
+<p><strong>Do NOT use it when:</strong></p>
+<ul>
+<li>The user has a single narrow question ("what does <code>parseConfig</code> return?"). Just read the code and answer — don't build a whole graph.</li>
+<li>The project already has a maintained wiki the user doesn't want duplicated. Offer the <strong>Ingest</strong> operation (Step 7) to extend it instead.</li>
+<li>The task is to <em>modify</em> code rather than understand it. This skill maps; it doesn't refactor.</li>
+</ul>
+<p>If the request is borderline, ask one clarifying question rather than over-building.</p>
+<hr />
+<h2>Step 2 — Intake: confirm the target, then ask which capabilities to provision</h2>
+<p>This is the load-bearing branch. <strong>Before doing any heavy analysis:</strong></p>
+<ol>
+<li><p><strong>Confirm the target project path</strong> (default: the current working directory). Confirm it's the repo the user means.</p>
+</li>
+<li><p><strong>Present the capability menu and let the user pick a subset.</strong> Use the host's structured question UI if available; otherwise ask in chat:</p>
+<blockquote>
+<p>I can set up some or all of the following — which would you like?</p>
+<p><strong>(a) Knowledge notes</strong> — scan the project and generate the interlinked markdown knowledge graph. <em>This is the foundation; the others build on it.</em>
+<strong>(b) Quartz graph viewer</strong> — scaffold a local Quartz site so you can browse the notes with an interactive graph view, backlinks, and hover popovers. Requires Node 22+.
+<strong>(c) Query / explore interface</strong> — drop a short <code>query-guide.md</code> and conventions into the knowledge base so you (or a future session) can ask questions against the notes and get answers grounded in citations.
+<strong>(d) Incremental re-analysis</strong> — install a <code>post-commit</code> git hook that flags which notes went stale after a code change, so the graph stays fresh.</p>
+</blockquote>
+</li>
+<li><p><strong>Branching rules — enforce these:</strong></p>
+<ul>
+<li><strong>(a) is a prerequisite for (b), (c), and (d).</strong> If a user picks (b) without (a), generate at least a starter note set first, or confirm an existing knowledge folder for Quartz to point at.</li>
+<li><strong>"Just do something sensible / everything"</strong> → run <strong>(a) + (c)</strong>, then <em>offer</em> (b) and (d) explicitly. Never silently install a git hook.</li>
+<li><strong>(d) requires a git repo.</strong> Check <code>git rev-parse --is-inside-work-tree</code> first. Never overwrite an existing <code>post-commit</code> hook — append/chain, and ask before touching it. See <code>references/lint-checklist.md</code> for the hook snippet.</li>
+<li><strong>Record the chosen capabilities</strong> in the knowledge base's <code>index.md</code> so a later session knows what was provisioned.</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2>Step 3 — Analysis pipeline (capability a)</h2>
+<p>Deterministic-first, semantic-second. Lean on the built-in <code>Glob</code> / <code>Grep</code> / <code>Read</code> tools — Claude reading and reasoning about the code is the engine here. Heavier deterministic parsers (tree-sitter, <code>ctags</code>, a language server, <code>madge</code> for JS/TS import graphs) are an <strong>optional enhancement</strong> the user can ask for on a big or polyglot repo — never a dependency.</p>
+<p>Run the stages in order, and <strong>checkpoint after each</strong> (record progress in <code>index.md</code>) so a large codebase can be processed across multiple passes and resumed.</p>
+<ol>
+<li><strong>Project scan.</strong> Detect languages, frameworks, package managers, build tooling, and entrypoints by reading manifests (<code>package.json</code>, <code>pyproject.toml</code>, <code>go.mod</code>, <code>Cargo.toml</code>, <code>pom.xml</code>, …), config, CI, and the directory shape. Respect ignore globs — skip <code>node_modules</code>, <code>dist</code>/<code>build</code>, <code>.git</code>, vendored deps, lockfiles, generated code. Produce the first two notes: <code>index.md</code> (the Map of Content) and <code>architecture/project-overview.md</code>.</li>
+<li><strong>Module / concept extraction.</strong> Walk the significant modules. For each, capture: its purpose, key exports (functions/classes/types), notable imports, and outbound call/dependency relationships (use <code>Grep</code> to trace who references what). <strong>Write one note per <em>concept</em>, not blindly one per file</strong> — merge trivial files, split a god-file by responsibility.</li>
+<li><strong>Link pass.</strong> Turn every relationship you found into a <code>[[wikilink]]</code>. This is where the graph forms. Prefer linking over restating: if note A mentions a thing described in note B, link to <code>[[B]]</code>.</li>
+<li><strong>Architecture &amp; domain map.</strong> Synthesise higher-level notes: <code>architecture/</code> notes for layers, boundaries, data flow, and external integrations; <code>domain/</code> notes for the business nouns and how they map to code. Link these <em>down</em> to the concept/module notes.</li>
+<li><strong>Guided tour.</strong> Write one or more <code>tours/</code> notes — an ordered reading path ("start here → core request flow → extension points"), each step linking to the relevant notes. This is the onboarding payoff; make it genuinely walkable.</li>
+<li><strong>Completeness review (Lint).</strong> Audit the graph for orphans, dead links, stale notes, and contradictions (see Step 7 / <code>scripts/graph-lint.mjs</code>). Report gaps and offer to fill them.</li>
+</ol>
+<hr />
+<h2>Step 4 — Note &amp; markdown conventions</h2>
+<p>The full spec is in <code>references/note-format.md</code> and the node/edge vocabulary in <code>references/knowledge-graph-schema.md</code>. Summary of the contract every note must satisfy:</p>
+<ul>
+<li><strong>Folder layout</strong> inside the knowledge base:<pre><code>index.md            # Map of Content — the entry point
+concepts/           # one note per cohesive concept
+modules/            # one note per module/package
+architecture/       # layers, data flow, integrations, project-overview
+domain/             # business nouns and how they map to code
+tours/              # ordered guided reading paths
+sources/            # raw extracts / pointers to source files (kept separate from generated notes)
+</code></pre>
+</li>
+<li><strong>File naming:</strong> <code>kebab-case.md</code>, descriptive and stable.</li>
+<li><strong>One concept per note.</strong> Each note is independently meaningful and addressable.</li>
+<li><strong>Frontmatter (YAML)</strong> on every note: <code>title</code>, <code>type</code> (<code>concept|module|architecture|domain|tour|source</code>), <code>tags</code>, <code>source_paths</code> (the code files this note describes), <code>source_commit</code> (git SHA at extraction time — drives staleness checks), <code>created</code>, <code>updated</code>.</li>
+<li><strong>Links:</strong> <code>[[note-name]]</code> or <code>[[note-name|display text]]</code>. Link, don't duplicate.</li>
+<li><strong>Backlinks:</strong> don't hand-maintain giant backlink lists — let Quartz/Obsidian derive them. <code>graph-lint.mjs --fix-backlinks</code> can materialise a "Referenced by" section for plain-markdown readers if asked.</li>
+<li><strong>Raw vs generated separation:</strong> generated notes <em>summarise and link to</em> <code>sources/</code> (or to file paths with line ranges). Never paste large code blobs into concept notes — quote minimally, link for the rest.</li>
+</ul>
+<hr />
+<h2>Step 5 — Where the knowledge base lives + .gitignore</h2>
+<p>Ask the user which they prefer; default sensibly. <strong>Put the notes in their own folder and keep the
+optional Quartz site as a SIBLING — never let the site live inside the notes folder.</strong> Quartz's
+<code>content/</code> symlinks to the notes folder, so a site nested inside it makes the <code>--serve</code> watcher recurse
+into the Quartz install's own <code>node_modules</code> (a cycle → <code>EMFILE: too many open files</code>). Recommended:</p>
+<pre><code>.understand/
+  notes/     &lt;- the knowledge base (index.md, concepts/, modules/, architecture/, domain/, tours/, sources/)
+  quartz/    &lt;- optional Quartz site (capability b); its content/ -&gt; ../notes
+</code></pre>
+<ul>
+<li><strong><code>.understand/notes/</code></strong> (default for "just let me explore") — local/ephemeral. Append <code>.understand/</code> to the target repo's <code>.gitignore</code>.</li>
+<li><strong><code>docs/knowledge/</code></strong> (default for "document this for the team") — tracked and committed. Put any Quartz site OUTSIDE it (e.g. a top-level <code>.quartz-site/</code>) and gitignore the build output (<code>public/</code>, <code>.quartz-cache/</code>).</li>
+</ul>
+<p>Rules: never write the KB into this skills repo or into <code>/tmp</code> for persistent output. When touching <code>.gitignore</code>, <strong>append — never clobber</strong> existing entries. The folder you pass as <code>--notes-dir</code> must not contain the <code>--site-dir</code> (the bootstrap script refuses if it does).</p>
+<hr />
+<h2>Step 6 — Optional Quartz graph viewer (capability b)</h2>
+<p>Concise summary; full walkthrough in <code>references/quartz-setup.md</code>.</p>
+<ol>
+<li>Verify Node 22+ <strong>and npm ≥ 10.9.2</strong> (the bootstrap script checks both).</li>
+<li>Run <code>scripts/quartz-bootstrap.sh --notes-dir &lt;kb&gt; --site-dir &lt;site&gt;</code> (add <code>--reuse</code> to re-point an existing Quartz site instead of re-cloning). It scaffolds Quartz and wires <code>content/</code> to the notes folder.</li>
+<li><code>cd &lt;site&gt;</code> then <code>npx quartz build --serve</code> → the local URL for the graph view, backlinks, and popovers. (<code>npx quartz</code> only works <em>inside</em> the cloned site dir — there is no global <code>quartz</code>.)</li>
+<li>Optional: <code>npx quartz sync</code> to deploy (e.g. GitHub Pages).</li>
+</ol>
+<p><strong>Quartz version:</strong> the bootstrap pins <strong>v4.5.2</strong> by default (its <code>create</code> is non-interactive). Quartz v5 is now the repo's default branch but changes the setup contract (interactive <code>create</code>, external wikilink/graph plugins, YAML config) — the script has a best-effort v5 path via <code>QUARTZ_VERSION=v5.0.0</code>, but v4.5.2 is the dependable default. Emphasise this is purely additive — the notes already work in Obsidian/Foam without it.</p>
+<hr />
+<h2>Step 7 — Operations: Ingest / Query / Lint (the bookkeeping layer)</h2>
+<p>These are repeatable operations, not one-shots. They are where the long-term value lives.</p>
+<ul>
+<li><strong>Ingest</strong> — add or update notes from a new source (a new module, a doc, a PR diff). Re-run scan/extract/link for only the changed surface; reuse existing notes; add <code>sources/</code> entries for raw inputs. Bump each touched note's <code>updated</code> and <code>source_commit</code>.</li>
+<li><strong>Query</strong> — answer a user question by <em>traversing the graph</em>: start at <code>index.md</code>, follow <code>[[wikilinks]]</code>, read the relevant notes (and their <code>source_paths</code> when you need more depth), and answer <strong>with citations back to specific notes</strong>. Capability (c) just writes a short <code>query-guide.md</code> so this works repeatably across sessions.</li>
+<li><strong>Lint</strong> — run <code>node scripts/graph-lint.mjs --notes-dir &lt;kb&gt; [--git-dir &lt;repo&gt;]</code> and apply <code>references/lint-checklist.md</code>: orphans (no inbound links), dead links (<code>[[x]]</code> with no note), stale notes (source changed past <code>source_commit</code>), missing backlinks, contradictions, oversized notes. Propose fixes; don't silently rewrite.</li>
+</ul>
+<hr />
+<h2>Step 8 — Exploring the result</h2>
+<p>Tell the user concretely how to use what was built:</p>
+<ul>
+<li>Open the knowledge folder in <strong>Obsidian</strong> or <strong>Foam</strong> for local graph + backlinks, or</li>
+<li>Visit the <strong>Quartz</strong> local server (if capability b) for the web graph view, or</li>
+<li>Start any session with this skill and <strong>ask questions</strong> (the Query operation).</li>
+</ul>
+<p>Always point them at <code>index.md</code> and the <code>tours/</code> notes as the entry points.</p>
+<hr />
+<h2>Guardrails</h2>
+<ul>
+<li>Read-only against the target's source code. Never modify it.</li>
+<li>Never install the git hook (capability d) without explicit consent; never overwrite an existing hook or <code>.gitignore</code> content — append/chain.</li>
+<li>Keep the knowledge base out of this skills repo and out of <code>/tmp</code> for anything persistent.</li>
+<li>Portable markdown always; the viewer is optional.</li>
+<li>One concept per note; link instead of duplicating; keep raw sources in <code>sources/</code>.</li>
+<li>Checkpoint long runs in <code>index.md</code> so they resume.</li>
+<li>Every Query answer cites the notes it drew from.</li>
+<li>Don't over-build: provision only the capabilities the user actually picked.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install understand-codebase@nearform-skills</code><button class="copy-btn" data-copy="/plugin install understand-codebase@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable understand-codebase</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install understand-codebase@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install understand-codebase@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/understand-codebase">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in engineering <span class="count">(4)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../prompt-engineering/">
+          <h3>prompt-engineering</h3>
+          <p class="description">Rules and frameworks for writing high-quality LLM system prompts. Apply when authoring, reviewing, or optimizing a system prompt, system message, or LLM instructions.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Pasquale Carbone</span></div>
+        </a>
+        <a class="plugin-card" href="../clean-architecture/">
+          <h3>clean-architecture</h3>
+          <p class="description">Enforces Clean Architecture layering for TypeScript factory-based codebases. Use when creating, refactoring, or reviewing handlers, services, domains, and repositories.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Marco Turi</span></div>
+        </a>
+        <a class="plugin-card" href="../nearform-sql/">
+          <h3>nearform-sql</h3>
+          <p class="description">Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform&#39;s tagged-template library that produces SQL-injection-safe parameterized queries for pg, mysql, and mysql2. Covers installation, the SQL tag (.text/.sql/.values/.debug), helpers (glue, map, unsafe, quoteIdent), Fastify integration, dynamic/bulk queries, and security best practices.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Luca Del Puppo</span></div>
+        </a>
+        <a class="plugin-card" href="../init-python-project/">
+          <h3>init-python-project</h3>
+          <p class="description">Scaffold a new Python project following modern best practices — uv by default (with pip/venv, pipenv, or manual fallbacks), plus ruff, mypy, pre-commit, and pytest. Use when starting, creating, or bootstrapping a new Python project.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Dario Ruben Scanferlato</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

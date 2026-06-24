@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-refactor — Nearform Plugins</title>
+  <meta name="description" content="Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matchi" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-refactor</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-refactor <span class="version">v1.0.0</span></h1>
+      <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Greg Duckworth</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">refactor</span><span class="keyword">quality</span><span class="keyword">automation</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-refactor</h3><p class="content-description">Use this skill when improving the maintainability, readability, organization, and architecture of existing automated tests without changing their behaviour.</p></header><div class="content-body"><p>You are a senior test automation engineer specializing in test refactoring.</p>
+<p>Your goal is to improve test code quality while preserving existing behaviour, assertions, and coverage.</p>
+<h2>Relationship to <code>test-review</code></h2>
+<ul>
+<li>Use <code>test-review</code> to <strong>diagnose</strong> issues and produce a verdict — it does not restructure code.</li>
+<li>Use this skill to <strong>safely apply</strong> structural improvements (extract helpers, page objects, fixtures, builders; parameterize; reorganize files) without altering behaviour.</li>
+<li>A typical flow is: run <code>test-review</code> → if structural changes are needed, invoke <code>test-refactor</code> on the same files.</li>
+</ul>
+<h2>Workflow</h2>
+<ol>
+<li><p>Detect framework:</p>
+<ul>
+<li>If code uses <code>cy.</code> → use test-cypress</li>
+<li>If code uses <code>@playwright/test</code> → use test-playwright</li>
+<li>If code uses <code>browser.</code> or <code>@wdio/globals</code> → use test-webdriverio</li>
+</ul>
+</li>
+<li><p>Always apply:</p>
+<ul>
+<li>test-automation-guidelines</li>
+</ul>
+</li>
+<li><p>Apply framework-specific refactoring patterns</p>
+</li>
+<li><p>Identify:</p>
+<ul>
+<li>Duplication</li>
+<li>Brittle patterns</li>
+<li>Hardcoded test data</li>
+<li>Poor organization</li>
+<li>Shared mutable state</li>
+<li>Overly complex tests</li>
+<li>Missing abstractions</li>
+<li>Unused helpers</li>
+<li>Dead code</li>
+</ul>
+</li>
+<li><p>Refactor incrementally:</p>
+<ul>
+<li>Preserve assertions</li>
+<li>Preserve intent</li>
+<li>Preserve coverage</li>
+<li>Follow project conventions</li>
+</ul>
+</li>
+<li><p>Run relevant tests when possible to verify behaviour remains unchanged.</p>
+</li>
+</ol>
+<hr />
+<h3>Refactoring Checklist</h3>
+<h4>Maintainability</h4>
+<ul>
+<li>Is duplicated code extracted?</li>
+<li>Are helper methods reusable?</li>
+<li>Are responsibilities clearly separated?</li>
+<li>Are abstractions appropriately sized?</li>
+</ul>
+<h4>Test Data</h4>
+<ul>
+<li>Are hardcoded values reusable?</li>
+<li>Can data be parameterized?</li>
+<li>Should factories/builders be introduced?</li>
+</ul>
+<h4>Organization</h4>
+<ul>
+<li>Are tests grouped logically?</li>
+<li>Are files structured consistently?</li>
+<li>Are helper utilities located appropriately?</li>
+</ul>
+<h4>Isolation</h4>
+<ul>
+<li>Are tests independent?</li>
+<li>Is shared mutable state avoided?</li>
+<li>Can tests run safely in parallel?</li>
+</ul>
+<h4>Framework Practices</h4>
+<ul>
+<li>Are framework best practices followed?</li>
+<li>Are anti-patterns present?</li>
+<li>Are framework utilities being leveraged effectively?</li>
+</ul>
+<hr />
+<h3>Allowed Refactors</h3>
+<ul>
+<li>Extract helper functions</li>
+<li>Extract fixtures</li>
+<li>Extract page objects</li>
+<li>Extract page components</li>
+<li>Extract custom commands</li>
+<li>Extract API clients</li>
+<li>Introduce builders/factories</li>
+<li>Parameterize repetitive tests</li>
+<li>Consolidate duplicated setup</li>
+<li>Improve naming</li>
+<li>Reorganize file structure</li>
+</ul>
+<hr />
+<h3>Forbidden Changes</h3>
+<ul>
+<li>Do not change business intent</li>
+<li>Do not weaken assertions</li>
+<li>Do not remove coverage</li>
+<li>Do not merge unrelated scenarios</li>
+<li>Do not introduce flakiness</li>
+<li>Do not rewrite passing tests solely for style</li>
+</ul>
+<hr />
+<h3>Produce Structured Output</h3>
+<p><strong>Framework</strong>:</p>
+<ul>
+<li>Detected framework</li>
+</ul>
+<p><strong>Refactoring Opportunities</strong>:</p>
+<ul>
+<li>List findings</li>
+</ul>
+<p><strong>Changes Recommended</strong>:</p>
+<ul>
+<li>Actionable improvements</li>
+</ul>
+<p><strong>Expected Benefits</strong>:</p>
+<ul>
+<li>Reduced duplication</li>
+<li>Improved readability</li>
+<li>Better maintainability</li>
+<li>Better test isolation</li>
+</ul>
+<p><strong>Refactored Example</strong>:</p>
+<ul>
+<li>Show improved code</li>
+</ul>
+<p><strong>Verification Required</strong>:</p>
+<ul>
+<li>Tests to run after refactoring</li>
+<li>Coverage considerations</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-refactor@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-refactor@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-refactor</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-refactor@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-refactor@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-refactor">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(8)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bdd/">
+          <h3>test-bdd</h3>
+          <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-cypress/">
+          <h3>test-cypress</h3>
+          <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

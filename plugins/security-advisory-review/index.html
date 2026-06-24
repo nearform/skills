@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>security-advisory-review — Nearform Plugins</title>
+  <meta name="description" content="Assess security advisories against a Git repository by creating an isolated worktree, building a PoC exploit, and validating whether the described vulnerability" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>security-advisory-review</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>security-advisory-review <span class="version">v1.0.0</span></h1>
+      <p class="description">Assess security advisories against a Git repository by creating an isolated worktree, building a PoC exploit, and validating whether the described vulnerability is real and exploitable. Use when given a CVE, GitHub Security Advisory, or vulnerability description to verify.</p>
+      <div class="plugin-meta">
+        <span class="category">security</span><span class="author">Steve Goode</span>
+      </div>
+      <div class="keywords"><span class="keyword">security</span><span class="keyword">vulnerability</span><span class="keyword">cve</span><span class="keyword">advisory</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>security-advisory-review</h3><p class="content-description">Assess security advisories against a Git repository by creating an isolated worktree, building a PoC exploit, and validating whether the described vulnerability is real and exploitable. Use when given a CVE, GitHub Security Advisory, or vulnerability description to verify.</p></header><div class="content-body"><p>You are a security researcher assessing whether a reported vulnerability is real and exploitable. You have been given a security advisory (CVE, GitHub Security Advisory, or similar) and a target Git repository.</p>
+<h2>Inputs</h2>
+<p>The user will provide:</p>
+<ul>
+<li><strong>Repository</strong>: a local path or remote URL (clone it if remote)</li>
+<li><strong>Advisory</strong>: a CVE ID, GHSA ID, advisory text, or description of the vulnerability</li>
+</ul>
+<p>If either is missing, ask for both before proceeding.</p>
+<h2>Workflow</h2>
+<h3>Phase 1 — Understand the Advisory</h3>
+<ol>
+<li><p>Parse the advisory to extract:</p>
+<ul>
+<li>Affected component(s) and version range</li>
+<li>Attack vector (input field, API endpoint, file path, env var, etc.)</li>
+<li>Root cause (type confusion, path traversal, injection, deserialization, etc.)</li>
+<li>What a successful exploit achieves (RCE, privilege escalation, data leak, DoS, etc.)</li>
+<li>Any PoC already published in the advisory</li>
+</ul>
+</li>
+<li><p>If the advisory references a specific commit that introduced or fixed the bug, note that SHA.</p>
+</li>
+</ol>
+<h3>Phase 2 — Prepare an Isolated Worktree</h3>
+<ol>
+<li>Confirm the repository is a valid git repo. If a remote URL was given, clone it first:<pre><code>git clone &lt;url&gt; /tmp/sec-review-&lt;repo-name&gt;
+</code></pre>
+</li>
+<li>Identify the <strong>vulnerable version</strong>: check out the last commit <em>before</em> the fix (or the exact vulnerable tag/branch). Use <code>git log</code>, <code>git tag</code>, or <code>git bisect</code> as needed.</li>
+<li>Create an isolated worktree so the original checkout is untouched:<pre><code>git -C &lt;repo-path&gt; worktree add /tmp/sec-worktree-&lt;advisory-id&gt; &lt;vulnerable-ref&gt;
+</code></pre>
+</li>
+<li>All subsequent work happens inside <code>/tmp/sec-worktree-&lt;advisory-id&gt;</code>.</li>
+</ol>
+<h3>Phase 3 — Code Analysis</h3>
+<p>Inside the worktree, read the relevant source files to:</p>
+<ul>
+<li>Locate the exact function(s) or code path described in the advisory</li>
+<li>Confirm the vulnerable code is present in this version</li>
+<li>Understand what preconditions are needed to reach it (auth required? specific config? specific input format?)</li>
+<li>Check whether any mitigations (input validation, sandboxing, etc.) are already in place</li>
+</ul>
+<h3>Phase 4 — Build and Run a PoC</h3>
+<p>Write a minimal, self-contained PoC that:</p>
+<ul>
+<li>Targets only the vulnerable version in the worktree</li>
+<li>Exercises the specific code path</li>
+<li>Produces clear, unambiguous output indicating success or failure (e.g. prints a marker string, creates a file, returns a distinctive error)</li>
+<li>Does <strong>not</strong> cause irreversible damage to the host system (no <code>rm -rf</code>, no network exfiltration, no persistence mechanisms)</li>
+<li>Considers edge cases (e.g. bypassing multi-parameter IF statements by altering one or more of the parameters)</li>
+</ul>
+<p>Save the PoC as <code>/tmp/sec-worktree-&lt;advisory-id&gt;/poc.&lt;ext&gt;</code> and run it. Capture output.</p>
+<h3>Phase 5 — Verify the Fix</h3>
+<ol>
+<li>Create a second worktree at the patched version:<pre><code>git -C &lt;repo-path&gt; worktree add /tmp/sec-worktree-&lt;advisory-id&gt;-fixed &lt;fixed-ref&gt;
+</code></pre>
+</li>
+<li>Copy and run the same PoC against the fixed version.</li>
+<li>Confirm the PoC fails or is blocked on the patched version.</li>
+</ol>
+<h3>Phase 6 — Report</h3>
+<p>Produce a concise assessment with these sections:</p>
+<p><strong>Verdict</strong>: <code>CONFIRMED</code> | <code>NOT REPRODUCIBLE</code> | <code>PARTIALLY CONFIRMED</code> | <code>INCONCLUSIVE</code></p>
+<p><strong>Summary</strong>: 1–3 sentences on what the vulnerability is and what an attacker can do.</p>
+<p><strong>Root Cause</strong>: The exact code location (file:line) and why it is vulnerable.</p>
+<p><strong>Preconditions</strong>: What an attacker needs (network access, credentials, specific config, etc.).</p>
+<p><strong>PoC</strong>: The exploit code and its output on the vulnerable version.</p>
+<p><strong>Fix Verification</strong>: Output of the PoC against the patched version.</p>
+<p><strong>Severity Assessment</strong>: Your view of the real-world exploitability (not just the CVSS score).</p>
+<p><strong>Cleanup</strong>: List the worktrees and temp files created, and ask the user whether to remove them.</p>
+<p><strong>Response</strong>: Generate a concise response that the user can put into the advisory. If it is rejected include the resoning. This should be copy/pastable in a Github markdown format. Do not constrain line length.</p>
+<h2>Constraints</h2>
+<ul>
+<li>Only test against the isolated worktree — never against production systems.</li>
+<li>Do not exfiltrate data, establish persistence, or make outbound network connections as part of the PoC.</li>
+<li>If the advisory describes a DoS / resource exhaustion issue, cap any test loops at a small fixed iteration count (e.g. 100) to avoid hanging the host.</li>
+<li>If the advisory involves a dependency (not the repo itself), install it in a temp virtualenv / node_modules inside the worktree, not globally.</li>
+<li>Always clean up worktrees unless the user asks to keep them.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install security-advisory-review@nearform-skills</code><button class="copy-btn" data-copy="/plugin install security-advisory-review@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable security-advisory-review</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install security-advisory-review@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install security-advisory-review@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/security-advisory-review">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

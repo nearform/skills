@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>init-python-project — Nearform Plugins</title>
+  <meta name="description" content="Scaffold a new Python project following modern best practices — uv by default (with pip/venv, pipenv, or manual fallbacks), plus ruff, mypy, pre-commit, and pyt" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>init-python-project</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>init-python-project <span class="version">v1.0.0</span></h1>
+      <p class="description">Scaffold a new Python project following modern best practices — uv by default (with pip/venv, pipenv, or manual fallbacks), plus ruff, mypy, pre-commit, and pytest. Use when starting, creating, or bootstrapping a new Python project.</p>
+      <div class="plugin-meta">
+        <span class="category">engineering</span><span class="author">Dario Ruben Scanferlato</span>
+      </div>
+      <div class="keywords"><span class="keyword">python</span><span class="keyword">scaffold</span><span class="keyword">uv</span><span class="keyword">ruff</span><span class="keyword">pytest</span><span class="keyword">engineering</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>init-python-project</h3><p class="content-description">Scaffold a new Python project that follows modern best practices, using uv by default to initialize and manage the project (with pip/venv, pipenv, or manual fallbacks if uv isn&#39;t available). Sets up ruff (lint + format), mypy type checking, pre-commit, a tests/ folder with pytest, and optionally Docker, a CI workflow, coverage, placeholder structure, and a git repo with .gitignore. Use when the user wants to start/create/bootstrap a new Python project, says &quot;set up a Python project&quot;, &quot;init a python repo&quot;, &quot;new python project with best practices&quot;, or similar.</p></header><div class="content-body"><h1>/init-python-project — Scaffold a modern Python project</h1>
+<p>This skill sets up a new Python project that follows current best practices.
+<strong>uv is the default and recommended project/venv manager</strong>, but the skill can
+fall back to pip + venv, pipenv, a manual <code>.venv</code>, or skip environment setup
+entirely if the user prefers. It is opinionated about quality defaults (ruff +
+mypy + pre-commit + pytest) and confirms optional pieces (Docker, CI,
+coverage, placeholder structure) before acting.</p>
+<p>Be conversational and decisive: state the sensible defaults, confirm them, ask
+only the questions that genuinely change the output, then build.</p>
+<h2>Steps</h2>
+<h3>1. Choose the project/venv manager</h3>
+<p>Run <code>command -v uv</code> (or <code>uv --version</code>).</p>
+<ul>
+<li><strong>If uv is present</strong>, use it — it's the recommended path. Continue.</li>
+<li><strong>If uv is missing</strong>, ask the user how they want to proceed. Offer:<ol>
+<li><strong>Install uv for them</strong> (recommended). Install via the official installer
+(<code>curl -LsSf https://astral.sh/uv/install.sh | sh</code>, or <code>brew install uv</code>
+if Homebrew is available and they prefer it), then re-check with
+<code>uv --version</code>.</li>
+<li><strong>They install uv themselves</strong> — point them at
+<a href="https://docs.astral.sh/uv/getting-started/installation/">https://docs.astral.sh/uv/getting-started/installation/</a> and let them run
+it in this session with the <code>!</code> prefix; wait, re-check, continue.</li>
+<li><strong>Use an alternative manager</strong> — <code>pip</code> + <code>venv</code> (stdlib), <code>pipenv</code>, or a
+<strong>manually created <code>.venv</code></strong>. Confirm which.</li>
+<li><strong>Skip environment setup</strong> — just scaffold files/config and let the user
+wire up an environment later.</li>
+</ol>
+</li>
+</ul>
+<p><strong>Record the chosen manager</strong>; the steps below are written for uv and include
+equivalents for the alternatives (see <em>Manager equivalents</em> at the end). When
+a manager is skipped, still create all config files and note clearly which
+setup commands the user must run themselves.</p>
+<h3>2. Clarify what the project is for</h3>
+<p>Ask the user, conversationally:</p>
+<ul>
+<li><strong>What is the project?</strong> (its purpose / what it does) — shapes the package
+name, structure, and dependencies.</li>
+<li><strong>What name</strong> should the project/package use (default: derive a sensible
+kebab/snake name from the description).</li>
+<li><strong>Where</strong> should it be created? Run <code>pwd</code> and <strong>suggest a default path</strong> —
+a new subdirectory named after the project inside the current working
+directory (e.g. <code>&lt;cwd&gt;/&lt;name&gt;</code>). Present it clearly and let the user change
+it to any path they prefer.</li>
+<li><strong>Is it a library, a CLI, or an application/service?</strong> Affects layout
+(e.g. <code>--package</code>/src layout for libraries, an entry point for CLIs/apps)
+and whether Docker makes sense.</li>
+</ul>
+<h3>3. Choose the Python version</h3>
+<p><strong>Ask which Python version to target</strong> (default: the latest stable the user
+has, or the newest if installing fresh). Then:</p>
+<ul>
+<li>With uv: pin it with <code>uv python pin &lt;version&gt;</code> (creating <code>.python-version</code>),
+and if that version isn't installed, offer <code>uv python install &lt;version&gt;</code>.</li>
+<li>With other managers: confirm the interpreter (<code>python3 --version</code>) and write
+a <code>.python-version</code> and a <code>requires-python</code> in <code>pyproject.toml</code> to match.</li>
+</ul>
+<h3>4. State the defaults, then confirm the optional pieces</h3>
+<p>Tell the user plainly what you'll set up <strong>by default</strong> (let them opt out):</p>
+<ul>
+<li><strong>Ruff</strong> as the linter <strong>and</strong> formatter.</li>
+<li><strong>mypy</strong> for static type checking.</li>
+<li><strong>pre-commit</strong> running ruff (lint + format), mypy, and a set of standard
+hygiene hooks automatically before every commit.</li>
+<li>A <strong><code>tests/</code></strong> folder with <strong>pytest</strong> added to the dev environment.</li>
+</ul>
+<p>Then ask the questions that DO change the output (use AskUserQuestion):</p>
+<ul>
+<li><strong>Docker?</strong> <code>Dockerfile</code>, <code>docker-compose.yml</code>, both, or neither?
+(Default: neither.)</li>
+<li><strong>CI workflow?</strong> A GitHub Actions workflow running lint + type-check + tests
+on push/PR. (Default: yes for libraries/apps that'll live on GitHub; ask.)</li>
+<li><strong>Test coverage?</strong> Add <code>pytest-cov</code> with a coverage config. (Default: yes.)</li>
+<li><strong>Placeholder structure &amp; files?</strong> Starter scaffolding (package module(s), a
+sample entry point, a sample test, README) or just the bare project? Tailor
+placeholders to the project type from step 2.</li>
+<li><strong>Git?</strong> Confirm initializing a git repo (default: yes) — you'll add an
+appropriate Python <code>.gitignore</code>.</li>
+</ul>
+<h3>5. Safety check before initializing</h3>
+<p>Before creating anything, verify the target path is safe:</p>
+<ul>
+<li>Run <code>test -e &lt;path&gt;</code> / <code>ls -la &lt;path&gt;</code>. If it <strong>exists and is non-empty</strong>,
+stop and confirm with the user (pick a different path, or explicitly proceed
+into the existing directory). Never silently overwrite or clobber an
+existing project.</li>
+</ul>
+<h3>6. Initialize the project</h3>
+<p>With uv, pick the form that matches the project type:</p>
+<ul>
+<li>Application/CLI: <code>uv init &lt;name&gt;</code> (add <code>--package</code> for an installable CLI
+with an entry point).</li>
+<li>Library: <code>uv init --lib &lt;name&gt;</code> (src layout, installable package).</li>
+</ul>
+<p>Then work inside the project dir (use absolute paths in subsequent commands to
+avoid permission prompts) and confirm <code>pyproject.toml</code>, the package module,
+and the lockfile workflow exist. For alternative managers, create the dir,
+<code>pyproject.toml</code>, and package layout yourself and set up the environment with
+the chosen tool (see <em>Manager equivalents</em>).</p>
+<h3>7. Add tooling to the environment</h3>
+<p>Add dev dependencies: <strong>ruff, mypy, pytest, pre-commit</strong> (plus <strong>pytest-cov</strong>
+if coverage was chosen).</p>
+<ul>
+<li>uv: <code>uv add --dev ruff mypy pytest pre-commit</code> (and <code>uv add --dev pytest-cov</code> if coverage was chosen)</li>
+<li>Verify with <code>uv run ruff --version</code>, <code>uv run mypy --version</code>,</li>
+<li>For pip/pipenv, install the same packages as dev dependencies (see <em>Manager
+equivalents</em>).</li>
+</ul>
+<h3>8. Configure ruff</h3>
+<p>Add a <code>[tool.ruff]</code> section to <code>pyproject.toml</code> with modern defaults: target
+the pinned Python version, a reasonable line length, and a useful lint rule
+selection (e.g. <code>E</code>, <code>F</code>, <code>I</code> imports, <code>UP</code> pyupgrade, <code>B</code> bugbear). Configure
+both linting and formatting. Keep it readable and lightly commented.</p>
+<h3>9. Configure mypy</h3>
+<p>Add a <code>[tool.mypy]</code> section with sensible-but-not-punishing strictness for a
+fresh project (e.g. <code>python_version</code> matching the pin, <code>warn_unused_configs</code>,
+<code>warn_redundant_casts</code>, <code>warn_unused_ignores</code>, <code>disallow_untyped_defs</code>, and
+<code>ignore_missing_imports = true</code> to start). Note the user can tighten toward
+<code>strict = true</code> later.</p>
+<h3>10. Configure pre-commit</h3>
+<p>Create <code>.pre-commit-config.yaml</code> with <strong>pinned hook revisions</strong>:</p>
+<ul>
+<li><code>ruff-pre-commit</code>: the <code>ruff</code> hook (lint, with <code>--fix</code>) and <code>ruff-format</code>.</li>
+<li><code>mirrors-mypy</code>: the <code>mypy</code> hook.</li>
+<li><code>pre-commit-hooks</code>: standard hygiene hooks (<code>trailing-whitespace</code>,
+<code>end-of-file-fixer</code>, <code>check-yaml</code>, <code>check-added-large-files</code>,
+<code>check-merge-conflict</code>).
+After the git repo exists (step 15), run <code>pre-commit install</code> (via the chosen
+manager, e.g. <code>uv run pre-commit install</code>) so hooks fire on every commit, and
+consider <code>pre-commit autoupdate</code> to freshen pinned revs. If git isn't being
+set up, note that <code>pre-commit install</code> requires a git repo.</li>
+</ul>
+<h3>11. Tests folder</h3>
+<p>Ensure a <code>tests/</code> directory exists (with <code>__init__.py</code> or relying on pytest
+rootdir conventions) and, if placeholders were chosen, a minimal passing
+<code>tests/test_smoke.py</code>. Add <code>[tool.pytest.ini_options]</code> (e.g.
+<code>testpaths = ["tests"]</code>). If coverage was chosen, add a <code>[tool.coverage.run]</code>
+section (e.g. <code>source = ["&lt;package&gt;"]</code>) and document <code>--cov</code> usage.</p>
+<h3>12. Docker (only if requested)</h3>
+<ul>
+<li><strong>Dockerfile</strong>: modern, multi-stage-friendly, using the official <code>uv</code> base
+image (or installing the chosen manager) with <code>uv sync --frozen</code> / <code>uv run</code>.
+Slim Python base, non-root user.</li>
+<li><strong>docker-compose.yml</strong>: define the app service (and an obvious companion
+like a database only if the user mentions needing one). Keep it minimal.</li>
+<li>Add a <code>.dockerignore</code>.</li>
+</ul>
+<h3>13. CI workflow (only if requested)</h3>
+<p>Create <code>.github/workflows/ci.yml</code> that, on push and pull_request: checks out
+the repo, sets up the chosen manager (e.g. <code>astral-sh/setup-uv</code>), installs
+deps, then runs <code>ruff check</code>, <code>ruff format --check</code>, <code>mypy</code>, and <code>pytest</code>
+(with coverage if enabled). Pin action versions.</p>
+<h3>14. Placeholder structure (only if requested)</h3>
+<p>Create starter files appropriate to the project type:</p>
+<ul>
+<li>A package module with a <code>main()</code> / sample function and, for CLIs/apps, a
+runnable entry point wired in <code>pyproject.toml</code> (<code>[project.scripts]</code>).</li>
+<li>A <code>README.md</code> with a short description and the run/test/lint/type-check
+commands.</li>
+<li>The sample test from step 11.
+Keep placeholders minimal and obviously-replaceable.</li>
+</ul>
+<h3>15. Git + .gitignore</h3>
+<ul>
+<li>If the user wants git (default yes): <code>git init</code>, create a Python
+<code>.gitignore</code> (cover <code>.venv/</code>, <code>__pycache__/</code>, <code>*.pyc</code>, <code>.pytest_cache/</code>,
+<code>.ruff_cache/</code>, <code>.mypy_cache/</code>, coverage files (<code>.coverage</code>, <code>htmlcov/</code>),
+build/dist artifacts, <code>.env</code>, and editor/OS cruft; add Docker ignores only
+if Docker was set up).</li>
+<li>Then run <code>pre-commit install</code> (via the chosen manager).</li>
+<li>Make an initial commit only if the user wants one (ask) — otherwise leave
+the working tree staged/clean for them to review.</li>
+</ul>
+<h3>16. Validate the scaffold</h3>
+<p>Before handing off, <strong>prove the setup is green</strong> by running (via the chosen
+manager; skip cleanly if env setup was skipped):</p>
+<ul>
+<li><code>uv run ruff check .</code> and <code>uv run ruff format --check .</code></li>
+<li><code>uv run mypy .</code></li>
+<li><code>uv run pytest</code>
+Report the results. If anything fails, fix the scaffold (not by loosening
+config blindly) until it passes, or clearly flag what the user needs to
+resolve.</li>
+</ul>
+<h3>17. Confirm and hand off</h3>
+<p>Summarize what was created (paths, key files, defaults applied, optional
+pieces included/skipped, and the chosen manager) and give the everyday
+commands (uv form shown; translate for the chosen manager):</p>
+<ul>
+<li>Run the app: <code>uv run &lt;entrypoint&gt;</code> (or <code>uv run python -m &lt;package&gt;</code>)</li>
+<li>Run tests: <code>uv run pytest</code></li>
+<li>Lint/format: <code>uv run ruff check .</code> / <code>uv run ruff format .</code></li>
+<li>Type-check: <code>uv run mypy .</code></li>
+<li>Hooks run automatically on <code>git commit</code>.</li>
+</ul>
+<h2>Manager equivalents</h2>
+<p>The steps default to uv. For the alternatives, map commands as follows:</p>
+<ul>
+<li><strong>pip + venv (stdlib):</strong><ul>
+<li>Create env: <code>python3 -m venv .venv</code> then activate it.</li>
+<li>Init: create the project dir, <code>pyproject.toml</code>, and package layout by hand.</li>
+<li>Add dev deps: <code>pip install ruff mypy pytest pre-commit pytest-cov</code> and
+record them under <code>[dependency-groups]</code> / an optional <code>dev</code> extra (or a
+<code>requirements-dev.txt</code>).</li>
+<li>Run tools directly once the venv is active (<code>ruff check .</code>, <code>mypy .</code>,
+<code>pytest</code>), i.e. drop the <code>uv run</code> prefix.</li>
+</ul>
+</li>
+<li><strong>pipenv:</strong><ul>
+<li>Env + deps: <code>pipenv install --dev ruff mypy pytest pre-commit pytest-cov</code>.</li>
+<li>Run tools via <code>pipenv run &lt;cmd&gt;</code> instead of <code>uv run &lt;cmd&gt;</code>.</li>
+</ul>
+</li>
+<li><strong>manual <code>.venv</code>:</strong> same as pip + venv, but the user manages activation; be
+explicit about the activation step in the hand-off.</li>
+<li><strong>skip:</strong> create every config file and the layout, but run no install/venv
+commands — list the exact commands the user should run later to finish.</li>
+</ul>
+<h2>Principles</h2>
+<ul>
+<li><strong>uv is the default project manager</strong> — use <code>uv init</code>, <code>uv add</code>, <code>uv run</code>,
+<code>uv sync</code>. Only fall back to pip/pipenv/manual when uv is unavailable and the
+user chooses an alternative.</li>
+<li><strong>Install uv only with consent</strong> — if it's missing, ask first; install it for
+the user if they say yes, otherwise offer the alternatives above.</li>
+<li><strong>Quality is on by default</strong> — ruff, mypy, pytest, and pre-commit are baked
+in; Docker, CI, coverage, placeholders, and the initial commit are the
+branch points to ask about.</li>
+<li><strong>Never clobber</strong> — check the target path before initializing.</li>
+<li><strong>Always validate</strong> — finish by running lint, types, and tests so the user
+receives a known-green scaffold.</li>
+<li>Prefer modern, minimal, well-commented config over kitchen-sink setups the
+user has to delete.</li>
+<li>Use absolute paths in shell commands once inside the new project dir.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install init-python-project@nearform-skills</code><button class="copy-btn" data-copy="/plugin install init-python-project@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable init-python-project</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install init-python-project@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install init-python-project@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/init-python-project">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in engineering <span class="count">(4)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../prompt-engineering/">
+          <h3>prompt-engineering</h3>
+          <p class="description">Rules and frameworks for writing high-quality LLM system prompts. Apply when authoring, reviewing, or optimizing a system prompt, system message, or LLM instructions.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Pasquale Carbone</span></div>
+        </a>
+        <a class="plugin-card" href="../clean-architecture/">
+          <h3>clean-architecture</h3>
+          <p class="description">Enforces Clean Architecture layering for TypeScript factory-based codebases. Use when creating, refactoring, or reviewing handlers, services, domains, and repositories.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Marco Turi</span></div>
+        </a>
+        <a class="plugin-card" href="../understand-codebase/">
+          <h3>understand-codebase</h3>
+          <p class="description">Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Adaptively provisions only what you ask for: knowledge notes, a Quartz graph viewer, a query interface, or incremental git-hook re-analysis. Use when onboarding to a new or undocumented project.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Gabriele Magno</span></div>
+        </a>
+        <a class="plugin-card" href="../nearform-sql/">
+          <h3>nearform-sql</h3>
+          <p class="description">Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform&#39;s tagged-template library that produces SQL-injection-safe parameterized queries for pg, mysql, and mysql2. Covers installation, the SQL tag (.text/.sql/.values/.debug), helpers (glue, map, unsafe, quoteIdent), Fastify integration, dynamic/bulk queries, and security best practices.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Luca Del Puppo</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

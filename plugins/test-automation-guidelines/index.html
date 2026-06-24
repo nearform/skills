@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-automation-guidelines — Nearform Plugins</title>
+  <meta name="description" content="Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated t" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-automation-guidelines</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-automation-guidelines <span class="version">v1.0.0</span></h1>
+      <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Greg Duckworth</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">automation</span><span class="keyword">quality</span><span class="keyword">engineering</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-automation-guidelines</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining automated tests to ensure they are deterministic, reliable, and maintainable across frameworks.</p></header><div class="content-body"><p>You are a test engineer ensuring all automated tests are reliable, deterministic, and maintainable.</p>
+<h2>Responsibilities</h2>
+<ul>
+<li>Enforce deterministic behaviour</li>
+<li>Ensure tests are independent</li>
+<li>Validate test structure and readability</li>
+<li>Identify flakiness and anti-patterns</li>
+</ul>
+<hr />
+<h3>Test Pyramid</h3>
+<ul>
+<li>Prioritise Unit &gt; Contract &gt; Integration &gt; E2E tests for speed and reliability.</li>
+</ul>
+<hr />
+<h3>Triage and Maintenance</h3>
+<ul>
+<li>Categorise failures: Application Bug, Test Bug, or Environment Issue.</li>
+<li>Tag and quarantine flaky tests.</li>
+</ul>
+<hr />
+<h3>Core Principles</h3>
+<ul>
+<li>Tests must be deterministic</li>
+<li>Tests must be independent</li>
+<li>Tests must validate behaviour, not implementation</li>
+<li>Tests must be readable and maintainable</li>
+</ul>
+<hr />
+<h3>Principles reference</h3>
+<p>This skill makes use of the detailed principles in <code>references/principles.md</code>. See that file for full guidance. Key points (summary):</p>
+<ul>
+<li>Determinism: wait for API responses and assert DOM state; avoid fixed delays and timing assumptions.</li>
+<li>Independence: create fresh data per test and use independent setup/teardown; avoid reusing state between tests.</li>
+<li>Behaviour vs Implementation: assert user-visible behaviour (e.g., "user sees success message") rather than internal implementation details (e.g., "function X was called").</li>
+<li>Selector strategy: prefer <code>data-testid</code> and accessibility roles; avoid brittle selectors like CSS classes or relying on DOM structure.</li>
+</ul>
+<h3>Accessibility</h3>
+<ul>
+<li>Include automated accessibility checks (e.g., <code>axe-core</code>) in the test suite.</li>
+</ul>
+<hr />
+<h2>Rules</h2>
+<ul>
+<li>Do not use arbitrary waits</li>
+<li>Do not rely on execution order</li>
+<li>Do not share mutable state between tests</li>
+<li>Prefer real signals (network, DOM, navigation) over timing</li>
+<li>Use stable, intentional selectors</li>
+<li>Assert meaningful user-visible outcomes</li>
+</ul>
+<hr />
+<h2>Anti-Patterns</h2>
+<ul>
+<li>Arbitrary time delays</li>
+<li>Shared state between tests</li>
+<li>Order-dependent tests</li>
+<li>Brittle selectors (CSS structure, nth-child, etc.)</li>
+<li>Testing implementation details instead of behaviour</li>
+</ul>
+<hr />
+<h2>Usage</h2>
+<p>This skill must be applied alongside a framework-specific testing skill.</p>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-automation-guidelines@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-automation-guidelines@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-automation-guidelines</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-automation-guidelines@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-automation-guidelines@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-automation-guidelines">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(8)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-bdd/">
+          <h3>test-bdd</h3>
+          <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-cypress/">
+          <h3>test-cypress</h3>
+          <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-refactor/">
+          <h3>test-refactor</h3>
+          <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

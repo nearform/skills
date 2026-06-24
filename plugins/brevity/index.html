@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>brevity — Nearform Plugins</title>
+  <meta name="description" content="Compress text to its load-bearing minimum without losing meaning. Inspired by Giuseppe Ungaretti." />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>brevity</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>brevity <span class="version">v1.0.0</span></h1>
+      <p class="description">Compress text to its load-bearing minimum without losing meaning. Inspired by Giuseppe Ungaretti.</p>
+      <div class="plugin-meta">
+        <span class="category">content</span><span class="author">Jack Camerano</span>
+      </div>
+      <div class="keywords"><span class="keyword">brevity</span><span class="keyword">concise</span><span class="keyword">concision</span><span class="keyword">verbose</span><span class="keyword">filler</span><span class="keyword">tighten</span><span class="keyword">compress</span><span class="keyword">editing</span><span class="keyword">writing</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>brevity</h3><p class="content-description">Compress a supplied text (pasted or a file path) to its load-bearing minimum: remove filler, keep every claim, qualifier and scope. EXPLICIT INVOCATION ONLY: use only when the user names the skill; never auto-trigger on generic requests to shorten or tighten text, and never apply to your own chat replies.</p></header><div class="content-body"><h1>Brevity: every word loaded with meaning</h1>
+<p>An editing pass that compresses a supplied text to its load-bearing minimum: remove every word that does not change meaning, and no more.</p>
+<p>The hard part is the second clause. The value is protecting words that look decorative but are load-bearing: a hedge, a scope, a number, a turn of voice. <strong>Cut filler, keep meaning.</strong> A cut that drops meaning is deletion, not brevity.</p>
+<h2>Invocation</h2>
+<p><strong>Explicit only.</strong> Engage only when the user names the skill directly: "use brevity on this", "run brevity on this file", "brevity this", or the <code>/brevity</code> command. Do not auto-trigger on generic requests to shorten, tighten or trim text, and never apply this to your own conversational replies. It operates only on a text the user hands you.</p>
+<h2>Scope</h2>
+<ul>
+<li><strong>In:</strong> any supplied text, pasted or a file path you read. Any language. Prose and short-form alike (commits, PRs, Slack, emails, summaries, docs, READMEs, reports).</li>
+<li><strong>Out:</strong> fetching URLs, code and your own chat output. Text only.</li>
+</ul>
+<h2>Procedure</h2>
+<ol>
+<li><strong>Ingest:</strong> take the pasted text, or read the file path</li>
+<li><strong>Classify register</strong> → set the compression ceiling (below). State the call in one line</li>
+<li><strong>Build the ledger:</strong> internally extract the load-bearing atoms the rewrite must preserve. Terse, not narrated. See <a href="references/taxonomy.md">references/taxonomy.md</a></li>
+<li><strong>Cut</strong> filler up to the ceiling. See <a href="references/taxonomy.md">references/taxonomy.md</a></li>
+<li><strong>Fidelity check:</strong> verify every ledger atom survives. A dropped atom is restored, or surfaced in the cut-list for the user to confirm</li>
+<li><strong>Deliver:</strong> rewrite + at-risk cut-list + word-count delta</li>
+<li><strong>Offer the dial:</strong> invite harder or softer, per-section if useful</li>
+</ol>
+<h2>Register → compression ceiling</h2>
+<p>Register sets an automatic ceiling on how hard you may cut. Always on, not a user choice. Infer it from signals, state it in one line, proceed. Ask only when genuinely ambiguous.</p>
+<table>
+<thead>
+<tr>
+<th>Signals</th>
+<th>Register</th>
+<th>Ceiling</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Bullets, imperative, short, code refs</td>
+<td>Commit / PR / changelog</td>
+<td>Aggressive</td>
+</tr>
+<tr>
+<td>@mentions, casual, short</td>
+<td>Slack / chat</td>
+<td>Aggressive</td>
+</tr>
+<tr>
+<td>"Summary of…", recap</td>
+<td>Summary / notes</td>
+<td>Aggressive</td>
+</tr>
+<tr>
+<td>Salutation + sign-off</td>
+<td>Email</td>
+<td>Gentle: warmth and politeness are load-bearing</td>
+</tr>
+<tr>
+<td>Headings, length, narrative</td>
+<td>Doc / article / report / README</td>
+<td>Moderate: keep signposting and navigation</td>
+</tr>
+</tbody></table>
+<p>"Aggressive" never crosses the fidelity line. "Gentle" means tone is content here, not filler.</p>
+<h2>Aggressiveness</h2>
+<p>Register sets the ceiling. Within it, default to an <strong>assertive, fidelity-safe</strong> cut. The shown cut-list is what licenses boldness: nothing is lost silently, so the user can restore.</p>
+<p>Optional intensity shortcuts, dialed in conversation, not required upfront:</p>
+<ul>
+<li><code>gentle</code>: conservative, light touch</li>
+<li><code>standard</code>: the assertive default</li>
+<li><code>ungaretti</code>: maximal, still fidelity-bound</li>
+</ul>
+<p>The user steers per-section when useful ("full Ungaretti on the intro, softer elsewhere").</p>
+<h2>Fidelity check + clarity override + "nothing to do"</h2>
+<p><strong>Fidelity check.</strong> After cutting, scan: did any ledger atom vanish? A targeted scan, not a fresh re-derivation. If gone, restore it or surface it as a deliberate removal. The ceiling on aggression <em>is</em> this check: cut until the next cut would drop an atom. Rigor scales with stakes: short-form gets an internal read-back; prose gets an explicit ledger and a shown cut-list; very long docs are chunked by section so the ledger is never held whole.</p>
+<p><strong>Clarity override.</strong> Some content stays full even when words could be cut, because compressing it harms comprehension or safety. Back off the ceiling for: security and risk warnings, irreversible-action confirmations and multi-step instructions where terseness invites misreading. Fidelity protects claims; this protects clarity. When a cut would create ambiguity, don't make it.</p>
+<p><strong>Nothing to do.</strong> If the text is already lean, say so ("already tight; only trivial trims available") and stop. <strong>Word count is a consequence of removing filler, never a target.</strong> Never invent or pad cuts to manufacture a reduction. A skill that always "achieves" a cut will damage good text.</p>
+<h2>Verbatim-preserve list (keep the exact characters)</h2>
+<p>Distinct from the ledger. The ledger keeps <em>meaning</em>; this keeps the <em>literal text</em>. Never paraphrase or "tighten" these, even when wordy:</p>
+<ul>
+<li>Quotes (anything the author is quoting)</li>
+<li>Error messages, exactly as written</li>
+<li>Code, commands, anything in backticks</li>
+<li>Identifiers, function and variable names, file paths</li>
+<li>Numbers, versions, dates</li>
+<li>Proper nouns, citations, references</li>
+<li>Defined terms (a term the text explicitly defines)</li>
+</ul>
+<p>Conflating the two rules corrupts a citation or rewrites a quote.</p>
+<h2>Punctuation</h2>
+<p>Marks face the same test as words: keep what changes meaning, cut what only decorates. A mark is filler when the sentence reads the same without it.</p>
+<p>Examples:</p>
+<ul>
+<li>Em dashes: usually a decorative pause. Use a colon, comma, period or nothing, unless the dash sets off a genuine aside or carries the author's voice</li>
+<li>Serial (Oxford) commas: cut where no ambiguity follows, keep the one case where dropping it merges two list items</li>
+<li>Comma splices and stacked clauses: split into shorter sentences, or drop the clause</li>
+<li>Scare quotes, exclamation marks, parenthetical asides: keep only when they change how the claim reads</li>
+</ul>
+<p>Load-bearing punctuation stays: a comma that disambiguates, voice-carrying marks and the punctuation inside verbatim-preserve content, which is never altered.</p>
+<h2>Emission discipline</h2>
+<p>Output tokens are expensive; the naive build emits the text three or four times (original, ledger, rewrite, diff). Build the cheap version:</p>
+<ul>
+<li><strong>Never re-print the source.</strong> It is already in context.</li>
+<li><strong>Show cuts, not copies.</strong> The change summary names what was removed, not two full versions side by side.</li>
+<li><strong>Keep the ledger internal and terse.</strong> Reasoning scratch, mostly unemitted. Apply Ungaretti to the ledger too.</li>
+<li><strong>Summarize the bulk, enumerate only the risky.</strong> Describe routine filler removal in grouped terms ("cut throat-clearing throughout"), never word-by-word; spell out individually only the at-risk cuts (a dropped qualifier, scope or voice) so they can be confirmed.</li>
+</ul>
+<h2>Output format</h2>
+<p>The rewrite is shown only for pasted input. For a file edit the diff is the rewrite, so never reprint it; emit the change summary, delta and dial only. Count the delta exactly from both versions (e.g. <code>wc -w</code>), never estimate.</p>
+<ul>
+<li><strong>Short-form:</strong> the rewrite (pasted) or a one-line note (file). Fold a terse "what changed" into the note ("cut throat-clearing and hedge-stacking, −22%"). No visible ledger</li>
+<li><strong>Prose / high-stakes:</strong><ul>
+<li>the rewrite, for pasted input only;</li>
+<li>a short <strong>"what changed"</strong> summary, grouped by kind, not a per-word log ("removed throat-clearing and hedge-stacking; collapsed two rule-of-three lists; cut ceremonial transitions");</li>
+<li>any <strong>at-risk</strong> cut called out separately with a one-clause confirm-this reason ("dropped 'in most cases': confirm the claim is still meant to be hedged");</li>
+<li>word-count delta (<code>820 → 540 words, −34%</code>), reported as a result, never as a goal hit;</li>
+<li>the dial offer.</li>
+</ul>
+</li>
+</ul>
+<h2>Delivery</h2>
+<p>Invocation is explicit and name-gated, so act directly. The host's edit-permission prompt and diff view are the confirmation and preview layer, so do not add a bespoke confirm step.</p>
+<ul>
+<li><strong>Pasted text</strong> → return the rewrite in chat. It is the deliverable.</li>
+<li><strong>File path</strong> → edit the file in place. The diff is the rewrite, so never reprint the rewritten text; surface only the cut-list and delta. If the user asks to preview without changing the file, return the rewrite in chat instead.</li>
+</ul>
+<h2>Voice</h2>
+<p>Preserve the author's voice by default: it is load-bearing unless <em>also</em> redundant. Offer a <strong>neutralize</strong> mode (plain dense prose, voice removed) only when asked. Never neutralize silently.</p>
+<h2>Anti-patterns</h2>
+<ul>
+<li>Padding or inventing cuts to hit a word count</li>
+<li>Refusing to return "already lean" when the text is genuinely tight</li>
+<li>Paraphrasing anything on the verbatim-preserve list</li>
+<li>Dropping a hedge, qualifier or scope and calling it concision</li>
+<li>Re-printing the full original alongside the rewrite</li>
+<li>Narrating the full ledger to the user</li>
+<li>Invoking or depending on another skill: brevity runs standalone</li>
+<li>Touching your own chat replies or running unprompted</li>
+<li>Sanding off the author's voice without being asked</li>
+<li>Dropping articles, breaking grammar, reducing prose to telegraphese. Concision preserves grammaticality and register. This is the line between <code>brevity</code> and a blunt token-stripper. Output must read as natural, well-edited writing</li>
+</ul>
+<p>For the full filler and protect taxonomies see <a href="references/taxonomy.md">references/taxonomy.md</a>; for worked before/after pairs see <a href="references/examples.md">references/examples.md</a>.</p>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install brevity@nearform-skills</code><button class="copy-btn" data-copy="/plugin install brevity@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable brevity</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install brevity@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install brevity@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/brevity">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

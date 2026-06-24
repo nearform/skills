@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nearform-sql — Nearform Plugins</title>
+  <meta name="description" content="Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform&#39;s tagged-template library that produces SQL-injection-safe" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>nearform-sql</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>nearform-sql <span class="version">v1.0.0</span></h1>
+      <p class="description">Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform&#39;s tagged-template library that produces SQL-injection-safe parameterized queries for pg, mysql, and mysql2. Covers installation, the SQL tag (.text/.sql/.values/.debug), helpers (glue, map, unsafe, quoteIdent), Fastify integration, dynamic/bulk queries, and security best practices.</p>
+      <div class="plugin-meta">
+        <span class="category">engineering</span><span class="author">Luca Del Puppo</span>
+      </div>
+      <div class="keywords"><span class="keyword">sql</span><span class="keyword">database</span><span class="keyword">postgres</span><span class="keyword">mysql</span><span class="keyword">security</span><span class="keyword">nearform</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>nearform-sql</h3><p class="content-description">Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform&#39;s tagged-template library that produces SQL-injection-safe parameterized queries for pg, mysql, and mysql2. Covers installation, the SQL tag (.text/.sql/.values/.debug), helpers (glue, map, unsafe, quoteIdent), Fastify integration, dynamic/bulk queries, and security best practices. Trigger terms: SQL, query, parameterized query, SQL injection, pg, postgres, mysql, @nearform/sql, glue, quoteIdent.</p></header><div class="content-body"><h1>@nearform/sql</h1>
+<p><code>@nearform/sql</code> is a tagged-template library that turns ES6 template literals into
+<strong>parameterized</strong> queries, immune to SQL injection by construction. It works with
+<code>pg</code> (PostgreSQL), <code>mysql</code>, and <code>mysql2</code>. You build a query with the <code>SQL`...`</code>
+tag and pass the resulting statement object straight to your driver.</p>
+<h2>When to use this skill</h2>
+<p>Reach for this skill whenever you:</p>
+<ul>
+<li>Write or review code that builds SQL queries in Node.js.</li>
+<li>See a raw SQL string assembled with <code>+</code>, <code>${...}</code> inside a plain template string, or
+<code>string.replace</code> — that is a SQL-injection red flag; rewrite it with the <code> SQL</code> `` tag.</li>
+<li>Need dynamic queries: conditional <code>WHERE</code>, dynamic <code>SET</code>, bulk <code>INSERT</code>, or <code>IN (...)</code> lists.</li>
+<li>Interpolate identifiers (table/column names) into a query.</li>
+</ul>
+<blockquote>
+<p>For the full API reference see <a href="references/api-cheatsheet.md"><code>references/api-cheatsheet.md</code></a>.
+For framework integration and dynamic-query recipes see <a href="references/patterns.md"><code>references/patterns.md</code></a>.</p>
+</blockquote>
+<h2>Install &amp; import</h2>
+<pre><code class="language-sh">npm install @nearform/sql
+</code></pre>
+<pre><code class="language-js">import SQL from '@nearform/sql' // ESM — prefer this for new code
+</code></pre>
+<pre><code class="language-js">const SQL = require('@nearform/sql') // CommonJS — also supported
+</code></pre>
+<p>The package itself is published as CommonJS (no <code>exports</code> map), but it interops
+cleanly with ESM through a <strong>default import</strong> — use <code>import SQL from '@nearform/sql'</code>,
+then call <code>SQL.glue</code>, <code>SQL.map</code>, etc. off that default.</p>
+<p>Statements are fully typed — the package ships <code>SQL.d.ts</code>, and helpers like
+<code>SQL.map&lt;T&gt;(array, mapFunc?)</code> are generic, so TypeScript infers the element type.</p>
+<h2>The golden rule</h2>
+<p><strong>Every runtime value goes through <code>${...}</code> inside the <code> SQL</code> `` tag.</strong> The tag captures
+each interpolated value as a bound parameter — it never injects it into the query text.</p>
+<pre><code class="language-js">const username = "Robert'); DROP TABLE students;--"
+
+const sql = SQL`SELECT * FROM users WHERE username = ${username}`
+// sql.text   -&gt; "SELECT * FROM users WHERE username = $1"   (pg)
+// sql.sql    -&gt; "SELECT * FROM users WHERE username = ?"    (mysql)
+// sql.values -&gt; ["Robert'); DROP TABLE students;--"]        (bound, harmless)
+</code></pre>
+<ul>
+<li><strong>Never</strong> build the query with string concatenation or an untagged template literal.</li>
+<li><code>SQL.unsafe(value)</code> and <code>append(..., { unsafe: true })</code> interpolate literally and
+<strong>bypass this protection</strong> — use them only for values you fully control, never for
+user input. See the cheatsheet.</li>
+</ul>
+<h2>Core usage</h2>
+<p>The statement object is driver-agnostic. Choose the property your client expects, or
+pass the whole object — <code>pg</code>, <code>mysql</code>, and <code>mysql2</code> all read what they need from it.</p>
+<pre><code class="language-js">const user = { username: 'alice', email: 'alice@example.com' }
+
+const sql = SQL`
+  INSERT INTO users (username, email)
+  VALUES (${user.username}, ${user.email})
+`
+
+// PostgreSQL (pg) — uses sql.text ($1, $2) + sql.values
+await pgClient.query(sql)
+
+// MySQL (mysql / mysql2) — uses sql.sql (?, ?) + sql.values
+mysqlConnection.query(sql)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Use it for</th>
+<th>Placeholder style</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sql.text</code></td>
+<td>PostgreSQL (<code>pg</code>)</td>
+<td><code>$1, $2, …</code></td>
+</tr>
+<tr>
+<td><code>sql.sql</code></td>
+<td>MySQL (<code>mysql</code>, <code>mysql2</code>)</td>
+<td><code>?, ?, …</code></td>
+</tr>
+<tr>
+<td><code>sql.values</code></td>
+<td>The bound values array (both)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>sql.debug</code></td>
+<td><strong>Logging/debugging only</strong> — never execute it</td>
+<td>inlined (unsafe)</td>
+</tr>
+</tbody></table>
+<h2>Composing queries</h2>
+<p>Nest <code> SQL</code> `` tags directly — the preferred way to build queries from fragments.
+Parameterization is preserved across the nesting.</p>
+<pre><code class="language-js">const where = SQL`WHERE active = ${true}`
+const sql = SQL`SELECT id, email FROM users ${where} ORDER BY created_at DESC`
+</code></pre>
+<p>For repeated fragments, use the helpers:</p>
+<ul>
+<li><strong><code>SQL.glue(pieces, separator)</code></strong> — join an array of statements (dynamic <code>SET</code>/<code>WHERE</code>, bulk <code>VALUES</code>).</li>
+<li><strong><code>SQL.map(array, mapFunc?)</code></strong> — expand an array into bound values (<code>IN (...)</code> lists, bulk insert).</li>
+</ul>
+<pre><code class="language-js">const ids = [1, 2, 3]
+const sql = SQL`SELECT * FROM users WHERE id IN (${SQL.map(ids)})`
+</code></pre>
+<p>See <a href="references/patterns.md"><code>references/patterns.md</code></a> for complete dynamic-query, Fastify,
+and migration recipes.</p>
+<blockquote>
+<p><code>append()</code> still works but is <strong>deprecated</strong> — prefer nesting tags.</p>
+</blockquote>
+<h2>Best practices checklist</h2>
+<ul>
+<li>✅ Wrap <strong>every</strong> query in the <code> SQL</code> `` tag; pass interpolated values via <code>${...}</code>.</li>
+<li>✅ Never concatenate strings or use untagged template literals for SQL.</li>
+<li>⚠️ <strong>No <code>undefined</code></strong> — the tag throws on <code>undefined</code>. Coerce nullable fields to <code>null</code>:<pre><code class="language-js">SQL`INSERT INTO users (name, address) VALUES (${user.name}, ${user.address || null})`
+</code></pre>
+</li>
+<li>✅ Use <strong><code>SQL.quoteIdent(name)</code></strong> for dynamic identifiers (table/column names) — never
+interpolate them as values.</li>
+<li>⚠️ Use <strong><code>SQL.unsafe(value)</code></strong> only for trusted, non-user values; it bypasses injection protection.</li>
+<li>✅ Use <code>sql.debug</code> for logs only — <strong>never</strong> send it to the driver as the executed query.</li>
+<li>✅ Enforce the tag in your codebase with <a href="https://www.npmjs.com/package/eslint-plugin-sql"><code>eslint-plugin-sql</code></a>
+and the <code>thebearingedge.vscode-sql-lit</code> VS Code extension for syntax highlighting inside the tag.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install nearform-sql@nearform-skills</code><button class="copy-btn" data-copy="/plugin install nearform-sql@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable nearform-sql</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install nearform-sql@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install nearform-sql@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/nearform-sql">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in engineering <span class="count">(4)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../prompt-engineering/">
+          <h3>prompt-engineering</h3>
+          <p class="description">Rules and frameworks for writing high-quality LLM system prompts. Apply when authoring, reviewing, or optimizing a system prompt, system message, or LLM instructions.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Pasquale Carbone</span></div>
+        </a>
+        <a class="plugin-card" href="../clean-architecture/">
+          <h3>clean-architecture</h3>
+          <p class="description">Enforces Clean Architecture layering for TypeScript factory-based codebases. Use when creating, refactoring, or reviewing handlers, services, domains, and repositories.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Marco Turi</span></div>
+        </a>
+        <a class="plugin-card" href="../understand-codebase/">
+          <h3>understand-codebase</h3>
+          <p class="description">Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Adaptively provisions only what you ask for: knowledge notes, a Quartz graph viewer, a query interface, or incremental git-hook re-analysis. Use when onboarding to a new or undocumented project.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Gabriele Magno</span></div>
+        </a>
+        <a class="plugin-card" href="../init-python-project/">
+          <h3>init-python-project</h3>
+          <p class="description">Scaffold a new Python project following modern best practices — uv by default (with pip/venv, pipenv, or manual fallbacks), plus ruff, mypy, pre-commit, and pytest. Use when starting, creating, or bootstrapping a new Python project.</p>
+          <div class="plugin-meta"><span class="category">engineering</span><span class="author">Dario Ruben Scanferlato</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>
