@@ -1,0 +1,15 @@
+{
+  "name": "prompt-engineering",
+  "description": "Rules and frameworks for writing high-quality LLM system prompts. Apply when authoring, reviewing, or optimizing a system prompt, system message, or LLM instructions.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Pasquale Carbone"
+  },
+  "keywords": [
+    "prompt-engineering",
+    "llm",
+    "system-prompt",
+    "engineering"
+  ],
+  "category": "engineering"
+}

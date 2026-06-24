@@ -1,0 +1,17 @@
+{
+  "name": "understand-codebase",
+  "description": "Build an interlinked markdown knowledge graph of an unfamiliar codebase and explore it. Adaptively provisions only what you ask for: knowledge notes, a Quartz graph viewer, a query interface, or incremental git-hook re-analysis. Use when onboarding to a new or undocumented project.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Gabriele Magno"
+  },
+  "keywords": [
+    "codebase",
+    "onboarding",
+    "knowledge-graph",
+    "documentation",
+    "quartz",
+    "wikilinks"
+  ],
+  "category": "engineering"
+}

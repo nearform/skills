@@ -1,0 +1,17 @@
+{
+  "name": "init-python-project",
+  "description": "Scaffold a new Python project following modern best practices — uv by default (with pip/venv, pipenv, or manual fallbacks), plus ruff, mypy, pre-commit, and pytest. Use when starting, creating, or bootstrapping a new Python project.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dario Ruben Scanferlato"
+  },
+  "keywords": [
+    "python",
+    "scaffold",
+    "uv",
+    "ruff",
+    "pytest",
+    "engineering"
+  ],
+  "category": "engineering"
+}

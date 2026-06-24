@@ -1,0 +1,16 @@
+{
+  "name": "handoff",
+  "description": "Compact the current conversation into a handoff document so a fresh agent can continue the work in a new session. Use when splitting scope across sessions, spawning prototype or side tasks, or passing context between agents.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Rosario Terranova"
+  },
+  "keywords": [
+    "handoff",
+    "context",
+    "session",
+    "productivity",
+    "agent"
+  ],
+  "category": "productivity"
+}

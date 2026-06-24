@@ -1,0 +1,15 @@
+{
+  "name": "security-advisory-review",
+  "description": "Assess security advisories against a Git repository by creating an isolated worktree, building a PoC exploit, and validating whether the described vulnerability is real and exploitable. Use when given a CVE, GitHub Security Advisory, or vulnerability description to verify.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Steve Goode"
+  },
+  "keywords": [
+    "security",
+    "vulnerability",
+    "cve",
+    "advisory"
+  ],
+  "category": "security"
+}

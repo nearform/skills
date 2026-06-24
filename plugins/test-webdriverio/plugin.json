@@ -1,0 +1,15 @@
+{
+  "name": "test-webdriverio",
+  "description": "WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "webdriverio",
+    "wdio",
+    "automation"
+  ],
+  "category": "testing"
+}

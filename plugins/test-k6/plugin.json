@@ -1,0 +1,16 @@
+{
+  "name": "test-k6",
+  "description": "k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Sherrylene Gauci"
+  },
+  "keywords": [
+    "testing",
+    "k6",
+    "performance testing",
+    "load testing",
+    "automation"
+  ],
+  "category": "testing"
+}

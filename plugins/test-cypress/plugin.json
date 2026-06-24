@@ -1,0 +1,15 @@
+{
+  "name": "test-cypress",
+  "description": "Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "cypress",
+    "e2e",
+    "automation"
+  ],
+  "category": "testing"
+}

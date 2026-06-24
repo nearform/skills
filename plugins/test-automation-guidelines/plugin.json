@@ -1,0 +1,15 @@
+{
+  "name": "test-automation-guidelines",
+  "description": "Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "automation",
+    "quality",
+    "engineering"
+  ],
+  "category": "testing"
+}

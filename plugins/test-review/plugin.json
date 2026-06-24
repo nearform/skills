@@ -1,0 +1,15 @@
+{
+  "name": "test-review",
+  "description": "Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework's review patterns.",
+  "version": "1.0.1",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "review",
+    "quality",
+    "automation"
+  ],
+  "category": "testing"
+}

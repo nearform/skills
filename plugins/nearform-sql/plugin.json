@@ -1,0 +1,17 @@
+{
+  "name": "nearform-sql",
+  "description": "Use this skill when writing, reviewing, or refactoring database queries with @nearform/sql — Nearform's tagged-template library that produces SQL-injection-safe parameterized queries for pg, mysql, and mysql2. Covers installation, the SQL tag (.text/.sql/.values/.debug), helpers (glue, map, unsafe, quoteIdent), Fastify integration, dynamic/bulk queries, and security best practices.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Luca Del Puppo"
+  },
+  "keywords": [
+    "sql",
+    "database",
+    "postgres",
+    "mysql",
+    "security",
+    "nearform"
+  ],
+  "category": "engineering"
+}
