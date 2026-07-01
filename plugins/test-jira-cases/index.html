@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>test-automation-guidelines — Nearform Plugins</title>
-  <meta name="description" content="Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated t" />
+  <title>test-jira-cases — Nearform Plugins</title>
+  <meta name="description" content="Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review." />
   <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,18 +14,18 @@
 <body>
   <div class="container">
     <nav class="breadcrumbs">
-      <a href="../../">Plugins</a><span class="sep">/</span><span>test-automation-guidelines</span>
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-jira-cases</span>
     </nav>
   </div>
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-automation-guidelines <span class="version">v1.0.0</span></h1>
-      <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+      <h1>test-jira-cases <span class="version">v1.0.0</span></h1>
+      <p class="description">Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
       </div>
-      <div class="keywords"><span class="keyword">testing</span><span class="keyword">automation</span><span class="keyword">quality</span><span class="keyword">engineering</span></div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">jira</span><span class="keyword">test-cases</span><span class="keyword">requirements</span><span class="keyword">quality</span></div>
     </div>
   </header>
 
@@ -33,75 +33,201 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-automation-guidelines</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining automated tests to ensure they are deterministic, reliable, and maintainable across frameworks.</p></header><div class="content-body"><p>You are a test engineer ensuring all automated tests are reliable, deterministic, and maintainable.</p>
-<h2>Responsibilities</h2>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-jira-cases</h3><p class="content-description">Generate reviewer-ready, traceable test cases from Jira issues using an available Jira MCP server.</p></header><div class="content-body"><h1>Test Jira Cases</h1>
+<p>Generate comprehensive, risk-based, reviewer-ready test cases from Jira issues.</p>
+<p>Invoke only when the user explicitly requests:</p>
 <ul>
-<li>Enforce deterministic behaviour</li>
-<li>Ensure tests are independent</li>
-<li>Validate test structure and readability</li>
-<li>Identify flakiness and anti-patterns</li>
+<li>Test cases</li>
+<li>QA coverage</li>
+<li>Validation scenarios</li>
 </ul>
-<hr />
-<h3>Test Pyramid</h3>
+<p>Do not invoke for:</p>
 <ul>
-<li>Prioritise Unit &gt; Contract &gt; Integration &gt; E2E tests for speed and reliability.</li>
+<li>Test automation implementation</li>
+<li>Code refactoring</li>
+<li>Jira summarisation without testing intent</li>
 </ul>
-<hr />
-<h3>Triage and Maintenance</h3>
+<h2>Prerequisites</h2>
+<p>An MCP server providing Jira issue access is available.</p>
+<p>If multiple Jira MCP servers are available, use the most appropriate one.</p>
+<h2>Input</h2>
+<p>Accept:</p>
 <ul>
-<li>Categorise failures: Application Bug, Test Bug, or Environment Issue.</li>
-<li>Tag and quarantine flaky tests.</li>
+<li>Jira key</li>
+<li>Jira URL</li>
+<li>Story</li>
+<li>Bug</li>
+<li>Task</li>
+<li>Subtask</li>
+<li>Epic</li>
 </ul>
-<hr />
-<h3>Core Principles</h3>
+<p>Optional:</p>
 <ul>
-<li>Tests must be deterministic</li>
-<li>Tests must be independent</li>
-<li>Tests must validate behaviour, not implementation</li>
-<li>Tests must be readable and maintainable</li>
+<li>Scope focus (API, UI, permissions, reporting, etc.)</li>
+<li>Risk focus (security, payments, performance, accessibility, etc.)</li>
+<li>Maximum number of test cases</li>
 </ul>
-<hr />
-<h3>Principles reference</h3>
-<p>This skill makes use of the detailed principles in <code>references/principles.md</code>. See that file for full guidance. Key points (summary):</p>
+<p>If no ticket reference is provided, ask for one.</p>
+<h2>Process</h2>
+<ol>
+<li>Retrieve the Jira issue using an available Jira MCP tool.</li>
+<li>Use available issue information, including:<ul>
+<li>Summary</li>
+<li>Description</li>
+<li>Acceptance Criteria</li>
+<li>Comments</li>
+<li>Labels</li>
+<li>Components</li>
+<li>Status</li>
+<li>Priority</li>
+<li>Linked issues</li>
+<li>Subtasks</li>
+<li>Relevant custom fields</li>
+</ul>
+</li>
+<li>Review linked issues or subtasks only when they materially affect testing scope.</li>
+<li>Identify:<ul>
+<li>Functional behaviour</li>
+<li>Business rules</li>
+<li>User workflows</li>
+<li>Validation rules</li>
+<li>State transitions</li>
+<li>Roles and permissions</li>
+<li>Integrations and dependencies</li>
+<li>Error handling</li>
+<li>Security considerations</li>
+<li>Boundary and edge cases</li>
+<li>Business risks</li>
+</ul>
+</li>
+<li>If acceptance criteria are missing:<ul>
+<li>Derive explicit numbered requirements from the available information.</li>
+<li>Label them as <strong>Derived Requirements</strong>.</li>
+<li>Reduce confidence accordingly.</li>
+</ul>
+</li>
+<li>Generate concise, executable, risk-prioritised test cases covering, where applicable:<ul>
+<li>Happy path</li>
+<li>Negative</li>
+<li>Boundary</li>
+<li>Edge case</li>
+<li>Validation</li>
+<li>Permission</li>
+<li>Integration</li>
+<li>Error recovery</li>
+<li>Regression</li>
+</ul>
+</li>
+<li>Merge duplicate coverage and ensure each test validates one primary behaviour.</li>
+</ol>
+<p>If the issue cannot be retrieved:</p>
 <ul>
-<li>Determinism: wait for API responses and assert DOM state; avoid fixed delays and timing assumptions.</li>
-<li>Independence: create fresh data per test and use independent setup/teardown; avoid reusing state between tests.</li>
-<li>Behaviour vs Implementation: assert user-visible behaviour (e.g., "user sees success message") rather than internal implementation details (e.g., "function X was called").</li>
-<li>Selector strategy: prefer <code>data-testid</code> and accessibility roles; avoid brittle selectors like CSS classes or relying on DOM structure.</li>
+<li>Ask the user to provide the ticket contents.</li>
+<li>Continue using only user-provided information.</li>
+<li>Mark confidence as reduced.</li>
 </ul>
-<h3>Accessibility</h3>
+<p>If requirements are incomplete or ambiguous:</p>
 <ul>
-<li>Include automated accessibility checks (e.g., <code>axe-core</code>) in the test suite.</li>
+<li>Identify gaps.</li>
+<li>Clearly distinguish facts from assumptions.</li>
+<li>Ask clarifying questions when necessary.</li>
+<li>Never invent requirements.</li>
 </ul>
-<hr />
-<h2>Rules</h2>
+<h2>Validation</h2>
+<p>Before presenting results, ensure:</p>
 <ul>
-<li>Do not use arbitrary waits</li>
-<li>Do not rely on execution order</li>
-<li>Do not share mutable state between tests</li>
-<li>Prefer real signals (network, DOM, navigation) over timing</li>
-<li>Use stable, intentional selectors</li>
-<li>Assert meaningful user-visible outcomes</li>
+<li>Every acceptance criterion or derived requirement is covered.</li>
+<li>Major workflows are represented.</li>
+<li>Appropriate negative and edge-case testing is included.</li>
+<li>Each test case maps to at least one requirement.</li>
+<li>Steps are concise and executable.</li>
+<li>Expected results are observable.</li>
+<li>Assumptions and gaps are explicit.</li>
+<li>Any uncovered requirement is listed.</li>
 </ul>
-<hr />
-<h2>Anti-Patterns</h2>
+<h2>Output</h2>
+<h3>Coverage Summary</h3>
+<p>Include:</p>
 <ul>
-<li>Arbitrary time delays</li>
-<li>Shared state between tests</li>
-<li>Order-dependent tests</li>
-<li>Brittle selectors (CSS structure, nth-child, etc.)</li>
-<li>Testing implementation details instead of behaviour</li>
+<li>Acceptance criteria count</li>
+<li>Derived requirement count</li>
+<li>Test case count</li>
+<li>Coverage areas</li>
+<li>Key risks</li>
+<li>Confidence</li>
 </ul>
-<hr />
-<h2>Usage</h2>
-<p>This skill must be applied alongside a framework-specific testing skill.</p>
+<p>Confidence:</p>
+<ul>
+<li>High — Requirements are complete and testable.</li>
+<li>Medium — Minor assumptions required.</li>
+<li>Low — Significant ambiguity or missing information.</li>
+</ul>
+<h3>Traceability Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement / AC</th>
+<th>Test Cases</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-1</td>
+<td>TC-001</td>
+</tr>
+</tbody></table>
+<h3>Test Cases</h3>
+<p>For each test case include:</p>
+<ul>
+<li>ID</li>
+<li>Title</li>
+<li>Coverage Area</li>
+<li>Priority (P0–P3)</li>
+<li>Type</li>
+<li>Preconditions</li>
+<li>Steps</li>
+<li>Expected Result</li>
+<li>Traceability</li>
+<li>Notes / Assumptions</li>
+</ul>
+<p>Formatting:</p>
+<ul>
+<li>Sequential IDs (TC-001, TC-002...)</li>
+<li>Numbered steps</li>
+<li>Concise reviewer-friendly language</li>
+<li>Observable expected results</li>
+</ul>
+<h3>Completion</h3>
+<p>Include:</p>
+<ul>
+<li>Coverage Summary</li>
+<li>Open Questions</li>
+<li>Risks &amp; Gaps</li>
+<li>Uncovered Requirements (if any)</li>
+<li>Reviewer Recommendation</li>
+</ul>
+<p>Reviewer Recommendation:</p>
+<ul>
+<li>Ready for review</li>
+<li>Ready for review with assumptions</li>
+<li>Clarification required before review</li>
+<li>Insufficient requirements for reliable test generation</li>
+</ul>
+<h2>Guardrails</h2>
+<ul>
+<li>Never invent acceptance criteria, business rules or requirements.</li>
+<li>Clearly separate facts from assumptions.</li>
+<li>Prefer clarification over speculation.</li>
+<li>Never claim complete coverage when requirements are incomplete.</li>
+<li>Use linked issues only when relevant to testing scope.</li>
+<li>Do not expose internal reasoning.</li>
+</ul>
 </div></article></section>
       </article>
 
       <aside>
         <div class="side-card">
           <h3>Install</h3>
-          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-automation-guidelines@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-automation-guidelines@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-automation-guidelines</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-automation-guidelines@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-automation-guidelines@nearform-skills">Copy</button></pre></div>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-jira-cases@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-jira-cases@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-jira-cases</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-jira-cases@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-jira-cases@nearform-skills">Copy</button></pre></div>
         </div>
 
         <div class="side-card">
@@ -111,7 +237,7 @@
 
         <div class="side-card">
           <h3>Source</h3>
-          <a href="https://github.com/nearform/skills/tree/main/plugins/test-automation-guidelines">View on GitHub →</a>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-jira-cases">View on GitHub →</a>
         </div>
       </aside>
     </div>
@@ -120,9 +246,9 @@
     <section>
       <h2>More in testing <span class="count">(9)</span></h2>
       <div class="related-grid">
-        <a class="plugin-card" href="../test-jira-cases/">
-          <h3>test-jira-cases</h3>
-          <p class="description">Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.</p>
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
           <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
         </a>
         <a class="plugin-card" href="../test-bdd/">
