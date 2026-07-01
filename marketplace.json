@@ -75,6 +75,23 @@
       "category": "testing"
     },
     {
+      "name": "test-jira-cases",
+      "source": "./plugins/test-jira-cases",
+      "description": "Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Greg Duckworth"
+      },
+      "keywords": [
+        "testing",
+        "jira",
+        "test-cases",
+        "requirements",
+        "quality"
+      ],
+      "category": "testing"
+    },
+    {
       "name": "test-bdd",
       "source": "./plugins/test-bdd",
       "description": "Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.",

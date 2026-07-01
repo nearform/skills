@@ -1,0 +1,16 @@
+{
+  "name": "test-jira-cases",
+  "description": "Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "jira",
+    "test-cases",
+    "requirements",
+    "quality"
+  ],
+  "category": "testing"
+}
