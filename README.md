@@ -45,6 +45,7 @@ No marketplace support? Skills are just folders of Markdown, so they work with a
 git clone https://github.com/nearform/skills.git
 # then copy any skill into your project, for example with Claude Code:
 cp -r plugins/<plugin>/skills/<skill> .claude/skills/
+```
 
 Common locations:
 
