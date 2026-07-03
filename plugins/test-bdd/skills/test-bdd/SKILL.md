@@ -73,7 +73,7 @@ Scenario: Registered customer signs in
   Then she lands on her dashboard
 ```
 
-The selectors, typing, and URL assertions still exist — they live in the **step definitions**, governed by the framework skill, not in the feature file.
+The selectors, typing, and URL assertions still exist — they live in the **step definitions**, governed by the framework skill, not in the feature file. See `references/gherkin-style.md` for more examples.
 
 ---
 
@@ -87,30 +87,11 @@ A scenario asserts a single, named behaviour. If the name needs "and" to be accu
 
 `Background` is for **Given** steps that establish common context every scenario needs. It must not contain `When`/`Then`, actions, or assertions. If a `Background` grows beyond a few lines, the scenarios are probably coupled — prefer explicit setup or a tag-scoped hook.
 
-```gherkin
-Background:
-  Given the store has the "Standard" catalogue
-  And Ada is signed in
-```
-
 ---
 
 ### Use `Scenario Outline` for one behaviour with varying data
 
 Reach for `Scenario Outline` + `Examples` only when the **behaviour is identical** and only the **data** changes. Do not use it to bolt together different behaviours.
-
-```gherkin
-Scenario Outline: Discounts apply at qualifying basket totals
-  Given Ada has a basket worth <total>
-  When she views the basket
-  Then the discount shown is <discount>
-
-  Examples:
-    | total | discount |
-    | 50    | 0%       |
-    | 100   | 5%       |
-    | 250   | 10%      |
-```
 
 ---
 
@@ -143,17 +124,7 @@ A step definition translates one line of business language into one behavioural 
 
 ### Share state through the World, never module globals
 
-Within a scenario, share state via the Cucumber **World** (`this`). Across scenarios, share **nothing** — a fresh World per scenario is what keeps tests independent and parallel-safe. Module-level `let` variables create shared mutable state across scenarios and violate `test-automation-guidelines`.
-
-```javascript
-// Good — per-scenario state on the World
-Given("Ada has a basket worth {int}", function (total) {
-  this.basket = createBasketWorth(total); // isolated to this scenario
-});
-
-// Bad — module global leaks across scenarios
-let basket; // shared mutable state
-```
+Within a scenario, share state via the Cucumber **World** (`this`). Across scenarios, share **nothing** — a fresh World per scenario is what keeps tests independent and parallel-safe. Module-level `let` variables create shared mutable state across scenarios and violate `test-automation-guidelines`. See `references/gherkin-style.md` for a good/bad example.
 
 ### Map Gherkin to behaviour, delegate mechanics to the framework
 
@@ -212,11 +183,11 @@ If you reach for BDD, commit to the declarative discipline above. Imperative Ghe
 - `Scenario Outline` used to merge different behaviours
 - Logic, loops, or conditionals inside step definitions
 - Shared mutable state via module globals instead of the World
-- Restating framework rules in this skill instead of delegating
 - Tags used as narration, or `@wip`/`@flaky` left in a blocking pipeline
 
 ---
 
 ## References
 
-For the full declarative-Gherkin style guide with worked before/after rewrites, see `references/gherkin-style.md`.
+For the full Gherkin style guide with worked good/bad examples, see `references/gherkin-style.md`.
+
