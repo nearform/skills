@@ -72,31 +72,16 @@ test-cypress / test-playwright / test-webdriverio   (cy.* / page.* / browser.*)
   When she signs in with valid credentials
   Then she lands on her dashboard
 </code></pre>
-<p>The selectors, typing, and URL assertions still exist — they live in the <strong>step definitions</strong>, governed by the framework skill, not in the feature file.</p>
+<p>The selectors, typing, and URL assertions still exist — they live in the <strong>step definitions</strong>, governed by the framework skill, not in the feature file. See <code>references/gherkin-style.md</code> for more examples.</p>
 <hr />
 <h3>One behaviour per scenario</h3>
 <p>A scenario asserts a single, named behaviour. If the name needs "and" to be accurate, split it. Multiple unrelated assertions in one scenario make failures ambiguous and violate the independence principle from <code>test-automation-guidelines</code>.</p>
 <hr />
 <h3>Use <code>Background</code> for shared context only</h3>
 <p><code>Background</code> is for <strong>Given</strong> steps that establish common context every scenario needs. It must not contain <code>When</code>/<code>Then</code>, actions, or assertions. If a <code>Background</code> grows beyond a few lines, the scenarios are probably coupled — prefer explicit setup or a tag-scoped hook.</p>
-<pre><code class="language-gherkin">Background:
-  Given the store has the "Standard" catalogue
-  And Ada is signed in
-</code></pre>
 <hr />
 <h3>Use <code>Scenario Outline</code> for one behaviour with varying data</h3>
 <p>Reach for <code>Scenario Outline</code> + <code>Examples</code> only when the <strong>behaviour is identical</strong> and only the <strong>data</strong> changes. Do not use it to bolt together different behaviours.</p>
-<pre><code class="language-gherkin">Scenario Outline: Discounts apply at qualifying basket totals
-  Given Ada has a basket worth &lt;total&gt;
-  When she views the basket
-  Then the discount shown is &lt;discount&gt;
-
-  Examples:
-    | total | discount |
-    | 50    | 0%       |
-    | 100   | 5%       |
-    | 250   | 10%      |
-</code></pre>
 <hr />
 <h3>Avoid conjunction steps</h3>
 <p>A step that contains "and" is doing two things and cannot be reused cleanly. Split <code>Given the user is logged in and has an empty basket</code> into two <code>Given</code> steps.</p>
@@ -116,15 +101,7 @@ test-cypress / test-playwright / test-webdriverio   (cy.* / page.* / browser.*)
 <h3>Keep steps thin</h3>
 <p>A step definition translates one line of business language into one behavioural action, then hands the mechanics to the framework. Business logic, loops, and conditionals do not belong in step code — push them into helpers, page objects, or fixtures (see <code>test-refactor</code>).</p>
 <h3>Share state through the World, never module globals</h3>
-<p>Within a scenario, share state via the Cucumber <strong>World</strong> (<code>this</code>). Across scenarios, share <strong>nothing</strong> — a fresh World per scenario is what keeps tests independent and parallel-safe. Module-level <code>let</code> variables create shared mutable state across scenarios and violate <code>test-automation-guidelines</code>.</p>
-<pre><code class="language-javascript">// Good — per-scenario state on the World
-Given("Ada has a basket worth {int}", function (total) {
-  this.basket = createBasketWorth(total); // isolated to this scenario
-});
-
-// Bad — module global leaks across scenarios
-let basket; // shared mutable state
-</code></pre>
+<p>Within a scenario, share state via the Cucumber <strong>World</strong> (<code>this</code>). Across scenarios, share <strong>nothing</strong> — a fresh World per scenario is what keeps tests independent and parallel-safe. Module-level <code>let</code> variables create shared mutable state across scenarios and violate <code>test-automation-guidelines</code>. See <code>references/gherkin-style.md</code> for a good/bad example.</p>
 <h3>Map Gherkin to behaviour, delegate mechanics to the framework</h3>
 <p>The same feature file is satisfied by framework-specific glue. The step <strong>signature</strong> is identical; only the body changes, and the body obeys the framework skill.</p>
 <p><strong>Cypress glue (obeys test-cypress — chaining, <code>cy.session</code>, intercept aliases):</strong></p>
@@ -169,12 +146,11 @@ Then("she lands on her dashboard", async ({ page }) =&gt; {
 <li><code>Scenario Outline</code> used to merge different behaviours</li>
 <li>Logic, loops, or conditionals inside step definitions</li>
 <li>Shared mutable state via module globals instead of the World</li>
-<li>Restating framework rules in this skill instead of delegating</li>
 <li>Tags used as narration, or <code>@wip</code>/<code>@flaky</code> left in a blocking pipeline</li>
 </ul>
 <hr />
 <h2>References</h2>
-<p>For the full declarative-Gherkin style guide with worked before/after rewrites, see <code>references/gherkin-style.md</code>.</p>
+<p>For the full Gherkin style guide with worked good/bad examples, see <code>references/gherkin-style.md</code>.</p>
 </div></article></section>
       </article>
 
