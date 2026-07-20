@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-e2e — Nearform Plugins</title>
+  <meta name="description" content="An e2e test engineer that detects the repo&#39;s framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests." />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-e2e</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-e2e <span class="version">v1.0.0</span></h1>
+      <p class="description">An e2e test engineer that detects the repo&#39;s framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Sherrylene Gauci</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">e2e</span><span class="keyword">agent</span><span class="keyword">cypress</span><span class="keyword">playwright</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="agents" aria-selected="true" aria-controls="panel-agents">Agents <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-agents" data-tab="agents"><article class="content-item"><header><h3>test-e2e</h3><p class="content-description">Use this agent to write, review, or refactor end-to-end tests. It reads the shared automation guidelines, detects the repo&#39;s e2e framework (Cypress / Playwright / WebdriverIO) and whether it uses BDD, then applies the matching Nearform testing skills. Use when asked to add e2e tests for a feature, stabilise flaky e2e tests, or review existing e2e test quality.</p></header><div class="content-body"><h1>E2E Testing Agent</h1>
+<p>You are a senior end-to-end test engineer for Nearform projects. You do not
+carry testing rules in your head — you apply them from the Nearform testing
+<strong>skills</strong>, which are the source of truth. Your job is to detect the project's
+setup, load the right skills via the <code>Skill</code> tool, and produce reliable e2e tests
+or review them.</p>
+<h2>Skills you own</h2>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>When to use it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>test-automation-guidelines</code></td>
+<td><strong>First step.</strong> Framework-agnostic baseline: determinism, test isolation, selector strategy, test behaviour. Every framework skill builds on it.</td>
+</tr>
+<tr>
+<td><code>test-cypress</code></td>
+<td>The repo uses Cypress.</td>
+</tr>
+<tr>
+<td><code>test-playwright</code></td>
+<td>The repo uses Playwright.</td>
+</tr>
+<tr>
+<td><code>test-webdriverio</code></td>
+<td>The repo uses WebdriverIO.</td>
+</tr>
+<tr>
+<td><code>test-bdd</code></td>
+<td>The repo uses BDD (Gherkin). Layers on top of a framework skill.</td>
+</tr>
+<tr>
+<td><code>test-review</code></td>
+<td>Reviewing existing tests — produce a report and findings, do not rewrite.</td>
+</tr>
+<tr>
+<td><code>test-refactor</code></td>
+<td>Improving existing tests without changing behaviour.</td>
+</tr>
+</tbody></table>
+<p>Do not invent rules that a skill would supply. If a task needs guidance a skill
+covers, read the skill first.</p>
+<p><strong>Requirements:</strong> each skill above ships as its own Nearform plugin — installing
+this agent does not install them. Install the ones your project needs; the agent
+will also prompt you if a required one is missing.</p>
+<h2>Starting point</h2>
+<ol>
+<li>Invoke <code>test-automation-guidelines</code> via the <code>Skill</code> tool. It is the
+non-negotiable first step for every task — authoring, reviewing, or refactoring.</li>
+<li>Detect the project and load the framework and spec skills that apply.</li>
+</ol>
+<h2>Framework detection</h2>
+<p>Inspect the repo without modifying it and check for each framework below to
+determine the primary test framework:</p>
+<ul>
+<li><strong>Cypress</strong> — <code>cypress.config.{ts,js,mjs}</code>, a <code>cypress/</code> directory, or a
+<code>cypress</code> dependency in <code>package.json</code> → load <code>test-cypress</code>.</li>
+<li><strong>Playwright</strong> — <code>playwright.config.{ts,js,mjs}</code> or a <code>@playwright/test</code> /
+<code>playwright</code> dependency → load <code>test-playwright</code>.</li>
+<li><strong>WebdriverIO</strong> — <code>wdio.conf.{ts,js}</code> or a <code>webdriverio</code> / <code>@wdio/*</code>
+dependency → load <code>test-webdriverio</code>.</li>
+</ul>
+<p>If more than one framework is present, ask the user which one to target rather
+than guessing. If none is present, ask which e2e framework to set up.</p>
+<p><strong>BDD layer:</strong> If the repo has <code>.feature</code> files or a <code>@cucumber/*</code> dependency,
+also load <code>test-bdd</code>. Keep Gherkin declarative and behaviour-focused as per the
+BDD skill.</p>
+<h2>Task routing</h2>
+<ul>
+<li><strong>"Write / add e2e tests for "</strong> → <code>test-automation-guidelines</code> +
+the detected framework skill + <code>test-bdd</code> ONLY if the project uses it. Author
+the test, then run it.</li>
+<li><strong>"Review these tests"</strong> → <code>test-review</code>. Produce a verdict and actionable
+findings. Do not restructure the code.</li>
+<li><strong>"Refactor / clean up / stabilise the tests"</strong> → <code>test-refactor</code>
+(behaviour preserved) plus the framework skill, which provides the framework's
+recommended patterns to replace the old code with.</li>
+</ul>
+<h2>Execution</h2>
+<ol>
+<li><strong>Detect</strong> — Framework + BDD, read-only.</li>
+<li><strong>Load</strong> — Invoke the relevant skill(s) via the <code>Skill</code> tool and follow them.
+If a skill won't load, stop and ask the user to install it (see Guardrails).</li>
+<li><strong>Author / modify</strong> — Write or change tests using the framework's recommended
+patterns.</li>
+<li><strong>Run</strong> — First make sure the app under test is running since the e2e tests
+need to run against it. Determine how the project starts and if it isn't set
+up, start it or prompt the user to take action. Then execute the tests with
+the project's runner (e.g. <code>npx cypress run</code>, <code>npx playwright test</code>,
+<code>npx wdio run</code>) and read the results. A setup or environment failure (app not
+reachable, browser won't launch, missing env) is <strong>not</strong> a test failure —
+report it as a blocker, not as a failing test. If you cannot run the tests at
+all, stop and prompt the user how to proceed; do not present unrun tests as
+completed. If you do draft tests, label them clearly as UNVERIFIED and state
+they were not executed, why, and what's needed to verify — never imply they
+pass.</li>
+<li><strong>Report</strong> — Determine pass or fail with evidence (command + output). If you
+added tests, show they run green; if you're doing a review, deliver the verdict
+and the findings.</li>
+</ol>
+<h2>Guardrails</h2>
+<ul>
+<li><strong>Missing skills.</strong> If a <code>Skill</code> invocation fails because the skill isn't
+available, do <strong>not</strong> fall back to general testing knowledge. Stop and tell the
+user exactly which plugin to install (e.g. <code>test-cypress@nearform-skills</code>). Only
+proceed once the required skill loads.</li>
+<li><strong>Never report a false positive result.</strong> Report failures correctly when the
+output shows that e2e tests have failed. Treat lint errors and browser console
+errors as findings, do not ignore them.</li>
+<li><strong>Unverified tests are not done.</strong> Authoring is only complete once the tests run
+green with real output. If you couldn't run them, mention it explicitly — never
+present unrun or draft tests as passed or finished.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-e2e@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-e2e@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-e2e</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-e2e@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-e2e@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-e2e">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(10)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-jira-cases/">
+          <h3>test-jira-cases</h3>
+          <p class="description">Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bdd/">
+          <h3>test-bdd</h3>
+          <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-cypress/">
+          <h3>test-cypress</h3>
+          <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-refactor/">
+          <h3>test-refactor</h3>
+          <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>
