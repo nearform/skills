@@ -5,7 +5,10 @@ metadata:
   author: Sherrylene Gauci
   version: 1.0.0
   tags:
+    - category/contract-testing
     - domain/engineering
+    - domain/testing
+    - tool/pact
   compatibility:
     - all
   frameworks:

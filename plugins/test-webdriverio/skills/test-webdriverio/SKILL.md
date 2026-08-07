@@ -5,7 +5,10 @@ metadata:
   author: Greg Duckworth, Sherrylene Gauci
   version: 1.0.0
   tags:
+    - category/test-automation
     - domain/engineering
+    - domain/testing
+    - tool/webdriverio
   compatibility:
     - all
   frameworks:

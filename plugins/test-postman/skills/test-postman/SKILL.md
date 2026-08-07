@@ -5,7 +5,11 @@ metadata:
   author: Greg Duckworth
   version: 1.0.0
   tags:
+    - category/api-testing
     - domain/engineering
+    - domain/testing
+    - tool/postman
+    - tool/newman
   compatibility:
     - all
   frameworks:

@@ -5,9 +5,9 @@ metadata:
   author: Greg Duckworth
   version: 1.0.0
   tags:
+    - category/code-review
     - domain/engineering
     - domain/testing
-    - purpose/review
   compatibility:
     - all
 ---

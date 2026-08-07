@@ -5,7 +5,9 @@ metadata:
   author: Greg Duckworth
   version: 1.0.0
   tags:
+    - category/test-automation
     - domain/engineering
+    - domain/testing
   compatibility:
     - all
 ---

@@ -5,9 +5,9 @@ metadata:
   author: Greg Duckworth
   version: 1.0.0
   tags:
+    - category/refactoring
     - domain/engineering
     - domain/testing
-    - purpose/refactoring
   compatibility:
     - all
 ---

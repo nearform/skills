@@ -5,7 +5,10 @@ metadata:
   author: Sherrylene Gauci
   version: 1.0.0
   tags:
+    - category/performance-testing
     - domain/engineering
+    - domain/testing
+    - tool/k6
   compatibility:
     - all
   frameworks:
