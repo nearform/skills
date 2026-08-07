@@ -1,0 +1,16 @@
+{
+  "name": "test-bruno",
+  "description": "Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "api",
+    "bruno",
+    "rest",
+    "automation"
+  ],
+  "category": "testing"
+}

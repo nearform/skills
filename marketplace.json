@@ -329,6 +329,57 @@
         "playwright"
       ],
       "category": "testing"
+    },
+    {
+      "name": "test-api",
+      "source": "./plugins/test-api",
+      "description": "Framework-agnostic best practices for testing HTTP/REST APIs: request design, assertions, auth, data setup, and environment handling. Use when writing or reviewing API tests, or as the shared base for tool-specific API testing skills (Bruno, Postman).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Greg Duckworth"
+      },
+      "keywords": [
+        "testing",
+        "api",
+        "rest",
+        "http",
+        "automation"
+      ],
+      "category": "testing"
+    },
+    {
+      "name": "test-bruno",
+      "source": "./plugins/test-bruno",
+      "description": "Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Greg Duckworth"
+      },
+      "keywords": [
+        "testing",
+        "api",
+        "bruno",
+        "rest",
+        "automation"
+      ],
+      "category": "testing"
+    },
+    {
+      "name": "test-postman",
+      "source": "./plugins/test-postman",
+      "description": "Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Greg Duckworth"
+      },
+      "keywords": [
+        "testing",
+        "api",
+        "postman",
+        "newman",
+        "automation"
+      ],
+      "category": "testing"
     }
   ]
 }

@@ -1,0 +1,16 @@
+{
+  "name": "test-api",
+  "description": "Framework-agnostic best practices for testing HTTP/REST APIs: request design, assertions, auth, data setup, and environment handling. Use when writing or reviewing API tests, or as the shared base for tool-specific API testing skills (Bruno, Postman).",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "api",
+    "rest",
+    "http",
+    "automation"
+  ],
+  "category": "testing"
+}
