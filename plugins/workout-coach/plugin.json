@@ -1,0 +1,18 @@
+{
+  "name": "workout-coach",
+  "description": "Desk-friendly workout coaching for remote workers: set up a fitness profile and trainer persona, generate a training plan, get a daily workout, log completed sets, and track stats.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dario Ruben Scanferlato"
+  },
+  "keywords": [
+    "workout",
+    "fitness",
+    "exercise",
+    "health",
+    "coach",
+    "remote-work",
+    "wellness"
+  ],
+  "category": "wellness"
+}

@@ -314,6 +314,25 @@
       "category": "content"
     },
     {
+      "name": "workout-coach",
+      "source": "./plugins/workout-coach",
+      "description": "Desk-friendly workout coaching for remote workers: set up a fitness profile and trainer persona, generate a training plan, get a daily workout, log completed sets, and track stats.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Dario Ruben Scanferlato"
+      },
+      "keywords": [
+        "workout",
+        "fitness",
+        "exercise",
+        "health",
+        "coach",
+        "remote-work",
+        "wellness"
+      ],
+      "category": "wellness"
+    },
+    {
       "name": "test-e2e",
       "source": "./plugins/test-e2e",
       "description": "An e2e test engineer that detects the repo's framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.",
