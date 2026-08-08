@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>workout-coach — Nearform Plugins</title>
+  <meta name="description" content="Desk-friendly workout coaching for remote workers: set up a fitness profile and trainer persona, generate a training plan, get a daily workout, log completed se" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>workout-coach</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>workout-coach <span class="version">v1.0.0</span></h1>
+      <p class="description">Desk-friendly workout coaching for remote workers: set up a fitness profile and trainer persona, generate a training plan, get a daily workout, log completed sets, and track stats.</p>
+      <div class="plugin-meta">
+        <span class="category">wellness</span><span class="author">Dario Ruben Scanferlato</span>
+      </div>
+      <div class="keywords"><span class="keyword">workout</span><span class="keyword">fitness</span><span class="keyword">exercise</span><span class="keyword">health</span><span class="keyword">coach</span><span class="keyword">remote-work</span><span class="keyword">wellness</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(6)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>workout</h3><p class="content-description">Propose a short, working-day-friendly workout tailored to the user&#39;s saved fitness profile (exercise types, level, equipment, time, goals, injuries) AND their chosen trainer persona. Use when the user asks for a workout, &quot;what should I do today&quot;, &quot;give me a quick set&quot;, &quot;suggest exercises for my break&quot;, or similar. Reads ~/workout-coach/profile.md and ~/workout-coach/trainer.md.</p></header><div class="content-body"><h1>/workout — Propose a short workout</h1>
+<p>Generate a concise workout the user can do during a working-day break,
+tailored to their profile.</p>
+<h2>Steps</h2>
+<ol>
+<li><p><strong>Load the profile, trainer, and plan.</strong> Run
+<code>cat ~/workout-coach/profile.md</code>, <code>cat ~/workout-coach/trainer.md</code>, and
+<code>cat ~/workout-coach/plan.md</code> (the plan may not exist yet).</p>
+<ul>
+<li>If the <strong>profile</strong> doesn't exist, tell the user to run <code>/workout-profile</code>
+first (or offer to capture a quick profile inline by asking 2–3
+questions). Don't guess a full profile silently.</li>
+<li>If the <strong>trainer</strong> doesn't exist, proceed with a neutral, balanced coach,
+and mention they can run <code>/workout-trainer</code> to pick a persona (e.g. Bruce
+Lee, Saitama, Arnold, Yoga Instructor, Physio/Mobility Coach) for
+style-flavored workouts.</li>
+</ul>
+</li>
+<li><p><strong>Pick the session source &amp; account for context.</strong> Get today's date from the
+shell with <code>date +%F</code> (don't trust a remembered date), then factor in:</p>
+<ul>
+<li><strong>Default to the plan.</strong> If <code>~/workout-coach/plan.md</code> exists, it is the
+default source: work out which session the plan schedules next — match
+today's weekday in its weekly schedule, skip any slots already logged
+today, honor scheduling rules baked into the profile/plan (e.g. pull-ups
+only after 18:00 and only with a run), and prescribe the plan's current
+<strong>progression targets</strong> for those movements. Build <em>that</em> session.
+<strong>Unless the user specifies otherwise</strong> — if they ask for a different
+focus, a different duration, or to ignore the plan, honor that and tell
+them the session is <em>off-plan</em> (so <code>/workout-log</code> won't tick it against the
+plan). If no plan exists, build from the profile as usual and mention they
+can run <code>/workout-plan</code> to get a structured program.</li>
+<li><strong>The trainer persona</strong>, if set — let it shape the <em>style</em>, exercise
+selection bias, and tone of the workout (e.g. Saitama → simple high-rep
+calisthenics; Yoga Instructor → breath-led mobility flow). The persona
+flavors the set; it never overrides the profile's limits.</li>
+<li>How much time they have right now (ask if unclear — default to the
+profile's "time per session").</li>
+<li><strong>What they've already done today</strong> — read today's log
+(<code>cat ~/workout-coach/logs/$(date +%F).yaml 2&gt;/dev/null</code>; today's file is
+YAML). If sessions exist, avoid hammering the same muscle groups twice,
+nudge toward variety/balance, and note which session number this is vs.
+their target frequency.</li>
+<li><strong>Recent history &amp; progression</strong> — list and skim the last few daily logs
+(<code>ls -t ~/workout-coach/logs/ 2&gt;/dev/null | head -5</code>, then <code>cat</code> them).
+Logs are <strong>YAML</strong> (<code>&lt;date&gt;.yaml</code>, a <code>sessions:</code> list). Use the
+planned-vs-actual signal to scale: if they've consistently <strong>met or beat</strong>
+targets (<code>met: true</code>) on a movement, nudge reps/load/duration up a notch;
+if they've <strong>fallen short</strong> repeatedly, ease it back. This is how the
+log's data feeds back into the suggestion — close the loop. When a plan
+exists, its <strong>progression targets</strong> are the prescribed loads — use the logs
+to fine-tune within them, and let <code>/workout-log</code> ratchet the plan itself.</li>
+<li>Their stated level, equipment, goals, and <strong>injuries to avoid</strong>.</li>
+<li><strong>Today's condition</strong> — the profile's limitations may include <em>temporary</em>
+niggles. Briefly ask if anything's bothering them today (e.g. "neck still
+stiff?") and adjust, so a healed niggle doesn't suppress work forever.</li>
+<li><strong>Keep the profile current.</strong> If the user volunteers <em>durable</em>
+health/fitness info — a niggle that has resolved or newly appeared, a
+change in level, equipment, or a PB/target — <strong>propose updating
+<code>~/workout-coach/profile.md</code> and confirm before editing</strong>, then apply the
+change with <code>Edit</code> and bump the <code>_Last updated_</code> date (<code>date +%F</code>). Only
+persist lasting changes this way; one-off day-of feelings belong in the
+log, not the profile. Never rewrite the profile silently.</li>
+</ul>
+</li>
+<li><p><strong>Design ONE workout</strong>, scaled to their level and time budget. Keep it
+short (usually 3–6 working exercises, plus a warm-up). For each exercise
+decide: name, sets × reps (or a duration for holds/cardio), a one-line
+form/scaling cue, and a <strong>short explanation</strong> of what it does and why it's
+in today's set. If a trainer is set, write the set in that persona's voice
+and lean its exercise choices that way (without overdoing the roleplay —
+keep it useful first).</p>
+</li>
+<li><p><strong>Always open with a warm-up.</strong> Put a warm-up section <em>first</em>, before the
+working sets. Scale it to the work ahead and to today's condition — a
+couple of minutes of mobility/activation for the muscle groups about to be
+loaded is the minimum; recommend more if the session is intense, the user
+is cold (e.g. first session of the day), or a niggle is present. Never skip
+it silently; if you genuinely judge none is needed, say so explicitly.</p>
+</li>
+<li><p><strong>Estimate the duration and check it against their preference.</strong> Before
+presenting, do a quick time budget for the whole session and confirm it
+fits the user's stated time per session (or the time they gave for right
+now). For each exercise estimate:</p>
+<ul>
+<li><strong>Work time:</strong> reps × ~3s/rep (or the hold/cardio duration) × sets.</li>
+<li><strong>Rest time:</strong> rest between sets (typically 30–60s for strength,
+15–30s for mobility) × (sets − 1).</li>
+</ul>
+<p>Add the warm-up, sum it all, and compare to the budget:</p>
+<ul>
+<li>If the total <strong>overshoots</strong>, trim — cut a set, drop an exercise, or
+shorten rests — until it fits, then re-check.</li>
+<li>If it <strong>undershoots</strong> noticeably, you have room to add a set or an
+exercise.</li>
+</ul>
+<p>Show the user a one-line total (e.g. "≈12 min incl. rests — fits your
+15-min window") so the check is visible, not hidden.</p>
+</li>
+<li><p><strong>Take safety seriously.</strong></p>
+<ul>
+<li>Order exercises sensibly: warm-up first, then heavier/more technical or
+explosive work while fresh, finishing with lighter/core/cooldown.</li>
+<li>Default to movements appropriate for the user's level. <strong>Avoid dangerous
+or high-injury-risk exercises</strong> (heavy overhead/loaded spine work,
+ballistic/plyometric moves, deep loaded ranges, anything that stresses a
+listed injury). Only include such a movement if the profile shows the
+user is genuinely experienced with it <strong>and</strong> you flag the risk and the
+safety cues clearly — never slip it in unwarned.</li>
+<li>Always honor injuries and temporary niggles; when in doubt, pick the
+safer regression.</li>
+</ul>
+</li>
+<li><p><strong>Present it cleanly</strong>, exercises in order, warm-up first, each with its
+short explanation. For example:</p>
+<pre><code>### Today's set — ≈12 min (incl. rests, fits your 15-min window), upper body
+
+**Warm-up (~2 min)**
+- Arm circles + band pull-aparts — 1 min
+  Wakes up the shoulders and upper back so the pressing work is safe.
+
+**Working sets**
+1. Push-ups — 3 × 12   (drop to knees if form breaks)
+   Main chest/triceps builder; the staple horizontal press.
+2. Chair dips — 3 × 10  (keep elbows tracking back)
+   Hits triceps and front delts — uses just your chair.
+3. Band rows — 3 × 15
+   Balances all the pushing and counters desk-hunched posture.
+4. Plank — 3 × 30s
+   Bracing core finisher; keep hips level, don't sag.
+</code></pre>
+</li>
+<li><p><strong>Offer to log it.</strong> End by telling the user that once they've done it,
+they can run <code>/workout-log</code> and report how many reps they actually
+completed — you'll record it against today's date.</p>
+</li>
+</ol>
+<h2>Principles</h2>
+<ul>
+<li>Respect the remote-work constraint: quiet, low-space, minimal-equipment,
+finishable in one break. No 45-minute programs.</li>
+<li>Match difficulty to the profile — don't prescribe 50 push-ups to a beginner.</li>
+<li>Always honor the injuries/limitations section.</li>
+<li><strong>Safety first.</strong> Warm up before loading, order exercises from
+technical/explosive to light, and never prescribe a dangerous movement
+unless the user is clearly experienced with it and explicitly warned. When
+unsure, choose the safer regression.</li>
+<li><strong>Always fit the clock.</strong> Estimate the real duration including rest between
+sets, compare it to the user's time budget, and adjust until it fits — then
+show the total so they can trust it.</li>
+<li><strong>Explain each exercise</strong> briefly so the user knows what it's for and how to
+do it safely — extra detail the first time they meet a movement.</li>
+<li>The trainer flavors <strong>style and selection</strong>, never safety — the profile's
+limits and injuries always override the persona.</li>
+<li><strong>Follow the plan by default.</strong> When <code>plan.md</code> exists, pull today's session
+from the next thing it schedules; go off-plan only when the user asks, and say
+so when you do (so the log knows not to credit it against the plan).</li>
+<li>Keep it actionable, not a lecture. One workout, ready to start.</li>
+</ul>
+</div></article><article class="content-item"><header><h3>workout-log</h3><p class="content-description">Log a completed workout. The user reports how many reps/sets they actually did (usually against a workout that was just suggested), and this records it to a per-day YAML file at ~/workout-coach/logs/YYYY-MM-DD.yaml. Use when the user says &quot;log my workout&quot;, &quot;I did X reps&quot;, &quot;done&quot;, &quot;I finished my set&quot;, or wants to record exercise they completed.</p></header><div class="content-body"><h1>/workout-log — Record a completed workout</h1>
+<p>Append a short session to the user's daily log. One file per day; a working
+day can hold several short sessions. Logs are stored as <strong>YAML</strong>
+(<code>~/workout-coach/logs/&lt;date&gt;.yaml</code>) so they're machine-parseable yet still
+readable by hand.</p>
+<h2>Steps</h2>
+<ol>
+<li><p><strong>Determine today's date.</strong> Run <code>date +%F</code> to get <code>YYYY-MM-DD</code>. Use this
+for the filename and run <code>date +%H:%M</code> for the session time. (Don't trust a
+remembered date — read it from the shell.)</p>
+</li>
+<li><p><strong>Figure out what was done.</strong> Ideally this follows a <code>/workout</code>
+proposal — match the user's reported reps against the planned exercises so
+you can show planned-vs-actual. If there was no prior proposal, just ask
+what they did (exercise, sets × reps) and record that.</p>
+<p>Capture for each exercise: name, sets × actual reps, and (if known) the
+planned target. Note anything the user mentions (felt easy/hard, pain).
+Also capture, for the session as a whole:</p>
+<ul>
+<li><strong>Trainer</strong> — the active persona, if any
+(<code>cat ~/workout-coach/trainer.md 2&gt;/dev/null</code> → the <code>## Trainer</code> line).</li>
+<li><strong>Effort</strong> — an optional perceived-exertion note (e.g. RPE 7/10, or
+"felt easy / felt brutal"). Ask briefly if the user didn't say.</li>
+</ul>
+</li>
+<li><p><strong>Write to <code>~/workout-coach/logs/&lt;today&gt;.yaml</code>.</strong></p>
+<ul>
+<li>Run <code>mkdir -p ~/workout-coach/logs</code> first.</li>
+<li>If the file <strong>doesn't exist</strong>, create it with <code>date: &lt;today&gt;</code> and a
+<code>sessions:</code> list containing this one session.</li>
+<li>If it <strong>already exists</strong>, read it first, then <strong>append a new entry to the
+<code>sessions:</code> list</strong>; do NOT overwrite or drop earlier sessions from the
+same day.</li>
+<li>Keep the YAML valid: quote any value containing <code>:</code> or <code>#</code> (e.g. times
+like <code>"13:27"</code> and planned strings like <code>"4x10-12s"</code>), and use the schema
+below. Omit fields that don't apply rather than leaving them blank.</li>
+</ul>
+</li>
+<li><p><strong>Confirm</strong> what you logged and give one short, encouraging takeaway (e.g.
+progress vs. last session if visible). Offer another set later via
+<code>/workout</code> if appropriate.</p>
+</li>
+<li><p><strong>Keep the profile current.</strong> If, while reporting the session, the user
+volunteers <em>durable</em> health/fitness info — a niggle that has resolved or
+newly appeared, a change in level/equipment, or a hit/new PB or target —
+<strong>propose updating <code>~/workout-coach/profile.md</code> and confirm before
+editing</strong>, then apply it with <code>Edit</code> and bump the <code>_Last updated_</code> date
+(<code>date +%F</code>). For PBs, also update the relevant "current best" under the
+profile's PB targets. Only persist lasting changes; one-off effort/feeling
+notes stay in the log, not the profile. Never rewrite the profile silently.</p>
+</li>
+<li><p><strong>Update the plan if the session came from it.</strong> If <code>~/workout-coach/plan.md</code>
+exists (<code>cat</code> it), decide whether the session just logged was <strong>taken from
+the plan</strong> — i.e. it matches a session the plan schedules for today, or the
+<code>/workout</code> proposal / conversation indicates it was the planned one. A
+session the user explicitly did <em>off-plan</em> does <strong>not</strong> count.
+If it was taken from the plan:</p>
+<ul>
+<li><strong>Tick adherence:</strong> under the plan's <code>## This week (adherence)</code> section,
+record the completed session with today's date (append a line; if the week
+just rolled over, add a <code>Week of &lt;this Monday's date&gt;</code> heading). Compute
+that Monday from the shell rather than by hand —
+<code>date -v-$(($(date +%u)-1))d +%F</code> on macOS, or
+<code>date -d "-$(($(date +%u)-1)) days" +%F</code> on GNU/Linux — the same way
+today's date is read; don't trust a remembered date.</li>
+<li><strong>Ratchet progression:</strong> compare the actual reps/sets/time against the
+plan's <code>## Progression targets</code> for those movements. If the user <strong>met or
+beat</strong> the target per that movement's ratchet rule, bump the target up a
+notch; if they <strong>fell short</strong> repeatedly, ease it back. Record the change
+in the plan's <code>## Revision log</code> with today's date.</li>
+<li>Bump the plan's <code>_Last updated_</code> date (<code>date +%F</code>).
+Make these as in-place <code>Edit</code>s — never rewrite the whole plan, and leave it
+untouched for off-plan sessions.</li>
+</ul>
+</li>
+</ol>
+<h2>Daily file format (YAML)</h2>
+<p>One file per day, <code>~/workout-coach/logs/&lt;YYYY-MM-DD&gt;.yaml</code>:</p>
+<pre><code class="language-yaml">date: 2026-06-15
+sessions:
+  - time: "13:27"                  # HH:MM, quoted
+    label: Upper body &amp; core       # short human label
+    trainer: Bruce Lee             # active persona, or omit if none
+    from_plan: Wed Slot 2          # plan slot it came from; omit if off-plan
+    off_plan: false                # set true for an explicitly off-plan session
+    effort: RPE 7/10               # perceived exertion, or omit
+    exercises:
+      - name: Push-ups
+        sets: 4
+        reps: [12, 12, 12, 12]     # per-set reps (a list), or a single int
+        planned: "4x12"            # the prescribed target, quoted; omit if none
+        met: true                  # true if met/beat target, false if under
+      - name: L-sit hold
+        sets: 4
+        duration_s: [6, 5, 5, 6]   # timed holds, seconds per set
+        planned: "4x10-12s"
+        met: false
+      - name: Run                  # cardio: use the fields that fit
+        distance_km: 3
+        duration: "17:45"
+        pace: "5:55/km"
+        met: true
+    notes: nailed everything but L-sit — out of practice on it
+  # append further same-day sessions as additional list items here
+</code></pre>
+<h3>Field guide</h3>
+<ul>
+<li><strong>Per exercise</strong>, always give <code>name</code>; then include only the fields that
+apply: <code>sets</code>, <code>reps</code> (int or per-set list), <code>duration_s</code> (timed holds),
+<code>distance_km</code> / <code>duration</code> / <code>pace</code> (cardio), <code>weight_kg</code> (loaded moves),
+<code>planned</code> (the prescribed target as a quoted string), <code>met</code> (bool), and an
+optional per-exercise <code>note</code>.</li>
+<li><strong><code>met</code></strong> records whether the target was hit: <code>true</code> when the user met or
+beat the planned target, <code>false</code> when they came in under (no judgment — it's
+just a signal for future scaling). Omit it when there was no planned target.</li>
+<li><strong><code>from_plan</code></strong> vs <strong><code>off_plan</code></strong>: set <code>from_plan</code> to the plan slot when the
+session was taken from <code>plan.md</code>; set <code>off_plan: true</code> for an explicitly
+off-plan session. (This is what step 6 keys off of.)</li>
+</ul>
+<p>Keep entries terse. This file is the history that <code>/workout</code>, <code>/workout-stats</code>,
+and <code>/workout-plan</code> read to balance future workouts and track progress.</p>
+</div></article><article class="content-item"><header><h3>workout-plan</h3><p class="content-description">Generate (or revise) a structured, multi-session training plan from the user&#39;s profile and trainer persona, oriented toward their goals and PB targets. Writes ~/workout-coach/plan.md — a repeating weekly schedule plus progression targets that `workout` pulls today&#39;s session from and `workout-log` ratchets as sessions are completed. Use when the user says &quot;make a plan&quot;, &quot;build my training plan&quot;, &quot;plan my week&quot;, &quot;create a program&quot;, or wants a structured schedule rather than a single session.</p></header><div class="content-body"><h1>/workout-plan — Build the user's training plan</h1>
+<p>This skill turns the profile + trainer into a structured program and writes it
+to <code>~/workout-coach/plan.md</code>. The plan is a <strong>living template</strong>, not a fixed
+calendar: a repeating weekly schedule plus a set of <strong>progression targets</strong> that
+ratchet over time.</p>
+<p>It sits at the center of the workout loop:</p>
+<ul>
+<li><strong><code>workout</code></strong> reads <code>plan.md</code> and, by default, builds today's session from the
+next thing the plan schedules (unless the user asks for something else).</li>
+<li><strong><code>workout-log</code></strong> updates <code>plan.md</code> when a logged session was taken from the
+plan — ticking adherence and ratcheting the progression targets.</li>
+<li><strong><code>workout-profile</code></strong> / <strong><code>workout-trainer</code></strong> are the inputs; re-run this skill
+after they change so the plan stays aligned.</li>
+</ul>
+<h2>Steps</h2>
+<ol>
+<li><p><strong>Load the inputs.</strong></p>
+<ul>
+<li><code>cat ~/workout-coach/profile.md</code> — <strong>required.</strong> If it doesn't exist, tell
+the user to run <code>/workout-profile</code> first; don't invent a profile.</li>
+<li><code>cat ~/workout-coach/trainer.md</code> — optional. If absent, use a neutral,
+balanced coach and mention <code>/workout-trainer</code>.</li>
+<li><code>cat ~/workout-coach/plan.md</code> — if it <strong>exists</strong>, this is a <em>revision</em>:
+summarize the current plan and ask what to change (progress the block,
+swap a focus, account for a profile change) rather than silently
+overwriting. Preserve the revision log.</li>
+<li>Skim recent logs for current baselines
+(<code>ls -t ~/workout-coach/logs/ 2&gt;/dev/null | head -5</code>, then <code>cat</code> a few).
+Logs are <strong>YAML</strong> (<code>&lt;date&gt;.yaml</code>, a <code>sessions:</code> list).</li>
+<li>Get the date with <code>date +%F</code>. For the <code>## This week (adherence)</code> heading,
+also compute this week's Monday from the shell rather than by hand —
+<code>date -v-$(($(date +%u)-1))d +%F</code> on macOS, or
+<code>date -d "-$(($(date +%u)-1)) days" +%F</code> on GNU/Linux; don't trust a
+remembered date.</li>
+</ul>
+</li>
+<li><p><strong>Set the goal focus and prioritize.</strong> Pull the goals and <strong>PB targets</strong> from
+the profile. Where goals compete for recovery (classic case: heavy leg work
+vs. running, or max-strength vs. endurance), say so plainly and <strong>rank them</strong>
+— the plan should clearly serve the top priorities and keep the rest in
+maintenance. Don't pretend five goals can all be peaked at once.</p>
+</li>
+<li><p><strong>Choose the methodology per goal</strong>, scaled to the user's level:</p>
+<ul>
+<li>Calisthenics rep goals (e.g. more push-ups/pull-ups) → frequent
+submaximal volume ("grease the groove"), which fits a many-short-sessions
+day especially well.</li>
+<li>Running speed (e.g. a faster mile) → intervals + strides.</li>
+<li>Running endurance (e.g. a half marathon) → a progressive weekly long run +
+tempo work.</li>
+<li>Strength/size → progressive load within the available equipment.
+Let the <strong>trainer persona</strong> flavor <em>style and exercise selection</em> (e.g. Bruce
+Lee → crisp, never-to-failure GtG and mobility woven between sets), but never
+let it override the profile's limits or safety.</li>
+</ul>
+</li>
+<li><p><strong>Honor the profile's constraints — these are hard rules, not suggestions:</strong></p>
+<ul>
+<li><strong>Frequency &amp; time:</strong> fit the user's sessions/day and minutes/session.
+Each planned session must be self-contained and inside the time budget.</li>
+<li><strong>Equipment &amp; location rules:</strong> only program what they have, where they
+have it. Respect any <strong>scheduling rules</strong> in the profile (e.g. "pull-ups
+only after 18:00 and only when a run is involved" → schedule pull-ups as
+evening run-to-the-bar sessions, never as a daytime desk slot).</li>
+<li><strong>Permanent limitations &amp; current niggles:</strong> work around them; pick the
+safer regression when unsure.</li>
+<li><strong>Off-clock work:</strong> if a goal needs a session that can't fit a normal slot
+(e.g. a 16 km long run), schedule it explicitly outside the working day and
+say so — don't pretend it fits a 15-minute break.</li>
+</ul>
+</li>
+<li><p><strong>Sequence and recover.</strong> Order the week so competing systems aren't stacked
+(e.g. don't put a hard squat session the day before a hard run, or hammer the
+same muscle group two slots running). Build in at least one easy/mobility or
+rest provision per week, and a <strong>deload</strong> rule (e.g. ease ~30% every 4th
+week) so adaptation sticks.</p>
+</li>
+<li><p><strong>Set progression targets.</strong> For each key movement, write the <em>current
+working number</em> the plan prescribes now, plus the <strong>ratchet rule</strong> that moves
+it (e.g. "push-up GtG: 4×22 — +2 reps/set once all sets hit target two
+sessions running"; "long run: 8 km — +1 km/week, hold on deload weeks").
+These are the numbers <code>workout</code> prescribes and <code>workout-log</code> updates.</p>
+</li>
+<li><p><strong>Write the plan</strong> to <code>~/workout-coach/plan.md</code> using the template below
+(<code>mkdir -p ~/workout-coach</code> first if needed). Stamp the created/updated date
+and which profile/trainer it's based on. On a revision, append to the
+revision log rather than wiping history, and reset <code>## This week</code>.</p>
+</li>
+<li><p><strong>Confirm and hand off.</strong> Summarize the plan in a few lines, name the top
+priority and any honest tradeoffs, then point the user on:</p>
+<ul>
+<li>run <code>/workout</code> to get today's session pulled from the plan (or ask for
+something specific to go off-plan),</li>
+<li>run <code>/workout-log</code> to record it — completed planned sessions ratchet the
+plan automatically,</li>
+<li>re-run <code>/workout-plan</code> after a profile change, or every few weeks to
+progress the block.</li>
+</ul>
+</li>
+</ol>
+<h2>Plan template</h2>
+<pre><code class="language-markdown"># Workout Plan
+
+_Created: &lt;YYYY-MM-DD&gt; · Last updated: &lt;YYYY-MM-DD&gt;_
+_Based on: profile.md (&lt;profile's last-updated date&gt;) · trainer: &lt;persona or none&gt;_
+_Block: &lt;e.g. 4-week progression — week 1 of 4&gt;_
+
+## Goal focus
+Prioritized targets this plan drives toward:
+1. &lt;goal / PB&gt; — &lt;why it's first, the strategy in a line&gt;
+2. &lt;goal / PB&gt; — &lt;...&gt;
+&lt;note any goals kept in maintenance, and any tradeoff being made&gt;
+
+## Approach
+&lt;2–5 lines: the methodology — e.g. grease-the-groove for push/pull, 3 runs/week
+(intervals / tempo / long), leg sequencing, deload every 4th week. Note the
+trainer flavor.&gt;
+
+## Weekly schedule
+Repeating week. &lt;constraints recap, e.g. workday = 4 × ~15-min slots; pull-ups
+only after 18:00 and only with a run; long run is off-clock on the weekend.&gt;
+
+### Monday — &lt;theme&gt;
+- Slot 1 — &lt;focus&gt;: &lt;movements @ targets&gt;  (&lt;one-line cue&gt;)
+- Slot 2 — &lt;...&gt;
+- Slot 3 — &lt;...&gt;
+- Slot 4 — &lt;...&gt;
+### Tuesday — &lt;theme&gt;
+- ...
+### ... (through the week, including rest/mobility days)
+### Sunday — &lt;theme or rest&gt;
+- ...
+
+## Progression targets
+Current working numbers — `workout` prescribes these; `workout-log` ratchets them:
+- &lt;movement&gt;: &lt;current target&gt;  — _ratchet:_ &lt;rule&gt;
+- &lt;movement&gt;: &lt;current target&gt;  — _ratchet:_ &lt;rule&gt;
+- ...
+
+## This week (adherence)
+Week of &lt;Monday's date&gt; — `workout-log` records sessions taken from the plan here;
+`workout-plan` resets this on each revision.
+- (none yet)
+
+## Revision log
+- &lt;YYYY-MM-DD&gt;: plan created from profile (&lt;profile date&gt;), trainer &lt;persona&gt;.
+</code></pre>
+<h2>Principles</h2>
+<ul>
+<li><strong>The plan is a living template + progression state</strong>, not a frozen calendar.
+It encodes <em>what to do</em> and <em>the numbers to do it at</em>; the numbers move as the
+log proves the user is ready.</li>
+<li><strong>The profile and safety always win.</strong> The trainer flavors style and
+selection; it never overrides limits, injuries, equipment, or scheduling
+rules. When unsure, choose the safer regression.</li>
+<li><strong>Prioritize honestly.</strong> When goals compete, rank them and keep the rest in
+maintenance — don't promise to peak everything at once.</li>
+<li><strong>Respect the clock and the calendar.</strong> Every planned session fits the user's
+slot/time budget; anything that can't (e.g. a long run) is scheduled off-clock
+and labeled as such.</li>
+<li><strong>Sequence for recovery.</strong> Don't stack competing systems; bake in easy days
+and a deload.</li>
+<li><strong>Keep <code>plan.md</code> tidy and skimmable</strong> — <code>workout</code> and <code>workout-log</code> parse it,
+so keep the section headings and the progression-target format stable.</li>
+</ul>
+</div></article><article class="content-item"><header><h3>workout-profile</h3><p class="content-description">Gather and save a remote-worker&#39;s fitness profile — preferred exercise types, how often they want to train, current fitness level, available equipment/space, time per session, goals, and any injuries. Use when the user wants to set up, create, or update their workout profile, or says things like &quot;set up my workout plan&quot;, &quot;I want to start exercising at my desk&quot;, or before proposing/logging workouts if no profile exists yet.</p></header><div class="content-body"><h1>/workout-profile — Build the user's fitness profile</h1>
+<p>This skill interviews the user and writes a profile to
+<code>~/workout-coach/profile.md</code>. The other workout skills (<code>workout</code>,
+<code>workout-log</code>) read this file, so keep it accurate and well-structured.</p>
+<h2>Context</h2>
+<p>The user works remotely and wants <strong>short workouts that fit inside a working
+day</strong> — typically 5–15 minute sets done between meetings, with limited space
+and equipment. Frame every question with that in mind.</p>
+<h2>Steps</h2>
+<ol>
+<li><p><strong>Check for an existing profile.</strong> Run <code>cat ~/workout-coach/profile.md</code>
+(it may not exist). If it exists, this is an <em>update</em> — show the current
+values and ask what they want to change rather than starting from scratch.</p>
+</li>
+<li><p><strong>Interview the user.</strong> Ask conversationally, a few related questions at a
+time — don't dump all of these at once. Cover:</p>
+<ul>
+<li><strong>Exercise types they enjoy / want</strong> — e.g. bodyweight strength,
+resistance bands, dumbbells/kettlebell, mobility &amp; stretching, desk-based
+movement, light cardio. Multiple is fine.</li>
+<li><strong>Frequency</strong> — how many short sessions per day and/or days per week.</li>
+<li><strong>Current fitness level</strong> — beginner / intermediate / advanced, plus a
+sentence on what they can currently do (e.g. "can do 10 push-ups").</li>
+<li><strong>Equipment &amp; space</strong> — what they have at their desk/home and how much
+room (e.g. "just a chair and a yoga mat", "adjustable dumbbells").</li>
+<li><strong>Time per session</strong> — minutes they realistically have per break.</li>
+<li><strong>Goals</strong> — e.g. counter sitting, build strength, mobility, energy.
+Also ask explicitly whether they have any <strong>specific PB / measurable
+targets</strong> they're chasing (e.g. "10 pull-ups in a row", "sub-6:00 mile",
+"half marathon in 2:10", "100 push-ups"). Capture each with a current
+best where known, so <code>/workout</code> can program toward them and progress is
+trackable. "None yet" is a fine answer.</li>
+<li><strong>Injuries / limitations</strong> — distinguish <strong>permanent</strong> things to avoid
+(e.g. a chronic bad back) from <strong>temporary</strong> niggles that should clear up
+(e.g. "neck stiff this week"). The temporary ones shouldn't suppress
+exercises forever.</li>
+</ul>
+<p>Use sensible defaults if the user is vague, and confirm them. Don't
+interrogate — 2–4 short exchanges is plenty.</p>
+</li>
+<li><p><strong>Write the profile</strong> to <code>~/workout-coach/profile.md</code> using the template
+below. Run <code>mkdir -p ~/workout-coach</code> first if needed. Fill in only what
+you learned; leave honest "not specified" for anything skipped.</p>
+</li>
+<li><p><strong>Confirm</strong> what you saved and point to the next steps: they can pick a
+coaching persona with <code>/workout-trainer</code> (optional), then run <code>/workout</code> to
+get a session.</p>
+</li>
+</ol>
+<h2>Profile template</h2>
+<pre><code class="language-markdown"># Workout Profile
+
+_Last updated: &lt;YYYY-MM-DD&gt;_
+
+## Fitness level
+&lt;beginner | intermediate | advanced&gt; — &lt;one line on current baseline&gt;
+
+## Preferred exercise types
+- &lt;type 1&gt;
+- &lt;type 2&gt;
+
+## Frequency
+&lt;e.g. 2 short sessions per workday, ~4 days/week&gt;
+
+## Time per session
+&lt;e.g. 10 minutes&gt;
+
+## Equipment &amp; space
+&lt;e.g. yoga mat, resistance band, ~2m of floor space, a sturdy chair&gt;
+
+## Goals
+&lt;e.g. break up sitting, build upper-body strength&gt;
+
+### PB targets
+&lt;specific measurable goals with current best where known, e.g.
+"Pull-ups: 10 in a row (current best: 8)", "1 mile run: sub-6:00". "none yet" if so&gt;
+
+## Permanent limitations
+&lt;lasting things to always avoid, e.g. sensitive lower back — avoid heavy spinal loading. "none" if so&gt;
+
+## Current / temporary niggles
+&lt;short-term issues to work around for now, e.g. stiff neck this week. Clear these once resolved. "none" if so&gt;
+
+## Notes
+&lt;anything else worth remembering&gt;
+</code></pre>
+<p>Get the current date from the shell with <code>date +%F</code> for the <code>_Last updated_</code>
+field (don't trust a remembered date). Keep the file tidy — it's the single
+source of truth.</p>
+</div></article><article class="content-item"><header><h3>workout-stats</h3><p class="content-description">Summarize the user&#39;s recent workout history — sessions this week, current streak, planned-vs-actual hit rate, muscle-group balance, and progression trends. Reads the per-day logs in ~/workout-coach/logs/ (plus profile.md for targets). Use when the user asks &quot;how am I doing&quot;, &quot;show my stats&quot;, &quot;what&#39;s my streak&quot;, &quot;weekly summary&quot;, &quot;am I making progress&quot;, or similar.</p></header><div class="content-body"><h1>/workout-stats — Summarize recent workout history</h1>
+<p>Give the user a short, motivating read on how their training is going, based on
+the logs that <code>/workout-log</code> writes. Read-only — this skill never writes.</p>
+<h2>Steps</h2>
+<ol>
+<li><p><strong>Gather the data.</strong> Get today's date (<code>date +%F</code>). Then:</p>
+<ul>
+<li>List the log files: <code>ls -t ~/workout-coach/logs/ 2&gt;/dev/null</code>. If there
+are none, say so warmly and point them to <code>/workout</code> to get started —
+don't fabricate stats.</li>
+<li>Read the recent ones (e.g. the last 7–14 days):
+<code>cat ~/workout-coach/logs/&lt;file&gt;.yaml</code> for each. Each log is <strong>YAML</strong> — a
+<code>sessions:</code> list of structured entries; an exercise's <code>met: true/false</code>
+field marks whether the planned target was hit.</li>
+<li>Read <code>~/workout-coach/profile.md 2&gt;/dev/null</code> for their target frequency,
+goals, and limitations (to judge "on track").</li>
+</ul>
+</li>
+<li><p><strong>Compute the summary.</strong> From the logs, work out:</p>
+<ul>
+<li><strong>This week</strong> — number of sessions vs. the profile's target frequency.</li>
+<li><strong>Streak</strong> — consecutive days (or workdays) with at least one session, up
+to today.</li>
+<li><strong>Volume / balance</strong> — rough split across muscle groups or session types
+(e.g. mobility vs. upper vs. lower), flagging anything neglected.</li>
+<li><strong>Progression</strong> — for recurring movements, are reps/load/duration trending
+up? Use the planned-vs-actual <code>met</code> signal.</li>
+<li><strong>Effort</strong> — if RPE / effort notes exist, note the trend (cruising vs.
+grinding).</li>
+</ul>
+</li>
+<li><p><strong>Present it concisely.</strong> A short scannable summary, e.g.:</p>
+<pre><code>### Last 7 days
+- Sessions: 5 / target ~4–8  ✅ on track
+- Streak: 3 days
+- Balance: 3× mobility, 1× upper, 1× lower — legs a bit light
+- Progress: push-ups 12 → 14 → 15 (trending up 💪)
+- Effort: mostly RPE 6–7, one tough one
+</code></pre>
+<p>Add one or two honest, encouraging takeaways and, if useful, a concrete
+nudge (e.g. "due for a lower-body set — try <code>/workout</code>").</p>
+</li>
+</ol>
+<h2>Principles</h2>
+<ul>
+<li><strong>Read-only and truthful</strong> — summarize only what the logs actually show; if
+data is thin, say the picture is limited rather than inventing trends.</li>
+<li>Keep it short and motivating, not a spreadsheet dump.</li>
+<li>Respect the profile's goals and limitations when judging "on track" or
+suggesting what's next.</li>
+</ul>
+</div></article><article class="content-item"><header><h3>workout-trainer</h3><p class="content-description">Pick or create the user&#39;s workout &quot;trainer&quot; — a coaching persona (e.g. Bruce Lee, Saitama, Arnold, a Yoga Instructor, a Physio/Mobility Coach, or a custom one) that flavors how workouts are designed and described. Saves the choice to ~/workout-coach/trainer.md, which workout reads alongside the profile. Use when the user wants to choose, change, or create a trainer/coach persona, says &quot;pick a trainer&quot;, &quot;switch coach&quot;, &quot;I want Arnold to train me&quot;, &quot;make my own trainer&quot;, or similar.</p></header><div class="content-body"><h1>/workout-trainer — Choose or create a trainer</h1>
+<p>This skill picks the coaching <strong>persona</strong> that flavors the user's workouts. It
+writes <code>~/workout-coach/trainer.md</code>; <code>workout</code> reads that file together
+with <code>profile.md</code> so the <em>same</em> profile yields differently-styled workouts
+depending on the active trainer.</p>
+<p>A trainer changes <strong>tone, exercise selection bias, and how a set is framed</strong> —
+it never overrides safety. The user's profile (level, equipment, time, and
+especially <strong>injuries/limitations</strong>) always wins over a persona's style.</p>
+<h2>The 5 default trainers</h2>
+<ol>
+<li><strong>Bruce Lee</strong> — functional strength, speed, and mobility with a mind-body
+philosophy. Lean, efficient, precise movements; flow between strength and
+stretch. Motivational, philosophical tone.</li>
+<li><strong>Saitama (One Punch Man)</strong> — brutally simple, high-rep calisthenics
+(push-ups, sit-ups, squats, a run). Minimal equipment, maximal consistency.
+Deadpan, "just do it every day" tone.</li>
+<li><strong>Arnold</strong> — classic bodybuilding / hypertrophy with the dumbbells and band:
+moderate-heavy sets, mind-muscle focus, upper/lower splits. Big, encouraging,
+"come on, one more rep" tone.</li>
+<li><strong>Yoga Instructor</strong> — breath-led flexibility, balance, and flow; mobility and
+calm over intensity. Soothing, cue-rich, body-awareness tone.</li>
+<li><strong>Physio / Mobility Coach</strong> — longevity and desk-recovery focus: joint-friendly
+mobility, postural correction, gentle progressive strengthening. Careful,
+educational, "protect the joint" tone. (Great default for desk workers and
+anyone managing a niggle.)</li>
+</ol>
+<h2>Steps</h2>
+<ol>
+<li><p><strong>Check for an existing trainer.</strong> Run <code>cat ~/workout-coach/trainer.md</code>
+(it may not exist). If it exists, show the current trainer and ask whether
+they want to switch, tweak it, or create a new one.</p>
+</li>
+<li><p><strong>Let the user choose.</strong> Offer the 5 defaults above (use AskUserQuestion),
+or a <strong>"create my own"</strong> option. Briefly remind them what each persona
+emphasizes so the choice is informed.</p>
+</li>
+<li><p><strong>If creating a custom trainer,</strong> ask 2–4 short questions to capture:</p>
+<ul>
+<li><strong>Name</strong> of the trainer/persona.</li>
+<li><strong>Training philosophy / focus</strong> (e.g. strength, conditioning, mobility,
+calisthenics, hypertrophy).</li>
+<li><strong>Style &amp; tone</strong> (e.g. intense drill-sergeant, calm and technical,
+playful, philosophical).</li>
+<li><strong>Signature moves or biases</strong> (anything they want emphasized or avoided).
+Use sensible defaults and confirm; don't interrogate.</li>
+</ul>
+</li>
+<li><p><strong>Write the trainer</strong> to <code>~/workout-coach/trainer.md</code> using the template
+below (run <code>mkdir -p ~/workout-coach</code> first if needed). For a default
+trainer, fill it from the description above. For a custom one, fill from the
+interview.</p>
+</li>
+<li><p><strong>Confirm</strong> what you saved and tell the user they can now run
+<code>/workout</code> to get a workout in this trainer's style, or
+<code>/workout-trainer</code> again any time to switch.</p>
+</li>
+</ol>
+<h2>Trainer file template</h2>
+<pre><code class="language-markdown"># Workout Trainer
+
+_Last updated: &lt;YYYY-MM-DD&gt;_
+
+## Trainer
+&lt;persona name&gt;  (&lt;default | custom&gt;)
+
+## Philosophy &amp; focus
+&lt;one or two lines on what this trainer emphasizes&gt;
+
+## Style &amp; tone
+&lt;how the trainer talks and frames a session&gt;
+
+## Exercise biases
+- &lt;moves / styles this trainer leans toward&gt;
+- &lt;anything this trainer tends to avoid&gt;
+
+## Notes
+&lt;anything else worth remembering, e.g. catchphrases&gt;
+</code></pre>
+<p>Get the current date from the shell with <code>date +%F</code> for the <code>_Last updated_</code>
+field (don't trust a remembered date).</p>
+<h2>Principles</h2>
+<ul>
+<li>A trainer flavors <strong>style and selection</strong>, never safety. Profile limits and
+injuries always override the persona.</li>
+<li>Keep personas fun but the workouts real and doable in a working-day break.</li>
+<li>One active trainer at a time — this file is the single source of truth.</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install workout-coach@nearform-skills</code><button class="copy-btn" data-copy="/plugin install workout-coach@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable workout-coach</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install workout-coach@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install workout-coach@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/workout-coach">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>
