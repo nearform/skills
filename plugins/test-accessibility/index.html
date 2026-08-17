@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>test-postman — Nearform Plugins</title>
-  <meta name="description" content="Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests." />
+  <title>test-accessibility — Nearform Plugins</title>
+  <meta name="description" content="Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when" />
   <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,18 +14,18 @@
 <body>
   <div class="container">
     <nav class="breadcrumbs">
-      <a href="../../">Plugins</a><span class="sep">/</span><span>test-postman</span>
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-accessibility</span>
     </nav>
   </div>
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-postman <span class="version">v1.0.0</span></h1>
-      <p class="description">Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.</p>
+      <h1>test-accessibility <span class="version">v1.0.1</span></h1>
+      <p class="description">Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
       </div>
-      <div class="keywords"><span class="keyword">testing</span><span class="keyword">api</span><span class="keyword">postman</span><span class="keyword">newman</span><span class="keyword">automation</span></div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">accessibility</span><span class="keyword">a11y</span><span class="keyword">wcag</span><span class="keyword">axe-core</span></div>
     </div>
   </header>
 
@@ -33,57 +33,127 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-postman</h3><p class="content-description">Use this skill when writing or reviewing Postman API tests to apply Postman-specific best practices for reliable, idiomatic tests using pm.* assertions, collections, environments, and Newman in CI.</p></header><div class="content-body"><p>Use this skill when working with Postman API tests. Postman stores collections and environments as JSON that can be exported, version-controlled, and run headlessly with Newman.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-accessibility</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining accessibility (a11y) checks in automated tests, or when adding automated accessibility scanning (axe-core) to an existing Cypress, Playwright, or WebdriverIO suite.</p></header><div class="content-body"><p>You are a test engineer ensuring automated tests catch accessibility regressions and encourage accessible selector strategy.</p>
 <h2>Requires</h2>
 <ul>
 <li>test-automation-guidelines</li>
-<li>test-api</li>
 </ul>
-<p>Apply the shared API principles from <code>test-api</code> first; the rules below are Postman-specific additions.</p>
+<h2>Scope</h2>
+<ul>
+<li>Apply alongside a framework-specific testing skill (<code>test-cypress</code>, <code>test-playwright</code>, <code>test-webdriverio</code>) — this skill does not replace them.</li>
+<li>Covers two complementary areas:<ol>
+<li><strong>Automated scanning</strong> — running <code>axe-core</code> against pages/components to catch WCAG violations.</li>
+<li><strong>Accessible-first selectors</strong> — using accessibility roles and labels as the primary test selector strategy, which doubles as a manual accessibility signal.</li>
+</ol>
+</li>
+</ul>
+<hr />
 <h2>Workflow</h2>
 <ol>
-<li>Confirm the collection and environment layout, and how they are exported/version-controlled.</li>
-<li>Refer only to the reference file relevant to the task:<ul>
-<li>Collection and environment structure: <code>references/collections.md</code></li>
-<li>Assertions, scripting, and Newman/CI: <code>references/scripting-and-assertions.md</code></li>
+<li>Detect framework in the file under test/review:<ul>
+<li><code>cy.</code> → use the Cypress section below (<code>cypress-axe</code>)</li>
+<li><code>@playwright/test</code> → use the Playwright section below (<code>@axe-core/playwright</code>)</li>
+<li><code>browser.</code> / <code>@wdio/globals</code> → use the WebdriverIO section below (<code>@axe-core/webdriverio</code>)</li>
 </ul>
 </li>
-<li>Apply the principles and templates from that file.</li>
+<li>Ensure automated scans run on key states: initial page load, after navigation, and after interactions that change the DOM materially (modals, accordions, forms with validation errors).</li>
+<li>Fail builds on <code>critical</code> and <code>serious</code> violations by default; track <code>moderate</code>/<code>minor</code> separately rather than silently ignoring them.</li>
+<li>Additionally assert accessible names/roles where practical (see <code>plugins/test-automation-guidelines/skills/test-automation-guidelines/references/principles.md</code>) — this forces pages to expose proper accessible names, which is itself an accessibility check.</li>
 </ol>
-<h2>Postman Rules</h2>
-<h3>Collections and structure</h3>
+<hr />
+<h3>Cypress (<code>cypress-axe</code>)</h3>
+<pre><code class="language-javascript">import "cypress-axe";
+
+beforeEach(() =&gt; {
+  cy.visit("/checkout");
+  cy.injectAxe();
+});
+
+it("has no detectable accessibility violations on load", () =&gt; {
+  cy.checkA11y(null, {
+    includedImpacts: ["critical", "serious"],
+  });
+});
+
+it("has no violations after opening the modal", () =&gt; {
+  cy.get('[data-testid="open-modal"]').click();
+  cy.checkA11y('[role="dialog"]', {
+    includedImpacts: ["critical", "serious"],
+  });
+});
+</code></pre>
 <ul>
-<li>Export the collection and environment JSON into the repo and review changes in pull requests — do not keep tests only in a personal workspace.</li>
-<li>One request per behaviour, named for what it verifies; group into folders by resource/feature.</li>
-<li>Keep the exported JSON stable (avoid churn from unrelated UI reorders) so diffs stay reviewable.</li>
+<li>Call <code>cy.injectAxe()</code> after each <code>cy.visit()</code> / full-page reload — the injected script does not survive navigation.</li>
+<li>Scope <code>cy.checkA11y(selector)</code> to the changed region after an interaction instead of re-scanning the whole page.</li>
 </ul>
-<h3>Variables and environments</h3>
+<hr />
+<h3>Playwright (<code>@axe-core/playwright</code>)</h3>
+<pre><code class="language-javascript">import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+test("checkout page has no critical/serious a11y violations", async ({
+  page,
+}) =&gt; {
+  await page.goto("/checkout");
+
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa"])
+    .analyze();
+
+  const blocking = results.violations.filter((v) =&gt;
+    ["critical", "serious"].includes(v.impact),
+  );
+  expect(blocking).toEqual([]);
+});
+</code></pre>
 <ul>
-<li>Reference the base URL and config as variables (<code>{{baseUrl}}</code>), defined per environment.</li>
-<li>Store credentials as <strong>secret</strong>-typed variables (or Postman Vault), never as committed initial values.</li>
-<li>Scope variables intentionally: environment for config, collection for shared defaults, and <code>pm.variables</code> for request-local temporary values.</li>
+<li>Use <code>.include(selector)</code> / <code>.exclude(selector)</code> to scope a scan to a changed region instead of the full page.</li>
+<li>Use <code>.withTags([...])</code> to pin the WCAG level under test (e.g. <code>wcag2a</code>, <code>wcag2aa</code>) rather than scanning every rule unconditionally.</li>
+<li>Filter <code>results.violations</code> by <code>impact</code> before asserting (per the default in step 3) — asserting the raw array is empty fails the build on <code>moderate</code>/<code>minor</code> issues too. Log the filtered-out violations instead of discarding them.</li>
+<li>Snapshot the failing violations in assertion failures — they carry the rule id, impact, and offending selectors needed for triage.</li>
 </ul>
-<h3>Assertions (<code>pm.test</code>)</h3>
+<hr />
+<h3>WebdriverIO (<code>@axe-core/webdriverio</code>)</h3>
+<pre><code class="language-javascript">import AxeBuilder from "@axe-core/webdriverio";
+
+it("has no accessibility violations", async () =&gt; {
+  await browser.url("/checkout");
+
+  const results = await new AxeBuilder({ client: browser })
+    .withTags(["wcag2a", "wcag2aa"])
+    .analyze();
+
+  const blocking = results.violations.filter((v) =&gt;
+    ["critical", "serious"].includes(v.impact),
+  );
+  expect(blocking).toEqual([]);
+});
+</code></pre>
 <ul>
-<li>Assert behaviour inside <code>pm.test(...)</code> blocks with clear names.</li>
-<li>Use <code>pm.response.to.have.status(...)</code> and <code>pm.expect(...)</code> for status, fields, and schema.</li>
-<li>Use <code>pm.response.to.have.jsonSchema(schema)</code> for structural validation instead of many manual field checks.</li>
-<li>Assert presence/type/format for volatile values (IDs, timestamps), not exact matches.</li>
-<li>For a lightweight latency guard, assert <code>pm.response.responseTime</code> against a generous upper bound (a smoke check, not a load test).</li>
+<li>Same scoping/tagging/filtering approach as Playwright — <code>include</code>/<code>exclude</code>, <code>withTags</code>, and filtering by <code>impact</code> keep scans intentional and consistent with the step 3 default.</li>
 </ul>
-<h3>Scripting</h3>
+<hr />
+<h2>Selector &amp; Markup Rules</h2>
 <ul>
-<li>Use pre-request scripts to fetch tokens and generate unique data; use test scripts for assertions and extraction.</li>
-<li>Persist only the specific values later requests need via <code>pm.environment.set(...)</code> / <code>pm.collectionVariables.set(...)</code>.</li>
-<li>Keep scripts deterministic — no <code>setTimeout</code> waits; rely on the response.</li>
+<li><code>test-cypress</code> and <code>test-playwright</code> prefer <code>data-testid</code>/<code>getByTestId</code> as the house selector convention — keep using it. Where practical, <em>additionally</em> assert an accessible-name/role selector alongside it (<code>page.getByRole("button", { name: "Submit" })</code>, <code>cy.findByRole(...)</code> via <code>@testing-library/cypress</code>) rather than replacing the test id — this exercises the same accessible name the tool exposes to assistive tech without abandoning the house convention.</li>
+<li>If a test can only select an element via CSS structure or <code>nth-child</code>, treat that as a signal the markup is missing a semantic role, label, or landmark — flag it rather than only reaching for a test id.</li>
+<li>Verify interactive elements are real controls (<code>&lt;button&gt;</code>, <code>&lt;a href&gt;</code>) rather than <code>&lt;div onClick&gt;</code> — this affects both selector stability and keyboard/screen-reader access.</li>
+<li>Verify focus management for dynamic UI: opening a modal should move focus into it; closing it should return focus to the trigger.</li>
 </ul>
+<hr />
+<h2>Triage</h2>
+<ul>
+<li><strong>Critical / Serious</strong> — treat as blocking, same severity as a functional bug.</li>
+<li><strong>Moderate / Minor</strong> — log and track; do not let them silently accumulate unaddressed.</li>
+<li>Categorise each violation by WCAG success criterion (from the axe result's <code>tags</code>) so fixes can be prioritised by conformance level (A vs AA).</li>
+</ul>
+<hr />
 <h2>Anti-Patterns</h2>
 <ul>
-<li>Committing environment JSON containing real tokens or API keys.</li>
-<li>Hardcoded full URLs instead of <code>{{baseUrl}}</code>.</li>
-<li>A single request with dozens of unrelated <code>pm.test</code> assertions.</li>
-<li>Tests that only pass when run in a fixed collection order.</li>
-<li>Tests kept solely in a personal workspace, never exported or reviewed.</li>
+<li>Running a full-page scan only once at the end of a long flow instead of after each meaningful state change.</li>
+<li>Suppressing or disabling axe rules broadly (e.g. disabling a whole rule set) instead of fixing the underlying markup or scoping the exclusion narrowly with justification.</li>
+<li>Asserting only <code>results.violations.length === 0</code> without surfacing which rules failed, making failures hard to triage.</li>
+<li>Relying solely on automated scanning — axe-core catches a subset of WCAG issues (roughly programmatically detectable ones); it does not replace keyboard-navigation and screen-reader checks for critical flows.</li>
 </ul>
 </div></article></section>
       </article>
@@ -91,7 +161,7 @@
       <aside>
         <div class="side-card">
           <h3>Install</h3>
-          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-postman@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-postman@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-postman</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-postman@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-postman@nearform-skills">Copy</button></pre></div>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-accessibility@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-accessibility@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-accessibility</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-accessibility@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-accessibility@nearform-skills">Copy</button></pre></div>
         </div>
 
         <div class="side-card">
@@ -101,7 +171,7 @@
 
         <div class="side-card">
           <h3>Source</h3>
-          <a href="https://github.com/nearform/skills/tree/main/plugins/test-postman">View on GitHub →</a>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-accessibility">View on GitHub →</a>
         </div>
       </aside>
     </div>
@@ -160,11 +230,6 @@
           <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
           <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
         </a>
-        <a class="plugin-card" href="../test-accessibility/">
-          <h3>test-accessibility</h3>
-          <p class="description">Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.</p>
-          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
-        </a>
         <a class="plugin-card" href="../test-e2e/">
           <h3>test-e2e</h3>
           <p class="description">An e2e test engineer that detects the repo&#39;s framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.</p>
@@ -178,6 +243,11 @@
         <a class="plugin-card" href="../test-bruno/">
           <h3>test-bruno</h3>
           <p class="description">Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-postman/">
+          <h3>test-postman</h3>
+          <p class="description">Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.</p>
           <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
         </a></div>
     </section>

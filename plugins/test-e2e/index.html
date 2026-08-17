@@ -68,6 +68,10 @@ or review them.</p>
 <td>The repo uses BDD (Gherkin). Layers on top of a framework skill.</td>
 </tr>
 <tr>
+<td><code>test-accessibility</code></td>
+<td>Authoring or reviewing browser/DOM-driving e2e specs, or the suite already contains a11y checks. Layers on top of a framework skill.</td>
+</tr>
+<tr>
 <td><code>test-review</code></td>
 <td>Reviewing existing tests — produce a report and findings, do not rewrite.</td>
 </tr>
@@ -106,10 +110,11 @@ BDD skill.</p>
 <h2>Task routing</h2>
 <ul>
 <li><strong>"Write / add e2e tests for "</strong> → <code>test-automation-guidelines</code> +
-the detected framework skill + <code>test-bdd</code> ONLY if the project uses it. Author
-the test, then run it.</li>
-<li><strong>"Review these tests"</strong> → <code>test-review</code>. Produce a verdict and actionable
-findings. Do not restructure the code.</li>
+the detected framework skill + <code>test-accessibility</code> + <code>test-bdd</code> ONLY if the
+project uses it. Author the test, then run it.</li>
+<li><strong>"Review these tests"</strong> → <code>test-review</code> (it applies <code>test-accessibility</code> in
+turn when relevant). Produce a verdict and actionable findings. Do not
+restructure the code.</li>
 <li><strong>"Refactor / clean up / stabilise the tests"</strong> → <code>test-refactor</code>
 (behaviour preserved) plus the framework skill, which provides the framework's
 recommended patterns to replace the old code with.</li>
@@ -172,7 +177,7 @@ present unrun or draft tests as passed or finished.</li>
 
     
     <section>
-      <h2>More in testing <span class="count">(13)</span></h2>
+      <h2>More in testing <span class="count">(14)</span></h2>
       <div class="related-grid">
         <a class="plugin-card" href="../test-automation-guidelines/">
           <h3>test-automation-guidelines</h3>
@@ -222,6 +227,11 @@ present unrun or draft tests as passed or finished.</li>
         <a class="plugin-card" href="../test-webdriverio/">
           <h3>test-webdriverio</h3>
           <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-accessibility/">
+          <h3>test-accessibility</h3>
+          <p class="description">Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.</p>
           <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
         </a>
         <a class="plugin-card" href="../test-api/">
