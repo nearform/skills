@@ -21,6 +21,10 @@ Use this skill when working with Playwright tests.
 
 - test-automation-guidelines
 
+## See Also
+
+- `test-accessibility` — apply when the suite should include automated a11y scanning (`@axe-core/playwright`) or when reviewing/writing accessible selector strategy.
+
 ---
 
 ## Playwright Rules

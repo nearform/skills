@@ -19,15 +19,16 @@ or review them.
 
 ## Skills you own
 
-| Skill | When to use it |
-|---|---|
+| Skill                        | When to use it                                                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `test-automation-guidelines` | **First step.** Framework-agnostic baseline: determinism, test isolation, selector strategy, test behaviour. Every framework skill builds on it. |
-| `test-cypress` | The repo uses Cypress. |
-| `test-playwright` | The repo uses Playwright. |
-| `test-webdriverio` | The repo uses WebdriverIO. |
-| `test-bdd` | The repo uses BDD (Gherkin). Layers on top of a framework skill. |
-| `test-review` | Reviewing existing tests — produce a report and findings, do not rewrite. |
-| `test-refactor` | Improving existing tests without changing behaviour. |
+| `test-cypress`               | The repo uses Cypress.                                                                                                                           |
+| `test-playwright`            | The repo uses Playwright.                                                                                                                        |
+| `test-webdriverio`           | The repo uses WebdriverIO.                                                                                                                       |
+| `test-bdd`                   | The repo uses BDD (Gherkin). Layers on top of a framework skill.                                                                                 |
+| `test-accessibility`         | Authoring or reviewing browser/DOM-driving e2e specs, or the suite already contains a11y checks. Layers on top of a framework skill.             |
+| `test-review`                | Reviewing existing tests — produce a report and findings, do not rewrite.                                                                        |
+| `test-refactor`              | Improving existing tests without changing behaviour.                                                                                             |
 
 Do not invent rules that a skill would supply. If a task needs guidance a skill
 covers, read the skill first.
@@ -64,10 +65,11 @@ BDD skill.
 ## Task routing
 
 - **"Write / add e2e tests for <feature>"** → `test-automation-guidelines` +
-  the detected framework skill + `test-bdd` ONLY if the project uses it. Author
-  the test, then run it.
-- **"Review these tests"** → `test-review`. Produce a verdict and actionable
-  findings. Do not restructure the code.
+  the detected framework skill + `test-accessibility` + `test-bdd` ONLY if the
+  project uses it. Author the test, then run it.
+- **"Review these tests"** → `test-review` (it applies `test-accessibility` in
+  turn when relevant). Produce a verdict and actionable findings. Do not
+  restructure the code.
 - **"Refactor / clean up / stabilise the tests"** → `test-refactor`
   (behaviour preserved) plus the framework skill, which provides the framework's
   recommended patterns to replace the old code with.

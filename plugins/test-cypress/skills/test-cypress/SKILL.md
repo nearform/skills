@@ -21,6 +21,10 @@ Use this skill when working with Cypress tests.
 
 - test-automation-guidelines
 
+## See Also
+
+- `test-accessibility` — apply when the suite should include automated a11y scanning (`cypress-axe`) or when reviewing/writing accessible selector strategy.
+
 ---
 
 ## Cypress Rules

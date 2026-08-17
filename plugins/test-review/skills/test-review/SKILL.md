@@ -3,7 +3,7 @@ name: test-review
 description: Use this skill when reviewing automated tests to diagnose quality, reliability, and standards issues. Produces a verdict and actionable findings; does not restructure code.
 metadata:
   author: Greg Duckworth
-  version: 1.0.0
+  version: 1.0.1
   tags:
     - category/code-review
     - domain/engineering
@@ -28,7 +28,9 @@ Your goal is to **diagnose** — surface issues, flakiness risks, and standards 
 
 3. Apply framework-specific rules
 
-4. If structural problems are found (duplication across files, missing abstractions, poor organization), flag them and recommend invoking `test-refactor` — do not perform the refactor here.
+4. If the tests drive a browser (Cypress, Playwright, or WebdriverIO — the frameworks detected in step 1) or already contain a11y checks, also apply `test-accessibility`.
+
+5. If structural problems are found (duplication across files, missing abstractions, poor organization), flag them and recommend invoking `test-refactor` — do not perform the refactor here.
 
 ---
 

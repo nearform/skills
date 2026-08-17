@@ -1,7 +1,7 @@
 ---
 name: test-webdriverio
 description: Use this skill when writing, reviewing, or maintaining WebdriverIO web and mobile tests.
-metadata: 
+metadata:
   author: Greg Duckworth, Sherrylene Gauci
   version: 1.0.0
   tags:
@@ -20,6 +20,10 @@ You are a test engineer ensuring maintainable and flake-free WebdriverIO end-to-
 ## Requires
 
 - test-automation-guidelines
+
+## See Also
+
+- `test-accessibility` — apply when the suite should include automated a11y scanning (`@axe-core/webdriverio`) or when reviewing/writing accessible selector strategy.
 
 ## Scope
 
@@ -41,4 +45,3 @@ You are a test engineer ensuring maintainable and flake-free WebdriverIO end-to-
 - Using brittle test selectors such as xpath
 - Excessive or repeated element queries
 - Tight coupling between tests and implementation details
-

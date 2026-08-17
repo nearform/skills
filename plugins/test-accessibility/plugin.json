@@ -1,0 +1,16 @@
+{
+  "name": "test-accessibility",
+  "description": "Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.",
+  "version": "1.0.1",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "axe-core"
+  ],
+  "category": "testing"
+}
