@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-vitest — Nearform Plugins</title>
+  <meta name="description" content="Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-vitest</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-vitest <span class="version">v1.0.0</span></h1>
+      <p class="description">Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">vitest</span><span class="keyword">unit</span><span class="keyword">mocking</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-vitest</h3><p class="content-description">Use this skill when writing, reviewing, or refactoring unit tests with Vitest, to apply Vitest-specific conventions for test doubles, fake timers, async assertions, parametrisation, and config.</p></header><div class="content-body"><p>Use this skill when working with <a href="https://vitest.dev">Vitest</a> unit tests. The semantics below are <strong>Vitest 2 and later</strong> — mock resetting and restoration behave differently on 1.x.</p>
+<h2>Requires</h2>
+<ul>
+<li>test-unit-guidelines</li>
+</ul>
+<hr />
+<h2>Vitest Rules</h2>
+<h3>Test Structure</h3>
+<p>Use <code>describe</code> to name the unit and <code>it</code> to name the behaviour. Import the globals explicitly rather than relying on <code>globals: true</code>, so a test file's dependencies are visible.</p>
+<pre><code class="language-javascript">import { describe, it, expect } from "vitest";
+import { applyDiscount } from "./pricing";
+
+describe("applyDiscount", () =&gt; {
+  it("takes 10% off orders over 100", () =&gt; {
+    expect(applyDiscount({ total: 200 }).total).toBe(180);
+  });
+});
+</code></pre>
+<p>Every example below elides its <code>import { … } from "vitest"</code> line for brevity. A real test file still needs it — <code>vi</code>, <code>it</code>, <code>expect</code>, <code>describe</code>, and <code>afterEach</code> are all named imports unless <code>globals: true</code> is set, which this skill advises against.</p>
+<hr />
+<h3>Test Doubles</h3>
+<p>Use the lightest stand-in that does the job:</p>
+<ul>
+<li><code>vi.fn()</code> — a standalone stub/spy for an injected callback or dependency.</li>
+<li><code>vi.spyOn(obj, "method")</code> — wrap a real method to assert calls while keeping or overriding its behaviour.</li>
+<li><code>vi.mock("./module")</code> — replace a whole module at import time, for boundary modules only.</li>
+</ul>
+<pre><code class="language-javascript">// Good — mock only the external boundary; use the real thing for logic you own
+import { toUsd } from "./currency";
+
+vi.mock("./httpClient", () =&gt; ({
+  fetchRates: vi.fn().mockResolvedValue({ usd: 1.5 }),
+}));
+
+it("converts using the live rate", async () =&gt; {
+  expect(await toUsd(100)).toBe(150);
+});
+</code></pre>
+<p>Called with no factory, <code>vi.mock("./taxes")</code> does <strong>not</strong> automock straight away: Vitest first looks for <code>__mocks__/taxes.js</code> alongside the module and uses that instead if it exists. This is worth knowing — it's the usual cause of "my mock isn't applying".</p>
+<p>Failing that it automocks, which is not a blanket <code>vi.fn()</code>: methods and getters return <code>undefined</code>, arrays come back empty, primitives are left untouched, and objects and class instances are deep-cloned. So a primitive export such as <code>VERSION</code> survives with its real value, while an array export like <code>TAX_RATES</code> comes back as <code>[]</code> — the right type with the data silently gone.</p>
+<p>When asserting a message to a real boundary (see "Test behaviour, not implementation" in <code>test-unit-guidelines</code>), import the mocked module to get a handle on the mock — a factory's return value reaches <em>importers</em>, it does not create local bindings in the test file.</p>
+<pre><code class="language-javascript">// Good — the outbound message IS the behaviour under test
+import { send } from "./emailService";
+
+vi.mock("./emailService", () =&gt; ({ send: vi.fn() }));
+
+it("emails the customer when the order ships", () =&gt; {
+  markShipped({ email: "ada@example.com" });
+  expect(send).toHaveBeenCalledWith("ada@example.com", "shipped");
+});
+</code></pre>
+<p>When only part of a collaborator module is a boundary, replace that export and keep the rest real. This is usually what you want — whole-module replacement throws away logic you meant to exercise.</p>
+<pre><code class="language-javascript">// Good — fake the one boundary export of a collaborator, keep the rest of it real
+vi.mock("./taxes", async (importOriginal) =&gt; ({
+  ...(await importOriginal()),
+  loadTaxTable: vi.fn().mockResolvedValue({ vat: 0.2 }),
+}));
+</code></pre>
+<p>Mock the module the unit <strong>imports from</strong>, never the one it lives in: Vitest cannot intercept a call made from inside the same file, so partially mocking <code>./pricing</code> while testing <code>applyDiscount</code> leaves its internal calls hitting the real code — silently, with the mock recording nothing. A boundary reached from inside the same module needs dependency injection — pass it in. <code>vi.spyOn</code> does not rescue it either: a direct call to a module-local function never goes through the namespace object the spy replaces.</p>
+<p><code>vi.mock</code> is hoisted above imports. Anything its factory references must be created inside the factory, or declared with <code>vi.hoisted()</code>.</p>
+<pre><code class="language-javascript">// Good — the factory's dependencies are hoisted with it
+const { fetchRates } = vi.hoisted(() =&gt; ({ fetchRates: vi.fn() }));
+vi.mock("./httpClient", () =&gt; ({ fetchRates }));
+
+// Bad — factory closes over a variable that doesn't exist yet
+const fetchRates = vi.fn(); // evaluated after vi.mock is hoisted
+vi.mock("./httpClient", () =&gt; ({ fetchRates })); // ReferenceError
+</code></pre>
+<hr />
+<h3>Restoring State</h3>
+<p>Every spy and mock must be undone between tests. Set it once in <code>vitest.config</code> rather than remembering it per file:</p>
+<pre><code class="language-javascript">import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    restoreMocks: true,
+    clearMocks: true,
+  },
+});
+</code></pre>
+<p>Know the difference (Vitest 2+):</p>
+<ul>
+<li><code>clearMocks</code> — clears call history before each test. Implementations stay.</li>
+<li><code>mockReset</code> — note the name, <em>not</em> <code>resetMocks</code> (that's Jest's). Also resets implementations: a <code>vi.fn(impl)</code> goes back to <code>impl</code>, and a <code>vi.spyOn</code> spy starts calling through to the real method it wraps again. Only a bare <code>vi.fn()</code> with no implementation resets to a no-op returning <code>undefined</code>.</li>
+<li><code>restoreMocks</code> — restores the original descriptors of anything created with <code>vi.spyOn</code>.</li>
+</ul>
+<p>Set <code>restoreMocks</code> <strong>and</strong> <code>clearMocks</code>: restoration applies only to <code>vi.spyOn</code> spies, so <code>clearMocks</code> is what clears history on plain <code>vi.fn()</code> mocks. Where a shared config isn't available, call <code>vi.restoreAllMocks()</code> and <code>vi.clearAllMocks()</code> in <code>afterEach</code> — <code>restoreAllMocks</code> is likewise spy-only.</p>
+<pre><code class="language-javascript">// Bad — a spy that outlives its test
+it("logs a warning", () =&gt; {
+  vi.spyOn(console, "warn").mockImplementation(() =&gt; {});
+  expect(validate({})).toBe(false);
+  // console.warn stays stubbed for every later test in the file
+});
+</code></pre>
+<p>→ Fix: set <code>restoreMocks: true</code> in <code>vitest.config</code>.</p>
+<p>Note that none of these flags touch fake timers — see below.</p>
+<hr />
+<h3>Timers &amp; Randomness</h3>
+<p>Freeze the clock, advance it deliberately, then release it. <strong>No mock-reset flag releases timers</strong> — <code>restoreMocks</code> does not touch them, so do it in <code>afterEach</code> or the frozen clock leaks into every later test in the file.</p>
+<pre><code class="language-javascript">// Good — control the clock, and always release it
+afterEach(() =&gt; {
+  vi.useRealTimers();
+});
+
+it("expires the token after one hour", () =&gt; {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+
+  const token = issueToken();
+  vi.advanceTimersByTime(60 * 60 * 1000);
+
+  expect(isExpired(token)).toBe(true);
+});
+</code></pre>
+<p>Use <code>vi.advanceTimersByTimeAsync()</code> when the code under test awaits between timers — the synchronous form never lets the awaited work run.</p>
+<pre><code class="language-javascript">// Good
+it("retries after a backoff", async () =&gt; {
+  vi.useFakeTimers();
+  const promise = fetchWithRetry("/rates");
+
+  await vi.advanceTimersByTimeAsync(1000); // lets the awaited retry run
+
+  await expect(promise).resolves.toEqual({ usd: 1.5 });
+});
+
+// Bad — advancing past awaited code synchronously
+vi.advanceTimersByTime(1000); // the awaited retry never gets to run; test hangs or fails
+</code></pre>
+<p>Randomness is a boundary too — stub it rather than asserting around it. <code>restoreMocks: true</code> puts <code>Math.random</code> back afterwards.</p>
+<pre><code class="language-javascript">// Good — stub the boundary, assert the outcome
+it("picks the weighted winner", () =&gt; {
+  vi.spyOn(Math, "random").mockReturnValue(0.42);
+  expect(pickWinner(entrants)).toBe("ada");
+});
+</code></pre>
+<hr />
+<h3>Errors &amp; Callback Assertions</h3>
+<p>Wrap the call in a function so the matcher can catch the throw. <code>expect(fn())</code> runs <code>fn</code> eagerly, so the error escapes before <code>toThrow</code> can see it and the test dies with an uncaught exception instead of a readable failure. Assert the error type where the type is part of the contract.</p>
+<pre><code class="language-javascript">// Good — the matcher gets a chance to catch it
+expect(() =&gt; validateOrder({})).toThrow(TypeError);
+expect(() =&gt; validateOrder({})).toThrow("total is required");
+
+// Bad — no arrow, so the error never reaches the matcher
+expect(validateOrder({})).toThrow("total is required");
+</code></pre>
+<p>Assert rejections with <code>.rejects</code>, never a <code>try</code>/<code>catch</code> whose <code>expect</code> may never run.</p>
+<pre><code class="language-javascript">it("rejects an unknown user", async () =&gt; {
+  await expect(loadProfile("nobody")).rejects.toThrow("not found");
+});
+</code></pre>
+<p>When an assertion can only run inside a callback, <code>expect.assertions(n)</code> fails the test if that callback never fires:</p>
+<pre><code class="language-javascript">it("invokes the callback with the parsed row", () =&gt; {
+  expect.assertions(1); // guarantees the assertion below actually ran
+  parseCsv("a,1", (row) =&gt; expect(row).toEqual({ a: "1" }));
+});
+</code></pre>
+<hr />
+<h3>Parametrisation</h3>
+<p>Use <code>it.each</code> when the behaviour is identical and only the data varies. Use the <code>$property</code> syntax in the title so each case reports a distinct, readable name.</p>
+<pre><code class="language-javascript">// Good — same behaviour, varying data (note the boundary rows)
+it.each([
+  { total: 50, expected: 50 }, // below the threshold — untouched
+  { total: 100, expected: 100 }, // exactly 100 — not "over", untouched
+  { total: 200, expected: 180 }, // over 100 — 10% off
+])("applies the right discount to an order of $total", ({ total, expected }) =&gt; {
+  expect(applyDiscount({ total }).total).toBe(expected);
+});
+</code></pre>
+<hr />
+<h3>Assertions</h3>
+<p>Prefer the most specific matcher available — it produces a better failure message than a generic truthiness check.</p>
+<pre><code class="language-javascript">// Good — specific matchers, readable failures
+expect(result.total).toBe(180);
+expect(items).toHaveLength(3);
+expect(user).toMatchObject({ name: "Ada" }); // partial shape, not deep-equal on everything
+
+// Bad — generic checks with weaker failure messages
+expect(result.total === 180).toBe(true); // "expected false to be true" — the actual value is gone
+expect(items.length).toBe(3); // reports the count, but loses the array from the diff
+expect(JSON.stringify(user)).toContain("Ada"); // substring match on a serialised blob
+</code></pre>
+<p><code>toBe</code> demands an exact match, and decimal arithmetic rarely gives one — <code>0.1 + 0.2</code> comes out as <code>0.30000000000000004</code>, and <code>100 * 1.1</code> as <code>110.00000000000001</code>. When a number is the result of a calculation, assert it with <code>toBeCloseTo</code> and say how many decimal places matter.</p>
+<pre><code class="language-javascript">expect(0.1 + 0.2).toBeCloseTo(0.3, 5); // toBe(0.3) fails
+</code></pre>
+<p>Avoid snapshot tests for unit-level logic — they assert everything and therefore nothing in particular. Reserve them for large, stable serialised output.</p>
+<hr />
+<h3>Coverage</h3>
+<p>Install a provider first — <code>@vitest/coverage-v8</code> (or <code>@vitest/coverage-istanbul</code>); Vitest prompts for it on first run.</p>
+<p>Use <code>vitest run --coverage</code> in CI. Bare <code>vitest</code> does fall back to run mode when it detects CI or a non-interactive terminal, but <code>run</code> is explicit and does not depend on that detection.</p>
+<p>Read the <strong>branch</strong> column, not the line percentage.</p>
+<hr />
+<h2>Anti-Patterns</h2>
+<ul>
+<li>Relying on <code>globals: true</code> instead of importing <code>describe</code>/<code>it</code>/<code>expect</code></li>
+<li><code>vi.mock</code> factories referencing outer variables without <code>vi.hoisted()</code></li>
+<li>Partially mocking the module under test, expecting its internal calls to hit the mock</li>
+<li>Leaving mocks or fake timers unrestored (no <code>restoreMocks</code>, no <code>vi.useRealTimers()</code>)</li>
+<li><code>setTimeout</code>-based waiting instead of <code>vi.advanceTimersByTime</code></li>
+<li><code>advanceTimersByTime</code> where the code under test awaits between timers</li>
+<li><code>try</code>/<code>catch</code> rejection assertions instead of <code>.rejects</code></li>
+<li><code>expect(fn())</code> instead of <code>expect(() =&gt; fn())</code>, letting a thrown error escape the matcher</li>
+<li>Assertions inside a callback with no <code>expect.assertions(n)</code> to prove they ran</li>
+<li>Snapshot tests standing in for real assertions on unit logic</li>
+<li>Truthiness assertions where a specific matcher exists</li>
+</ul>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-vitest@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-vitest@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-vitest</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-vitest@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-vitest@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-vitest">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(16)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-unit-guidelines/">
+          <h3>test-unit-guidelines</h3>
+          <p class="description">Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-jira-cases/">
+          <h3>test-jira-cases</h3>
+          <p class="description">Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bdd/">
+          <h3>test-bdd</h3>
+          <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-cypress/">
+          <h3>test-cypress</h3>
+          <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-refactor/">
+          <h3>test-refactor</h3>
+          <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-accessibility/">
+          <h3>test-accessibility</h3>
+          <p class="description">Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-e2e/">
+          <h3>test-e2e</h3>
+          <p class="description">An e2e test engineer that detects the repo&#39;s framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-api/">
+          <h3>test-api</h3>
+          <p class="description">Framework-agnostic best practices for testing HTTP/REST APIs: request design, assertions, auth, data setup, and environment handling. Use when writing or reviewing API tests, or as the shared base for tool-specific API testing skills (Bruno, Postman).</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bruno/">
+          <h3>test-bruno</h3>
+          <p class="description">Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-postman/">
+          <h3>test-postman</h3>
+          <p class="description">Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>

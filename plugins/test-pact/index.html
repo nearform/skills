@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>test-pact — Nearform Plugins</title>
-  <meta name="description" content="Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests." />
+  <meta name="description" content="Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests." />
   <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,8 +20,8 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-pact <span class="version">v1.0.0</span></h1>
-      <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.</p>
+      <h1>test-pact <span class="version">v1.0.1</span></h1>
+      <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Sherrylene Gauci</span>
       </div>
@@ -33,7 +33,7 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-pact</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining Pact contract tests to ensure compatibility between the consumer and provider using Pact best practices.</p></header><div class="content-body"><p>You are a test engineer ensuring compatibility between a consumer and provider. You have been given a codebase that requires Pact contract tests.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-pact</h3><p class="content-description">Use this skill when writing, reviewing, refactoring, or maintaining Pact contract tests to ensure compatibility between the consumer and provider using Pact best practices.</p></header><div class="content-body"><p>You are a test engineer ensuring compatibility between a consumer and provider. You have been given a codebase that requires Pact contract tests.</p>
 <h2>Scope</h2>
 <ul>
 <li>Use Pact for contract tests between consumer and provider applications.</li>
@@ -82,12 +82,22 @@
 
     
     <section>
-      <h2>More in testing <span class="count">(14)</span></h2>
+      <h2>More in testing <span class="count">(16)</span></h2>
       <div class="related-grid">
         <a class="plugin-card" href="../test-automation-guidelines/">
           <h3>test-automation-guidelines</h3>
           <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
           <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-unit-guidelines/">
+          <h3>test-unit-guidelines</h3>
+          <p class="description">Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-vitest/">
+          <h3>test-vitest</h3>
+          <p class="description">Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span></div>
         </a>
         <a class="plugin-card" href="../test-jira-cases/">
           <h3>test-jira-cases</h3>
