@@ -1,0 +1,15 @@
+{
+  "name": "test-unit-guidelines",
+  "description": "Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jacopo Martinelli & Sherrylene Gauci"
+  },
+  "keywords": [
+    "testing",
+    "unit",
+    "guidelines",
+    "mocking"
+  ],
+  "category": "testing"
+}

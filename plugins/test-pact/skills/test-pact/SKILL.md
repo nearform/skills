@@ -1,9 +1,9 @@
 ---
 name: test-pact
-description: Use this skill when writing, reviewing, or maintaining Pact contract tests to ensure compatibility between the consumer and provider using Pact best practices.
+description: Use this skill when writing, reviewing, refactoring, or maintaining Pact contract tests to ensure compatibility between the consumer and provider using Pact best practices.
 metadata:
   author: Sherrylene Gauci
-  version: 1.0.0
+  version: 1.0.1
   tags:
     - category/contract-testing
     - domain/engineering

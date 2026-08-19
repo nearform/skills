@@ -75,6 +75,38 @@
       "category": "testing"
     },
     {
+      "name": "test-unit-guidelines",
+      "source": "./plugins/test-unit-guidelines",
+      "description": "Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Jacopo Martinelli & Sherrylene Gauci"
+      },
+      "keywords": [
+        "testing",
+        "unit",
+        "guidelines",
+        "mocking"
+      ],
+      "category": "testing"
+    },
+    {
+      "name": "test-vitest",
+      "source": "./plugins/test-vitest",
+      "description": "Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Jacopo Martinelli & Sherrylene Gauci"
+      },
+      "keywords": [
+        "testing",
+        "vitest",
+        "unit",
+        "mocking"
+      ],
+      "category": "testing"
+    },
+    {
       "name": "test-jira-cases",
       "source": "./plugins/test-jira-cases",
       "description": "Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.",
@@ -144,8 +176,8 @@
     {
       "name": "test-pact",
       "source": "./plugins/test-pact",
-      "description": "Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.",
-      "version": "1.0.0",
+      "description": "Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.",
+      "version": "1.0.1",
       "author": {
         "name": "Sherrylene Gauci"
       },

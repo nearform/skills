@@ -1,0 +1,15 @@
+{
+  "name": "test-vitest",
+  "description": "Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jacopo Martinelli & Sherrylene Gauci"
+  },
+  "keywords": [
+    "testing",
+    "vitest",
+    "unit",
+    "mocking"
+  ],
+  "category": "testing"
+}

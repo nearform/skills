@@ -1,7 +1,7 @@
 {
   "name": "test-pact",
-  "description": "Pact-specific best practices for consumer and provider contract tests. Use when writing or reviewing Pact tests.",
-  "version": "1.0.0",
+  "description": "Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.",
+  "version": "1.0.1",
   "author": {
     "name": "Sherrylene Gauci"
   },
