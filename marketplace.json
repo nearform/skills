@@ -448,6 +448,23 @@
         "automation"
       ],
       "category": "testing"
+    },
+    {
+      "name": "product-backlog",
+      "source": "./plugins/product-backlog",
+      "description": "Turn a story map into a backlog a team can pick up: read the map from a board or an image export, write the epic, then write the stories one at a time. Client-neutral, and the skills read the tracker without writing to it — the epic and story writers produce markdown files for a human to review and paste.",
+      "version": "1.1.0",
+      "author": {
+        "name": "Rich Warner"
+      },
+      "keywords": [
+        "product-management",
+        "epic",
+        "user-story",
+        "story-map",
+        "backlog"
+      ],
+      "category": "product"
     }
   ]
 }
