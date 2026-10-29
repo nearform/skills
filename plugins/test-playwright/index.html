@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-playwright <span class="version">v1.0.0</span></h1>
+      <h1>test-playwright <span class="version">v1.1.0</span></h1>
       <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -105,6 +105,34 @@ page.getByRole("button", { name: "Submit" });
 <ul>
 <li>Tests must be parallel-safe</li>
 <li>Avoid shared state across tests</li>
+<li>When tests share a server with a concurrency limit, set <code>workers</code> no higher than that limit</li>
+</ul>
+<hr />
+<h3>Timeouts</h3>
+<ul>
+<li>Web-first assertions and <code>expect.poll</code> give up after <code>expect.timeout</code> (5 seconds by default). Pass a <code>timeout</code> that covers waits on server work, or raise <code>expect.timeout</code> in the config.</li>
+<li>The test <code>timeout</code> (30 seconds by default) covers the whole test, including setup in fixtures. Waits that run one after another must fit inside it together.</li>
+</ul>
+<pre><code class="language-javascript">test("order becomes ready", async () =&gt; {
+  test.setTimeout(90_000);
+  await expect
+    .poll(() =&gt; getStatus(id), { timeout: 60_000 })
+    .toMatch(/^(ready|failed)$/);
+  expect(await getStatus(id)).toBe("ready");
+});
+</code></pre>
+<hr />
+<h3>Test Servers (<code>webServer</code>)</h3>
+<ul>
+<li><code>webServer.env</code> is laid over <code>process.env</code> and replaces any variable it names. Add to <code>NODE_OPTIONS</code> instead of overwriting it:</li>
+</ul>
+<pre><code class="language-javascript">env: {
+  NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --conditions=source`.trim(),
+},
+</code></pre>
+<ul>
+<li>Take ports from environment variables with defaults, so a second copy of the suite or a developer's own server doesn't collide.</li>
+<li>Playwright stops <code>webServer</code> processes with SIGKILL unless <code>gracefulShutdown</code> is set. Set it (e.g. <code>{ signal: "SIGTERM", timeout: 5000 }</code>) when the server cleans up on a signal.</li>
 </ul>
 <hr />
 <h3>Anti-Patterns</h3>
@@ -112,6 +140,8 @@ page.getByRole("button", { name: "Submit" });
 <li><code>waitForTimeout</code> usage</li>
 <li>Global shared state</li>
 <li>Overuse of <code>page.evaluate</code></li>
+<li>Overwriting <code>NODE_OPTIONS</code> (or similar variables) in <code>webServer.env</code></li>
+<li>Chained waits whose timeouts add up to more than the test timeout</li>
 </ul>
 </div></article></section>
       </article>

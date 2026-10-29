@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-review <span class="version">v1.0.1</span></h1>
+      <h1>test-review <span class="version">v1.1.0</span></h1>
       <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -66,6 +66,13 @@
 <li>Are assertions meaningful and behaviour-focused?</li>
 <li>Any flakiness risks (arbitrary waits, order dependence, shared state)?</li>
 <li>Are selectors stable (<code>data-testid</code>, roles) rather than brittle (CSS structure, nth-child)?</li>
+<li>Do setup helpers and test doubles check every result, or ignore errors and carry on?</li>
+<li>Does each wait or poll stop on failure states, or can a failure only show up as a timeout?</li>
+<li>Do a test's waits, added together, fit inside its timeout?</li>
+<li>Do assertions prove the outcome (the new content), not just an indicator that something changed?</li>
+<li>Do test doubles replace dependencies at the seam the codebase's own tests use, keeping its guards (permission checks, environment scrubbing)?</li>
+<li>Any unused helpers, fixture branches or exports?</li>
+<li>Is harness or test-double code copied from elsewhere in the codebase? (flag for <code>test-refactor</code>)</li>
 </ul>
 <hr />
 <h3>Produce structured output:</h3>
