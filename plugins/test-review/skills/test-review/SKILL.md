@@ -3,7 +3,7 @@ name: test-review
 description: Use this skill when reviewing automated tests to diagnose quality, reliability, and standards issues. Produces a verdict and actionable findings; does not restructure code.
 metadata:
   author: Greg Duckworth
-  version: 1.0.1
+  version: 1.1.0
   tags:
     - category/code-review
     - domain/engineering
@@ -43,6 +43,13 @@ Your goal is to **diagnose** — surface issues, flakiness risks, and standards 
 - Are assertions meaningful and behaviour-focused?
 - Any flakiness risks (arbitrary waits, order dependence, shared state)?
 - Are selectors stable (`data-testid`, roles) rather than brittle (CSS structure, nth-child)?
+- Do setup helpers and test doubles check every result, or ignore errors and carry on?
+- Does each wait or poll stop on failure states, or can a failure only show up as a timeout?
+- Do a test's waits, added together, fit inside its timeout?
+- Do assertions prove the outcome (the new content), not just an indicator that something changed?
+- Do test doubles replace dependencies at the seam the codebase's own tests use, keeping its guards (permission checks, environment scrubbing)?
+- Any unused helpers, fixture branches or exports?
+- Is harness or test-double code copied from elsewhere in the codebase? (flag for `test-refactor`)
 
 ---
 

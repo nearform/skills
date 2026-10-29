@@ -1,7 +1,7 @@
 {
   "name": "test-playwright",
   "description": "Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Greg Duckworth"
   },

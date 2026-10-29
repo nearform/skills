@@ -62,7 +62,7 @@
       "name": "test-automation-guidelines",
       "source": "./plugins/test-automation-guidelines",
       "description": "Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -193,7 +193,7 @@
       "name": "test-playwright",
       "source": "./plugins/test-playwright",
       "description": "Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -209,7 +209,7 @@
       "name": "test-review",
       "source": "./plugins/test-review",
       "description": "Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework's review patterns.",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
