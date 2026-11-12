@@ -1,47 +1,60 @@
 ---
 name: test-webdriverio
-description: Use this skill when writing, reviewing, or maintaining WebdriverIO web and mobile tests.
+description: Use this skill when writing, fixing, or reviewing WebdriverIO tests — browser e2e, or iOS/Android mobile via Appium — including selectors, waiting, page objects, and wdio.conf.
 metadata:
   author: Greg Duckworth, Sherrylene Gauci
-  version: 1.0.0
+  version: 1.1.0
   tags:
     - category/test-automation
     - domain/engineering
     - domain/testing
     - tool/webdriverio
+    - tool/appium
   compatibility:
     - all
   frameworks:
     - webdriverio
+    - appium
 ---
 
-You are a test engineer ensuring maintainable and flake-free WebdriverIO end-to-end tests.
+WebdriverIO-specific rules for web and mobile tests. Base principles are not restated here.
 
 ## Requires
 
-- test-automation-guidelines
+- `test-automation-guidelines` — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.
+- For web UI suites, also `test-accessibility` (`@axe-core/webdriverio`).
 
-## See Also
+## Rules
 
-- `test-accessibility` — apply when the suite should include automated a11y scanning (`@axe-core/webdriverio`) or when reviewing/writing accessible selector strategy.
+### Async model
 
-## Scope
+- `await` every `$`, `$$`, `browser`, and `expect` call.
 
-- Use WebdriverIO for browser-based or mobile end-to-end tests.
-- Keep guidance specific to the area under test.
+### Selectors
 
-## Workflow
+- Web: `$('[data-testid="…"]')` or a role/label attribute selector. Mobile: accessibility id (`$("~login-button")`).
+- Avoid XPath and DOM-structure selectors; text selectors (`$("button=Submit")`) are a fallback only.
 
-1. Identify whether the task is web tests, mobile tests, or both.
-2. Refer only to the needed reference file:
-   - Web: `references/web.md`
-   - Mobile: `references/mobile.md`
-3. Apply the relevant principles and examples from that file.
-4. Give recommendations or code updates aligned to WebdriverIO best practices.
+### Waiting and timeouts
+
+- Never `browser.pause(ms)`. Use `waitForDisplayed`/`waitForClickable` or WebdriverIO's auto-retrying `expect(...)` matchers.
+- Give waits on server work an explicit `timeout` rather than raising `waitforTimeout` globally; chained waits must fit within the framework's test timeout (`mochaOpts.timeout` or equivalent).
+- Use `browser.waitUntil` with a `timeoutMsg` that states the condition, and stop on failure states too.
+
+### Structure
+
+- Page objects expose elements as getters and actions as methods; query an element once per action, not repeatedly.
 
 ## Anti-Patterns
 
 - `browser.pause` usage
-- Using brittle test selectors such as xpath
+- XPath or other brittle selectors
 - Excessive or repeated element queries
 - Tight coupling between tests and implementation details
+
+## References
+
+Load only the one you need:
+
+- [references/web.md](references/web.md) — browser selectors, waiting, assertions, page objects.
+- [references/mobile.md](references/mobile.md) — Appium selectors (iOS predicate/class chain, Android UiAutomator), gestures, mobile page objects.

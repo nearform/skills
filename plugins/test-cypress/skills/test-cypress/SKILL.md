@@ -1,9 +1,9 @@
 ---
 name: test-cypress
-description: Use this skill when writing or reviewing Cypress tests to apply Cypress-specific best practices for reliable, idiomatic test code.
+description: Use this skill when writing, fixing, or reviewing Cypress e2e or component tests — command chaining, selectors, cy.intercept network control, cy.session auth, and waiting without cy.wait(ms).
 metadata:
   author: Greg Duckworth
-  version: 1.0.0
+  version: 1.1.0
   tags:
     - category/test-automation
     - domain/engineering
@@ -15,124 +15,53 @@ metadata:
     - cypress
 ---
 
-Use this skill when working with Cypress tests.
+Cypress-specific rules. Base principles are not restated here.
 
 ## Requires
 
-- test-automation-guidelines
+- `test-automation-guidelines` — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.
+- For UI suites, also `test-accessibility` (`cypress-axe`).
 
-## See Also
+## Rules
 
-- `test-accessibility` — apply when the suite should include automated a11y scanning (`cypress-axe`) or when reviewing/writing accessible selector strategy.
+### Command model
 
----
-
-## Cypress Rules
-
-### Command Model
-
-- Use Cypress command chaining
-- Do not use async/await
-- Avoid excessive use of `cy.then()`
-
----
+- Chain Cypress commands; do not use `async`/`await`. Keep `cy.then()` for the rare case that needs a plain value.
 
 ### Selectors
 
-Prefer stable, intentional selectors (attributes or accessibility hooks) as your primary choice. Text-based selectors are brittle — they can break with copy changes, translations, or small wording edits — so treat them as a fallback only when no stable attributes exist.
+- Primary: `cy.get('[data-testid="…"]')`, or a role/label query (`cy.findByRole` via `@testing-library/cypress`).
+- Avoid CSS classes, `nth-child`, and DOM structure. `cy.contains("Submit")` is a fallback only — copy changes break it.
 
-**Primary (preferred):**
+### Waiting and timeouts
 
-```javascript
-cy.get('[data-testid="..."]');
-cy.get("#elementId");
-```
+- Never `cy.wait(1000)`. Wait on `cy.wait("@alias")`, `.should(...)` retries, or DOM state.
+- Set `{ timeout }` on the specific command that waits for server work instead of raising `defaultCommandTimeout` globally. Chained alias waits must fit within the spec's budget (`requestTimeout` + `responseTimeout` per alias).
+- When waiting on an alias, assert its status so a failed request fails with the cause: `cy.wait("@save").its("response.statusCode").should("eq", 200)`.
 
-**Fallback (use only if no stable attributes are available):**
+### Network and test doubles
 
-```javascript
-cy.contains("Submit"); // text selector - brittle
-```
-
----
-
-### Waiting
-
-Do not use:
+- `cy.intercept()` for spying and stubbing; always alias it. Prefer stubs for determinism; use `{ fixture: "user.json" }` for bodies.
 
 ```javascript
-cy.wait(1000);
+cy.intercept("POST", "/api/checkout").as("checkout");
+cy.get('[data-testid="pay"]').click();
+cy.wait("@checkout").its("response.statusCode").should("eq", 201);
 ```
 
-Use:
+### Auth and state
 
-- `cy.wait('@alias')`
-- `.should(...)`
-- DOM assertions
+- Log in programmatically and cache with `cy.session()`; don't drive the login UI in every test.
+- `Cypress.env` is for configuration, never mutable cross-test state. Reset cookies/localStorage where needed.
 
----
+### Config and CI
 
-### Network Control
+- Use custom commands sparingly, for genuinely repeated actions. `cy.fixture()` for large data sets.
 
-- Use `cy.intercept()` for spying and stubbing
-- Prefer stubbing for deterministic tests
-- Always use aliases for intercepted requests
+## Anti-Patterns
 
-```javascript
-cy.intercept("GET", "/api/...", { fixture: "user.json" }).as("getUsers");
-cy.wait("@getUsers");
-```
-
----
-
-### Authentication
-
-- Prefer programmatic login
-- Use `cy.session()`
-- Avoid UI login in every test
-
-```javascript
-cy.session("user", () => {
-  cy.login();
-});
-```
-
----
-
-### State Management
-
-- Use `Cypress.env` for configuration and static data
-- Do not use `Cypress.env` to share mutable state between tests
-- Reset cookies/localStorage when required
-
----
-
-### Assertions
-
-```javascript
-cy.get('[data-testid="cart-count"]').should("have.text", "1");
-```
-
----
-
-### Custom Commands & Fixtures
-
-- Use custom commands sparingly for repetitive actions
-- Use `cy.fixture()` to manage large data sets
-
----
-
-### API Waiting Pattern
-
-```javascript
-cy.intercept("POST", "/checkout").as("checkout");
-cy.wait("@checkout");
-```
-
----
-
-### Anti-Patterns
-
-- Mixing async/await with Cypress
-- Overusing `cy.then()`
+- Mixing `async`/`await` with Cypress commands, or overusing `cy.then()`
+- `cy.wait(<ms>)`
+- Intercepts without aliases, or alias waits that never check the response
 - UI login in every test
+- Raising `defaultCommandTimeout` globally to hide a slow wait

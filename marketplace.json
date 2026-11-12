@@ -62,7 +62,7 @@
       "name": "test-automation-guidelines",
       "source": "./plugins/test-automation-guidelines",
       "description": "Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -78,7 +78,7 @@
       "name": "test-unit-guidelines",
       "source": "./plugins/test-unit-guidelines",
       "description": "Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Jacopo Martinelli & Sherrylene Gauci"
       },
@@ -94,7 +94,7 @@
       "name": "test-vitest",
       "source": "./plugins/test-vitest",
       "description": "Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Jacopo Martinelli & Sherrylene Gauci"
       },
@@ -110,7 +110,7 @@
       "name": "test-jira-cases",
       "source": "./plugins/test-jira-cases",
       "description": "Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -127,7 +127,7 @@
       "name": "test-bdd",
       "source": "./plugins/test-bdd",
       "description": "Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -144,7 +144,7 @@
       "name": "test-cypress",
       "source": "./plugins/test-cypress",
       "description": "Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -160,7 +160,7 @@
       "name": "test-k6",
       "source": "./plugins/test-k6",
       "description": "k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Sherrylene Gauci"
       },
@@ -177,7 +177,7 @@
       "name": "test-pact",
       "source": "./plugins/test-pact",
       "description": "Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "author": {
         "name": "Sherrylene Gauci"
       },
@@ -193,7 +193,7 @@
       "name": "test-playwright",
       "source": "./plugins/test-playwright",
       "description": "Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -209,7 +209,7 @@
       "name": "test-review",
       "source": "./plugins/test-review",
       "description": "Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework's review patterns.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -225,7 +225,7 @@
       "name": "test-refactor",
       "source": "./plugins/test-refactor",
       "description": "Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework's refactoring patterns.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -241,7 +241,7 @@
       "name": "test-webdriverio",
       "source": "./plugins/test-webdriverio",
       "description": "WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -257,7 +257,7 @@
       "name": "test-accessibility",
       "source": "./plugins/test-accessibility",
       "description": "Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -385,7 +385,7 @@
       "name": "test-e2e",
       "source": "./plugins/test-e2e",
       "description": "An e2e test engineer that detects the repo's framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Sherrylene Gauci"
       },
@@ -402,7 +402,7 @@
       "name": "test-api",
       "source": "./plugins/test-api",
       "description": "Framework-agnostic best practices for testing HTTP/REST APIs: request design, assertions, auth, data setup, and environment handling. Use when writing or reviewing API tests, or as the shared base for tool-specific API testing skills (Bruno, Postman).",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -419,7 +419,7 @@
       "name": "test-bruno",
       "source": "./plugins/test-bruno",
       "description": "Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -436,7 +436,7 @@
       "name": "test-postman",
       "source": "./plugins/test-postman",
       "description": "Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Greg Duckworth"
       },

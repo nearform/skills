@@ -1,11 +1,12 @@
 ---
 name: test-jira-cases
-description: Generate reviewer-ready, traceable test cases from Jira issues using an available Jira MCP server.
+description: Use this skill only when the user explicitly asks for test cases, QA coverage, or validation scenarios from a Jira issue. Produces risk-prioritised, traceable, reviewer-ready manual test cases via a Jira MCP server.
 metadata:
   author: Greg Duckworth
-  version: 1.0.0
+  version: 1.1.0
   tags:
     - category/generation
+    - domain/engineering
     - domain/testing
     - tool/jira
     - tool/mcp
@@ -17,183 +18,38 @@ metadata:
 
 Generate comprehensive, risk-based, reviewer-ready test cases from Jira issues.
 
-Invoke only when the user explicitly requests:
-
-- Test cases
-- QA coverage
-- Validation scenarios
-
-Do not invoke for:
-
-- Test automation implementation
-- Code refactoring
-- Jira summarisation without testing intent
+Do **not** use for test automation code (use the skill map in `test-automation-guidelines`), refactoring, or Jira summaries without testing intent.
 
 ## Prerequisites
 
-An MCP server providing Jira issue access is available.
-
-If multiple Jira MCP servers are available, use the most appropriate one.
+A Jira MCP server is available. If several are, use the most appropriate one.
 
 ## Input
 
-Accept:
-
-- Jira key
-- Jira URL
-- Story
-- Bug
-- Task
-- Subtask
-- Epic
-
-Optional:
-
-- Scope focus (API, UI, permissions, reporting, etc.)
-- Risk focus (security, payments, performance, accessibility, etc.)
-- Maximum number of test cases
-
-If no ticket reference is provided, ask for one.
+- Required: a Jira key or URL (story, bug, task, subtask, or epic). If none is given, ask for one.
+- Optional: scope focus (API, UI, permissions, reporting…), risk focus (security, payments, performance, accessibility…), maximum number of cases.
 
 ## Process
 
-1. Retrieve the Jira issue using an available Jira MCP tool.
-2. Use available issue information, including:
-   - Summary
-   - Description
-   - Acceptance Criteria
-   - Comments
-   - Labels
-   - Components
-   - Status
-   - Priority
-   - Linked issues
-   - Subtasks
-   - Relevant custom fields
-3. Review linked issues or subtasks only when they materially affect testing scope.
-4. Identify:
-   - Functional behaviour
-   - Business rules
-   - User workflows
-   - Validation rules
-   - State transitions
-   - Roles and permissions
-   - Integrations and dependencies
-   - Error handling
-   - Security considerations
-   - Boundary and edge cases
-   - Business risks
-5. If acceptance criteria are missing:
-   - Derive explicit numbered requirements from the available information.
-   - Label them as **Derived Requirements**.
-   - Reduce confidence accordingly.
-6. Generate concise, executable, risk-prioritised test cases covering, where applicable:
-   - Happy path
-   - Negative
-   - Boundary
-   - Edge case
-   - Validation
-   - Permission
-   - Integration
-   - Error recovery
-   - Regression
-7. Merge duplicate coverage and ensure each test validates one primary behaviour.
+1. Retrieve the issue: summary, description, acceptance criteria, comments, labels, components, status, priority, linked issues, subtasks, relevant custom fields. Follow links and subtasks only when they materially affect testing scope.
+2. Identify functional behaviour, business rules, workflows, validation, state transitions, roles and permissions, integrations, error handling, security, boundaries and edge cases, and business risks.
+3. If acceptance criteria are missing, derive explicit numbered requirements, label them **Derived Requirements**, and lower confidence.
+4. Generate concise, executable, risk-prioritised cases covering, where applicable: happy path, negative, boundary, edge, validation, permission, integration, error recovery, regression.
+5. Merge duplicate coverage; each case validates one primary behaviour.
 
-If the issue cannot be retrieved:
-
-- Ask the user to provide the ticket contents.
-- Continue using only user-provided information.
-- Mark confidence as reduced.
-
-If requirements are incomplete or ambiguous:
-
-- Identify gaps.
-- Clearly distinguish facts from assumptions.
-- Ask clarifying questions when necessary.
-- Never invent requirements.
+If the issue cannot be retrieved, ask the user for its contents, continue with only that, and mark confidence reduced. If requirements are ambiguous, list the gaps, separate facts from assumptions, and ask clarifying questions.
 
 ## Validation
 
-Before presenting results, ensure:
-
-- Every acceptance criterion or derived requirement is covered.
-- Major workflows are represented.
-- Appropriate negative and edge-case testing is included.
-- Each test case maps to at least one requirement.
-- Steps are concise and executable.
-- Expected results are observable.
-- Assumptions and gaps are explicit.
-- Any uncovered requirement is listed.
+Before presenting, check that every AC or derived requirement maps to at least one case, major workflows and negative/edge cases are covered, steps are executable, expected results are observable, and any uncovered requirement is listed.
 
 ## Output
 
-### Coverage Summary
-
-Include:
-
-- Acceptance criteria count
-- Derived requirement count
-- Test case count
-- Coverage areas
-- Key risks
-- Confidence
-
-Confidence:
-
-- High — Requirements are complete and testable.
-- Medium — Minor assumptions required.
-- Low — Significant ambiguity or missing information.
-
-### Traceability Matrix
-
-| Requirement / AC | Test Cases |
-| ---------------- | ---------- |
-| AC-1             | TC-001     |
-
-### Test Cases
-
-For each test case include:
-
-- ID
-- Title
-- Coverage Area
-- Priority (P0–P3)
-- Type
-- Preconditions
-- Steps
-- Expected Result
-- Traceability
-- Notes / Assumptions
-
-Formatting:
-
-- Sequential IDs (TC-001, TC-002...)
-- Numbered steps
-- Concise reviewer-friendly language
-- Observable expected results
-
-### Completion
-
-Include:
-
-- Coverage Summary
-- Open Questions
-- Risks & Gaps
-- Uncovered Requirements (if any)
-- Reviewer Recommendation
-
-Reviewer Recommendation:
-
-- Ready for review
-- Ready for review with assumptions
-- Clarification required before review
-- Insufficient requirements for reliable test generation
+Coverage Summary, Traceability Matrix, Test Cases (TC-001…), Open Questions, Risks & Gaps, Uncovered Requirements, and a Reviewer Recommendation — fields and wording in [references/output-format.md](references/output-format.md).
 
 ## Guardrails
 
-- Never invent acceptance criteria, business rules or requirements.
-- Clearly separate facts from assumptions.
-- Prefer clarification over speculation.
+- Never invent acceptance criteria, business rules, or requirements.
+- Clearly separate facts from assumptions; prefer clarification over speculation.
 - Never claim complete coverage when requirements are incomplete.
-- Use linked issues only when relevant to testing scope.
 - Do not expose internal reasoning.

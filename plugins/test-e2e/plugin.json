@@ -1,7 +1,7 @@
 {
   "name": "test-e2e",
   "description": "An e2e test engineer that detects the repo's framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Sherrylene Gauci"
   },

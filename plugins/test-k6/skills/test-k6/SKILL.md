@@ -1,9 +1,9 @@
 ---
 name: test-k6
-description: Use this skill when writing, reviewing, or maintaining k6 performance tests to validate system behaviour under load using k6 best practices.
+description: Use this skill when writing, fixing, or reviewing k6 performance or load tests — load profiles (smoke, load, stress, spike, soak), scenarios and executors, checks, and thresholds.
 metadata:
   author: Sherrylene Gauci
-  version: 1.0.0
+  version: 1.1.0
   tags:
     - category/performance-testing
     - domain/engineering
@@ -15,30 +15,38 @@ metadata:
     - k6
 ---
 
-You are a performance test engineer ensuring that the system behaves reliably under load. You have been given a codebase that requires k6 performance tests.
+You are a performance test engineer making sure the system behaves reliably under load.
+
+## Requires
+
+- `test-automation-guidelines` — its Guardrails apply (think-time `sleep()` models users and is allowed; it is not waiting for state). If it is not available, tell the user which plugin to install.
 
 ## Scope
 
-- Use k6 for performance tests across the standard profiles (smoke, average-load, stress, spike, breakpoint, soak — see `references/scenarios.md`).
-- Do not use k6 as a substitute for functional, end-to-end, or contract tests.
-- Keep test profile guidance specific to the type of performance test required.
+- Performance tests across standard profiles: smoke, average-load, stress, spike, breakpoint, soak.
+- Not a substitute for functional, end-to-end, or contract tests.
 
-## Workflow
+## Rules
 
-1. Identify the goal of the test: which load profile is needed (see `references/scenarios.md`) and which metrics or thresholds define success.
-2. Refer only to the needed reference file:
-   - Scenarios and load profiles: `references/scenarios.md`
-   - Metrics, checks, and thresholds: `references/thresholds.md`
-3. Apply the relevant principles and examples from that file.
-4. Give recommendations or code updates aligned to k6 best practices.
+- Start from the goal: which profile, and which metrics and thresholds define success.
+- **Thresholds decide pass/fail.** Checks alone never fail the run; define thresholds on latency percentiles **and** `http_req_failed`.
+- Use named `scenarios` with executors when one test needs several profiles; arrival-rate executors when you need a target request rate.
+- Model think-time on real user behaviour, not a fixed `sleep()` everywhere.
+- One user journey per scenario so bottlenecks stay attributable.
+- Base URLs, credentials, and tokens from `__ENV` or secrets, never hardcoded.
+- Coordinate before running load against shared environments.
 
-## Performance Test Anti-Patterns
+## Anti-Patterns
 
-- Running tests without defined thresholds
-- Relying on checks for pass/fail — a test with passing checks but no thresholds always exits 0, giving false confidence
-- Using `sleep()` as the only think-time strategy with no relation to real user behaviour
-- Hardcoding environment URLs, credentials, or tokens instead of using environment variables and/or secrets
-- Mixing unrelated endpoints into a single scenario, making bottlenecks hard to debug
-- Treating a smoke test (1–2 VUs) as evidence that the system scales successfully
-- Ignoring `http_req_failed` and asserting only on response time
-- Running load tests against shared environments without coordinating with other teams
+- No thresholds, or relying on checks for pass/fail (the run exits 0)
+- Asserting only on response time and ignoring `http_req_failed`
+- Treating a smoke test (1–2 VUs) as evidence that the system scales
+- Mixing unrelated endpoints in one scenario
+- Unannounced load runs against shared environments
+
+## References
+
+Load only the one you need:
+
+- [references/scenarios.md](references/scenarios.md) — load profiles, scenarios, executors.
+- [references/thresholds.md](references/thresholds.md) — metrics, checks, thresholds, custom metrics.

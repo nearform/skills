@@ -1,4 +1,4 @@
-# Postman Assertions, Scripting, and Newman
+# Postman Assertions, Scripting, and CI Runs
 
 Apply this guidance when adding assertions, scripts, or running Postman tests in CI.
 
@@ -70,6 +70,7 @@ pm.environment.set("orderId", pm.response.json().id);
 
 ## Running with Newman (CI)
 
+- The commands below are Newman's. If the project uses the Postman CLI (`postman collection run`) instead, apply the same rules with its own flags: select the environment explicitly, pass secrets from CI rather than committed files, emit a CI-readable report, and fail the build on any failed assertion.
 - Run headlessly with Newman: `newman run collection.json -e staging.postman_environment.json`.
 - Supply secrets via `--env-var "token=$TOKEN"` or a CI-provided environment file, not committed values.
 - Emit machine-readable output for CI:

@@ -1,9 +1,9 @@
 ---
 name: test-playwright
-description: Use this skill when working with Playwright tests and applying best practices for reliable, parallel-safe test automation.
+description: Use this skill when writing, fixing, or reviewing Playwright tests — locators, web-first assertions, page.route network control, storageState auth, timeouts, parallelism, and webServer config.
 metadata:
   author: Greg Duckworth
-  version: 1.1.0
+  version: 1.2.0
   tags:
     - category/test-automation
     - domain/engineering
@@ -15,153 +15,56 @@ metadata:
     - playwright
 ---
 
-Use this skill when working with Playwright tests.
+Playwright-specific rules. Base principles are not restated here.
 
 ## Requires
 
-- test-automation-guidelines
+- `test-automation-guidelines` — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.
+- For UI suites, also `test-accessibility` (`@axe-core/playwright`).
 
-## See Also
+## Rules
 
-- `test-accessibility` — apply when the suite should include automated a11y scanning (`@axe-core/playwright`) or when reviewing/writing accessible selector strategy.
+### Async model
 
----
-
-## Playwright Rules
-
-### Async Model
-
-- Use async/await consistently
-
----
+- `await` every Playwright call and assertion.
 
 ### Selectors
 
-Prefer stable, intentional selectors (attributes or accessibility hooks) as your primary choice. Text-based selectors are brittle — they can break with copy changes, translations, or small wording edits — so treat them as a fallback only when no stable attributes exist.
+- Primary: `page.getByTestId("…")` or `page.getByRole("button", { name: "Submit" })`.
+- `page.getByText(...)` is a fallback only — copy changes break it. Avoid CSS structure and `nth()` positions.
 
-**Primary (preferred):**
+### Waiting and timeouts
 
-```javascript
-page.getByTestId("...");
-page.getByRole("button", { name: "Submit" });
-```
+- Never `page.waitForTimeout(ms)`. Rely on locator auto-waiting and web-first assertions: `await expect(locator).toBeVisible()`.
+- `expect.timeout` (assertions, `expect.poll`) and the test `timeout` (whole test, including fixtures) are separate. Give waits on server work an explicit `timeout`, and keep chained waits within the test timeout. When polling, stop on every final state — see [references/config.md](references/config.md).
 
-**Fallback (use only if no stable attributes are available):**
+### Network and test doubles
 
-```javascript
-page.getByText("Submit");
-```
-
----
-
-### Waiting
-
-Do not use:
+- Stub or fulfil with `page.route`; prefer fixtures for bodies.
 
 ```javascript
-await page.waitForTimeout(1000);
-```
-
-Use:
-
-- locator auto-waiting
-- expect(...)
-
----
-
-### Assertions
-
-```javascript
-await expect(page.getByTestId("...")).toBeVisible();
-```
-
----
-
-### Authentication
-
-- Use storageState
-- Avoid UI login per test
-
-```javascript
-test.use({ storageState: "storageState.json" });
-```
-
----
-
-### Network Control
-
-```javascript
-await page.route('/api/...', route => route.fulfill(...));
-```
-
----
-
-### Mocking
-
-```javascript
-await page.route("/api/products", (route) =>
+await page.route("**/api/products", (route) =>
   route.fulfill({ path: "fixtures/products.json" }),
 );
 ```
 
----
+### Auth and state
 
-### Visual Testing
+- Log in once and reuse `storageState`; don't drive the login UI per test. Tests must be parallel-safe — no global shared state.
 
-- Use `expect(page).toHaveScreenshot()` for UI regression testing
+### Config and CI
 
----
+- `expect(page).toHaveScreenshot()` for visual regression, with stable data.
+- Traces and video in CI; `workers` within any shared server's concurrency limit; don't overwrite `NODE_OPTIONS` in `webServer.env` — details in [references/config.md](references/config.md).
 
-### Debugging
-
-- Use traces and video recordings in CI for easy triage
-
----
-
-### Parallelism
-
-- Tests must be parallel-safe
-- Avoid shared state across tests
-- When tests share a server with a concurrency limit, set `workers` no higher than that limit
-
----
-
-### Timeouts
-
-- Web-first assertions and `expect.poll` give up after `expect.timeout` (5 seconds by default). Pass a `timeout` that covers waits on server work, or raise `expect.timeout` in the config.
-- The test `timeout` (30 seconds by default) covers the whole test, including setup in fixtures. Waits that run one after another must fit inside it together.
-
-```javascript
-test("order becomes ready", async () => {
-  test.setTimeout(90_000);
-  await expect
-    .poll(() => getStatus(id), { timeout: 60_000 })
-    .toMatch(/^(ready|failed)$/);
-  expect(await getStatus(id)).toBe("ready");
-});
-```
-
----
-
-### Test Servers (`webServer`)
-
-- `webServer.env` is laid over `process.env` and replaces any variable it names. Add to `NODE_OPTIONS` instead of overwriting it:
-
-```javascript
-env: {
-  NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --conditions=source`.trim(),
-},
-```
-
-- Take ports from environment variables with defaults, so a second copy of the suite or a developer's own server doesn't collide.
-- Playwright stops `webServer` processes with SIGKILL unless `gracefulShutdown` is set. Set it (e.g. `{ signal: "SIGTERM", timeout: 5000 }`) when the server cleans up on a signal.
-
----
-
-### Anti-Patterns
+## Anti-Patterns
 
 - `waitForTimeout` usage
-- Global shared state
-- Overuse of `page.evaluate`
+- Global shared state between tests
+- Overuse of `page.evaluate` instead of locators
 - Overwriting `NODE_OPTIONS` (or similar variables) in `webServer.env`
 - Chained waits whose timeouts add up to more than the test timeout
+
+## References
+
+- [references/config.md](references/config.md) — timeouts, polling, parallelism, `webServer`, traces. Load when editing config or diagnosing timeouts.

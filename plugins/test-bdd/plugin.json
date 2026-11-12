@@ -1,7 +1,7 @@
 {
   "name": "test-bdd",
   "description": "Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Greg Duckworth"
   },

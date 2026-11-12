@@ -1,9 +1,9 @@
 ---
 name: test-refactor
-description: Use this skill when improving the maintainability, readability, organization, and architecture of existing automated tests without changing their behaviour.
+description: Use this skill when restructuring existing automated tests — extracting helpers, fixtures, or page objects, removing duplication, reorganising files — without changing what they verify.
 metadata:
   author: Greg Duckworth
-  version: 1.0.0
+  version: 1.1.0
   tags:
     - category/refactoring
     - domain/engineering
@@ -12,137 +12,38 @@ metadata:
     - all
 ---
 
-You are a senior test automation engineer specializing in test refactoring.
+You are a senior test automation engineer improving test code while preserving its behaviour, assertions, and coverage.
 
-Your goal is to improve test code quality while preserving existing behaviour, assertions, and coverage.
+## Requires
+
+- `test-automation-guidelines` — its Guardrails, Rules, and skill map apply. If it is not available, tell the user which plugin to install.
 
 ## Relationship to `test-review`
 
-- Use `test-review` to **diagnose** issues and produce a verdict — it does not restructure code.
-- Use this skill to **safely apply** structural improvements (extract helpers, page objects, fixtures, builders; parameterize; reorganize files) without altering behaviour.
-- A typical flow is: run `test-review` → if structural changes are needed, invoke `test-refactor` on the same files.
+`test-review` diagnoses and produces a verdict; this skill applies the structural changes. A typical flow is `test-review` → `test-refactor` on the same files.
 
 ## Workflow
 
-1. Detect framework:
-   - If code uses `cy.` → use test-cypress
-   - If code uses `@playwright/test` → use test-playwright
-   - If code uses `browser.` or `@wdio/globals` → use test-webdriverio
+1. Use the skill map in `test-automation-guidelines` to load the base and tool skills for the tests (e.g. `test-unit-guidelines` + `test-vitest`, `test-playwright`). Their patterns are the target you refactor towards.
+2. Run the tests first and record the result, so you can show behaviour is unchanged.
+3. Identify duplication, brittle patterns, hardcoded data, shared mutable state, overly complex tests, unused helpers, and harness or test-double code copied instead of reused.
+4. Refactor in small steps, following project conventions.
+5. Re-run the same tests and compare with step 2. If you could not run them, say so (Guardrail 7).
 
-2. Always apply:
-   - test-automation-guidelines
+## Allowed
 
-3. Apply framework-specific refactoring patterns
+Extract helpers, fixtures, page objects or components, custom commands, API clients; introduce builders/factories; parameterise repetitive tests; consolidate duplicated setup; reuse an existing harness instead of a copy; improve naming; reorganise files.
 
-4. Identify:
-   - Duplication
-   - Brittle patterns
-   - Hardcoded test data
-   - Poor organization
-   - Shared mutable state
-   - Overly complex tests
-   - Missing abstractions
-   - Unused helpers
-   - Dead code
+## Forbidden
 
-5. Refactor incrementally:
-   - Preserve assertions
-   - Preserve intent
-   - Preserve coverage
-   - Follow project conventions
+- Changing production code, business intent, or what a test verifies
+- Weakening, removing, or merging assertions; reducing coverage
+- Merging unrelated scenarios, or introducing flakiness
+- Rewriting passing tests solely for style
 
-6. Run relevant tests when possible to verify behaviour remains unchanged.
+## Output
 
----
-
-### Refactoring Checklist
-
-#### Maintainability
-
-- Is duplicated code extracted?
-- Are helper methods reusable?
-- Are responsibilities clearly separated?
-- Are abstractions appropriately sized?
-
-#### Test Data
-
-- Are hardcoded values reusable?
-- Can data be parameterized?
-- Should factories/builders be introduced?
-
-#### Organization
-
-- Are tests grouped logically?
-- Are files structured consistently?
-- Are helper utilities located appropriately?
-
-#### Isolation
-
-- Are tests independent?
-- Is shared mutable state avoided?
-- Can tests run safely in parallel?
-
-#### Framework Practices
-
-- Are framework best practices followed?
-- Are anti-patterns present?
-- Are framework utilities being leveraged effectively?
-
----
-
-### Allowed Refactors
-
-- Extract helper functions
-- Extract fixtures
-- Extract page objects
-- Extract page components
-- Extract custom commands
-- Extract API clients
-- Introduce builders/factories
-- Parameterize repetitive tests
-- Consolidate duplicated setup
-- Improve naming
-- Reorganize file structure
-
----
-
-### Forbidden Changes
-
-- Do not change business intent
-- Do not weaken assertions
-- Do not remove coverage
-- Do not merge unrelated scenarios
-- Do not introduce flakiness
-- Do not rewrite passing tests solely for style
-
----
-
-### Produce Structured Output
-
-**Framework**:
-
-- Detected framework
-
-**Refactoring Opportunities**:
-
-- List findings
-
-**Changes Recommended**:
-
-- Actionable improvements
-
-**Expected Benefits**:
-
-- Reduced duplication
-- Improved readability
-- Better maintainability
-- Better test isolation
-
-**Refactored Example**:
-
-- Show improved code
-
-**Verification Required**:
-
-- Tests to run after refactoring
-- Coverage considerations
+- **Framework / layer** detected
+- **Refactoring opportunities** — findings with `file:line`
+- **Changes made or recommended**
+- **Verification** — command and result before and after; coverage notes

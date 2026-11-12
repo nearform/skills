@@ -1,7 +1,7 @@
 {
   "name": "test-postman",
   "description": "Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Greg Duckworth"
   },

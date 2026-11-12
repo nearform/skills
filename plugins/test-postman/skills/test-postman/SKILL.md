@@ -1,9 +1,9 @@
 ---
 name: test-postman
-description: Use this skill when writing or reviewing Postman API tests to apply Postman-specific best practices for reliable, idiomatic tests using pm.* assertions, collections, environments, and Newman in CI.
+description: Use this skill when writing, fixing, or reviewing Postman test scripts — pm.test/pm.expect assertions, collection and environment structure, variables and secrets, and running collections in CI with the Postman CLI or Newman.
 metadata:
   author: Greg Duckworth
-  version: 1.0.0
+  version: 1.1.0
   tags:
     - category/api-testing
     - domain/engineering
@@ -17,55 +17,49 @@ metadata:
     - newman
 ---
 
-Use this skill when working with Postman API tests. Postman stores collections and environments as JSON that can be exported, version-controlled, and run headlessly with Newman.
+Postman-specific rules for test scripts and collections.
 
 ## Requires
 
-- test-automation-guidelines
-- test-api
+- `test-api` (which requires `test-automation-guidelines`) — its API rules and the base Guardrails apply. If either is not available, tell the user which plugin to install.
 
-Apply the shared API principles from `test-api` first; the rules below are Postman-specific additions.
+## Rules
 
-## Workflow
+### Collections in the repo
 
-1. Confirm the collection and environment layout, and how they are exported/version-controlled.
-2. Refer only to the reference file relevant to the task:
-   - Collection and environment structure: `references/collections.md`
-   - Assertions, scripting, and Newman/CI: `references/scripting-and-assertions.md`
-3. Apply the principles and templates from that file.
-
-## Postman Rules
-
-### Collections and structure
-
-- Export the collection and environment JSON into the repo and review changes in pull requests — do not keep tests only in a personal workspace.
-- One request per behaviour, named for what it verifies; group into folders by resource/feature.
-- Keep the exported JSON stable (avoid churn from unrelated UI reorders) so diffs stay reviewable.
+- Keep collections and environments in version control and review changes in PRs, never only in a personal workspace. Follow the repo's existing format: Postman's Git-native collection files if present, otherwise exported collection JSON.
+- One request per behaviour, named for what it verifies; folders by resource or feature. Keep exports stable (no unrelated reorder churn) so diffs stay reviewable.
 
 ### Variables and environments
 
-- Reference the base URL and config as variables (`{{baseUrl}}`), defined per environment.
-- Store credentials as **secret**-typed variables (or Postman Vault), never as committed initial values.
-- Scope variables intentionally: environment for config, collection for shared defaults, and `pm.variables` for request-local temporary values.
+- Config as variables (`{{baseUrl}}`) per environment. Credentials as **secret**-typed variables or Postman Vault, never as committed initial values.
+- Scope intentionally: environment for config, collection for shared defaults, `pm.variables` for request-local values.
 
-### Assertions (`pm.test`)
+### Assertions
 
-- Assert behaviour inside `pm.test(...)` blocks with clear names.
-- Use `pm.response.to.have.status(...)` and `pm.expect(...)` for status, fields, and schema.
-- Use `pm.response.to.have.jsonSchema(schema)` for structural validation instead of many manual field checks.
-- Assert presence/type/format for volatile values (IDs, timestamps), not exact matches.
-- For a lightweight latency guard, assert `pm.response.responseTime` against a generous upper bound (a smoke check, not a load test).
+- Assert inside named `pm.test(...)` blocks with `pm.response.to.have.status(...)` and `pm.expect(...)`.
+- Prefer `pm.response.to.have.jsonSchema(schema)` over many manual field checks.
+- `pm.response.responseTime` against a generous bound is a smoke check only, not a load test.
 
 ### Scripting
 
-- Use pre-request scripts to fetch tokens and generate unique data; use test scripts for assertions and extraction.
-- Persist only the specific values later requests need via `pm.environment.set(...)` / `pm.collectionVariables.set(...)`.
-- Keep scripts deterministic — no `setTimeout` waits; rely on the response.
+- Pre-request scripts fetch tokens and generate unique data; test scripts assert and extract.
+- Persist only values later requests need (`pm.collectionVariables.set(...)`). No `setTimeout` waits.
+
+### Running in CI
+
+- Use the runner the project already uses — the Postman CLI (`postman collection run`) or Newman — with the environment selected explicitly.
 
 ## Anti-Patterns
 
-- Committing environment JSON containing real tokens or API keys.
-- Hardcoded full URLs instead of `{{baseUrl}}`.
-- A single request with dozens of unrelated `pm.test` assertions.
-- Tests that only pass when run in a fixed collection order.
-- Tests kept solely in a personal workspace, never exported or reviewed.
+- Committed environment files containing real tokens or keys
+- Hardcoded full URLs instead of `{{baseUrl}}`
+- One request with dozens of unrelated `pm.test` assertions
+- Tests that only pass in a fixed collection order
+
+## References
+
+Load only the one you need:
+
+- [references/collections.md](references/collections.md) — collection and environment structure.
+- [references/scripting-and-assertions.md](references/scripting-and-assertions.md) — assertions, scripting, and CI runs.
