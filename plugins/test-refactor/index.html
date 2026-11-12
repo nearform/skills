@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-refactor <span class="version">v1.0.0</span></h1>
+      <h1>test-refactor <span class="version">v1.1.0</span></h1>
       <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,141 +33,36 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-refactor</h3><p class="content-description">Use this skill when improving the maintainability, readability, organization, and architecture of existing automated tests without changing their behaviour.</p></header><div class="content-body"><p>You are a senior test automation engineer specializing in test refactoring.</p>
-<p>Your goal is to improve test code quality while preserving existing behaviour, assertions, and coverage.</p>
-<h2>Relationship to <code>test-review</code></h2>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-refactor</h3><p class="content-description">Use this skill when restructuring existing automated tests — extracting helpers, fixtures, or page objects, removing duplication, reorganising files — without changing what they verify.</p></header><div class="content-body"><p>You are a senior test automation engineer improving test code while preserving its behaviour, assertions, and coverage.</p>
+<h2>Requires</h2>
 <ul>
-<li>Use <code>test-review</code> to <strong>diagnose</strong> issues and produce a verdict — it does not restructure code.</li>
-<li>Use this skill to <strong>safely apply</strong> structural improvements (extract helpers, page objects, fixtures, builders; parameterize; reorganize files) without altering behaviour.</li>
-<li>A typical flow is: run <code>test-review</code> → if structural changes are needed, invoke <code>test-refactor</code> on the same files.</li>
+<li><code>test-automation-guidelines</code> — its Guardrails, Rules, and skill map apply. If it is not available, tell the user which plugin to install.</li>
 </ul>
+<h2>Relationship to <code>test-review</code></h2>
+<p><code>test-review</code> diagnoses and produces a verdict; this skill applies the structural changes. A typical flow is <code>test-review</code> → <code>test-refactor</code> on the same files.</p>
 <h2>Workflow</h2>
 <ol>
-<li><p>Detect framework:</p>
-<ul>
-<li>If code uses <code>cy.</code> → use test-cypress</li>
-<li>If code uses <code>@playwright/test</code> → use test-playwright</li>
-<li>If code uses <code>browser.</code> or <code>@wdio/globals</code> → use test-webdriverio</li>
-</ul>
-</li>
-<li><p>Always apply:</p>
-<ul>
-<li>test-automation-guidelines</li>
-</ul>
-</li>
-<li><p>Apply framework-specific refactoring patterns</p>
-</li>
-<li><p>Identify:</p>
-<ul>
-<li>Duplication</li>
-<li>Brittle patterns</li>
-<li>Hardcoded test data</li>
-<li>Poor organization</li>
-<li>Shared mutable state</li>
-<li>Overly complex tests</li>
-<li>Missing abstractions</li>
-<li>Unused helpers</li>
-<li>Dead code</li>
-</ul>
-</li>
-<li><p>Refactor incrementally:</p>
-<ul>
-<li>Preserve assertions</li>
-<li>Preserve intent</li>
-<li>Preserve coverage</li>
-<li>Follow project conventions</li>
-</ul>
-</li>
-<li><p>Run relevant tests when possible to verify behaviour remains unchanged.</p>
-</li>
+<li>Use the skill map in <code>test-automation-guidelines</code> to load the base and tool skills for the tests (e.g. <code>test-unit-guidelines</code> + <code>test-vitest</code>, <code>test-playwright</code>). Their patterns are the target you refactor towards.</li>
+<li>Run the tests first and record the result, so you can show behaviour is unchanged.</li>
+<li>Identify duplication, brittle patterns, hardcoded data, shared mutable state, overly complex tests, unused helpers, and harness or test-double code copied instead of reused.</li>
+<li>Refactor in small steps, following project conventions.</li>
+<li>Re-run the same tests and compare with step 2. If you could not run them, say so (Guardrail 7).</li>
 </ol>
-<hr />
-<h3>Refactoring Checklist</h3>
-<h4>Maintainability</h4>
+<h2>Allowed</h2>
+<p>Extract helpers, fixtures, page objects or components, custom commands, API clients; introduce builders/factories; parameterise repetitive tests; consolidate duplicated setup; reuse an existing harness instead of a copy; improve naming; reorganise files.</p>
+<h2>Forbidden</h2>
 <ul>
-<li>Is duplicated code extracted?</li>
-<li>Are helper methods reusable?</li>
-<li>Are responsibilities clearly separated?</li>
-<li>Are abstractions appropriately sized?</li>
+<li>Changing production code, business intent, or what a test verifies</li>
+<li>Weakening, removing, or merging assertions; reducing coverage</li>
+<li>Merging unrelated scenarios, or introducing flakiness</li>
+<li>Rewriting passing tests solely for style</li>
 </ul>
-<h4>Test Data</h4>
+<h2>Output</h2>
 <ul>
-<li>Are hardcoded values reusable?</li>
-<li>Can data be parameterized?</li>
-<li>Should factories/builders be introduced?</li>
-</ul>
-<h4>Organization</h4>
-<ul>
-<li>Are tests grouped logically?</li>
-<li>Are files structured consistently?</li>
-<li>Are helper utilities located appropriately?</li>
-</ul>
-<h4>Isolation</h4>
-<ul>
-<li>Are tests independent?</li>
-<li>Is shared mutable state avoided?</li>
-<li>Can tests run safely in parallel?</li>
-</ul>
-<h4>Framework Practices</h4>
-<ul>
-<li>Are framework best practices followed?</li>
-<li>Are anti-patterns present?</li>
-<li>Are framework utilities being leveraged effectively?</li>
-</ul>
-<hr />
-<h3>Allowed Refactors</h3>
-<ul>
-<li>Extract helper functions</li>
-<li>Extract fixtures</li>
-<li>Extract page objects</li>
-<li>Extract page components</li>
-<li>Extract custom commands</li>
-<li>Extract API clients</li>
-<li>Introduce builders/factories</li>
-<li>Parameterize repetitive tests</li>
-<li>Consolidate duplicated setup</li>
-<li>Improve naming</li>
-<li>Reorganize file structure</li>
-</ul>
-<hr />
-<h3>Forbidden Changes</h3>
-<ul>
-<li>Do not change business intent</li>
-<li>Do not weaken assertions</li>
-<li>Do not remove coverage</li>
-<li>Do not merge unrelated scenarios</li>
-<li>Do not introduce flakiness</li>
-<li>Do not rewrite passing tests solely for style</li>
-</ul>
-<hr />
-<h3>Produce Structured Output</h3>
-<p><strong>Framework</strong>:</p>
-<ul>
-<li>Detected framework</li>
-</ul>
-<p><strong>Refactoring Opportunities</strong>:</p>
-<ul>
-<li>List findings</li>
-</ul>
-<p><strong>Changes Recommended</strong>:</p>
-<ul>
-<li>Actionable improvements</li>
-</ul>
-<p><strong>Expected Benefits</strong>:</p>
-<ul>
-<li>Reduced duplication</li>
-<li>Improved readability</li>
-<li>Better maintainability</li>
-<li>Better test isolation</li>
-</ul>
-<p><strong>Refactored Example</strong>:</p>
-<ul>
-<li>Show improved code</li>
-</ul>
-<p><strong>Verification Required</strong>:</p>
-<ul>
-<li>Tests to run after refactoring</li>
-<li>Coverage considerations</li>
+<li><strong>Framework / layer</strong> detected</li>
+<li><strong>Refactoring opportunities</strong> — findings with <code>file:line</code></li>
+<li><strong>Changes made or recommended</strong></li>
+<li><strong>Verification</strong> — command and result before and after; coverage notes</li>
 </ul>
 </div></article></section>
       </article>

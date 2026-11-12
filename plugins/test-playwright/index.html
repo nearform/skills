@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-playwright <span class="version">v1.1.0</span></h1>
+      <h1>test-playwright <span class="version">v1.2.0</span></h1>
       <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,115 +33,55 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-playwright</h3><p class="content-description">Use this skill when working with Playwright tests and applying best practices for reliable, parallel-safe test automation.</p></header><div class="content-body"><p>Use this skill when working with Playwright tests.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-playwright</h3><p class="content-description">Use this skill when writing, fixing, or reviewing Playwright tests — locators, web-first assertions, page.route network control, storageState auth, timeouts, parallelism, and webServer config.</p></header><div class="content-body"><p>Playwright-specific rules. Base principles are not restated here.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
+<li><code>test-automation-guidelines</code> — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.</li>
+<li>For UI suites, also <code>test-accessibility</code> (<code>@axe-core/playwright</code>).</li>
 </ul>
-<h2>See Also</h2>
+<h2>Rules</h2>
+<h3>Async model</h3>
 <ul>
-<li><code>test-accessibility</code> — apply when the suite should include automated a11y scanning (<code>@axe-core/playwright</code>) or when reviewing/writing accessible selector strategy.</li>
+<li><code>await</code> every Playwright call and assertion.</li>
 </ul>
-<hr />
-<h2>Playwright Rules</h2>
-<h3>Async Model</h3>
-<ul>
-<li>Use async/await consistently</li>
-</ul>
-<hr />
 <h3>Selectors</h3>
-<p>Prefer stable, intentional selectors (attributes or accessibility hooks) as your primary choice. Text-based selectors are brittle — they can break with copy changes, translations, or small wording edits — so treat them as a fallback only when no stable attributes exist.</p>
-<p><strong>Primary (preferred):</strong></p>
-<pre><code class="language-javascript">page.getByTestId("...");
-page.getByRole("button", { name: "Submit" });
-</code></pre>
-<p><strong>Fallback (use only if no stable attributes are available):</strong></p>
-<pre><code class="language-javascript">page.getByText("Submit");
-</code></pre>
-<hr />
-<h3>Waiting</h3>
-<p>Do not use:</p>
-<pre><code class="language-javascript">await page.waitForTimeout(1000);
-</code></pre>
-<p>Use:</p>
 <ul>
-<li>locator auto-waiting</li>
-<li>expect(...)</li>
+<li>Primary: <code>page.getByTestId("…")</code> or <code>page.getByRole("button", { name: "Submit" })</code>.</li>
+<li><code>page.getByText(...)</code> is a fallback only — copy changes break it. Avoid CSS structure and <code>nth()</code> positions.</li>
 </ul>
-<hr />
-<h3>Assertions</h3>
-<pre><code class="language-javascript">await expect(page.getByTestId("...")).toBeVisible();
-</code></pre>
-<hr />
-<h3>Authentication</h3>
+<h3>Waiting and timeouts</h3>
 <ul>
-<li>Use storageState</li>
-<li>Avoid UI login per test</li>
+<li>Never <code>page.waitForTimeout(ms)</code>. Rely on locator auto-waiting and web-first assertions: <code>await expect(locator).toBeVisible()</code>.</li>
+<li><code>expect.timeout</code> (assertions, <code>expect.poll</code>) and the test <code>timeout</code> (whole test, including fixtures) are separate. Give waits on server work an explicit <code>timeout</code>, and keep chained waits within the test timeout. When polling, stop on every final state — see <a href="references/config.md">references/config.md</a>.</li>
 </ul>
-<pre><code class="language-javascript">test.use({ storageState: "storageState.json" });
-</code></pre>
-<hr />
-<h3>Network Control</h3>
-<pre><code class="language-javascript">await page.route('/api/...', route =&gt; route.fulfill(...));
-</code></pre>
-<hr />
-<h3>Mocking</h3>
-<pre><code class="language-javascript">await page.route("/api/products", (route) =&gt;
+<h3>Network and test doubles</h3>
+<ul>
+<li>Stub or fulfil with <code>page.route</code>; prefer fixtures for bodies.</li>
+</ul>
+<pre><code class="language-javascript">await page.route("**/api/products", (route) =&gt;
   route.fulfill({ path: "fixtures/products.json" }),
 );
 </code></pre>
-<hr />
-<h3>Visual Testing</h3>
+<h3>Auth and state</h3>
 <ul>
-<li>Use <code>expect(page).toHaveScreenshot()</code> for UI regression testing</li>
+<li>Log in once and reuse <code>storageState</code>; don't drive the login UI per test. Tests must be parallel-safe — no global shared state.</li>
 </ul>
-<hr />
-<h3>Debugging</h3>
+<h3>Config and CI</h3>
 <ul>
-<li>Use traces and video recordings in CI for easy triage</li>
+<li><code>expect(page).toHaveScreenshot()</code> for visual regression, with stable data.</li>
+<li>Traces and video in CI; <code>workers</code> within any shared server's concurrency limit; don't overwrite <code>NODE_OPTIONS</code> in <code>webServer.env</code> — details in <a href="references/config.md">references/config.md</a>.</li>
 </ul>
-<hr />
-<h3>Parallelism</h3>
-<ul>
-<li>Tests must be parallel-safe</li>
-<li>Avoid shared state across tests</li>
-<li>When tests share a server with a concurrency limit, set <code>workers</code> no higher than that limit</li>
-</ul>
-<hr />
-<h3>Timeouts</h3>
-<ul>
-<li>Web-first assertions and <code>expect.poll</code> give up after <code>expect.timeout</code> (5 seconds by default). Pass a <code>timeout</code> that covers waits on server work, or raise <code>expect.timeout</code> in the config.</li>
-<li>The test <code>timeout</code> (30 seconds by default) covers the whole test, including setup in fixtures. Waits that run one after another must fit inside it together.</li>
-</ul>
-<pre><code class="language-javascript">test("order becomes ready", async () =&gt; {
-  test.setTimeout(90_000);
-  await expect
-    .poll(() =&gt; getStatus(id), { timeout: 60_000 })
-    .toMatch(/^(ready|failed)$/);
-  expect(await getStatus(id)).toBe("ready");
-});
-</code></pre>
-<hr />
-<h3>Test Servers (<code>webServer</code>)</h3>
-<ul>
-<li><code>webServer.env</code> is laid over <code>process.env</code> and replaces any variable it names. Add to <code>NODE_OPTIONS</code> instead of overwriting it:</li>
-</ul>
-<pre><code class="language-javascript">env: {
-  NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --conditions=source`.trim(),
-},
-</code></pre>
-<ul>
-<li>Take ports from environment variables with defaults, so a second copy of the suite or a developer's own server doesn't collide.</li>
-<li>Playwright stops <code>webServer</code> processes with SIGKILL unless <code>gracefulShutdown</code> is set. Set it (e.g. <code>{ signal: "SIGTERM", timeout: 5000 }</code>) when the server cleans up on a signal.</li>
-</ul>
-<hr />
-<h3>Anti-Patterns</h3>
+<h2>Anti-Patterns</h2>
 <ul>
 <li><code>waitForTimeout</code> usage</li>
-<li>Global shared state</li>
-<li>Overuse of <code>page.evaluate</code></li>
+<li>Global shared state between tests</li>
+<li>Overuse of <code>page.evaluate</code> instead of locators</li>
 <li>Overwriting <code>NODE_OPTIONS</code> (or similar variables) in <code>webServer.env</code></li>
 <li>Chained waits whose timeouts add up to more than the test timeout</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li><a href="references/config.md">references/config.md</a> — timeouts, polling, parallelism, <code>webServer</code>, traces. Load when editing config or diagnosing timeouts.</li>
 </ul>
 </div></article></section>
       </article>

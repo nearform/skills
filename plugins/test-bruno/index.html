@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-bruno <span class="version">v1.0.0</span></h1>
+      <h1>test-bruno <span class="version">v1.1.0</span></h1>
       <p class="description">Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,55 +33,47 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-bruno</h3><p class="content-description">Use this skill when writing or reviewing Bruno API tests (.bru files) to apply Bruno-specific best practices for reliable, version-controlled, idiomatic tests.</p></header><div class="content-body"><p>Use this skill when working with Bruno API tests. Bruno stores collections as plain-text <code>.bru</code> files in the repo, so tests are reviewed and versioned like code.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-bruno</h3><p class="content-description">Use this skill when writing, fixing, or reviewing Bruno API tests (.bru files) — collection layout, environments and secrets, assert/tests blocks, scripting, and bru run in CI.</p></header><div class="content-body"><p>Bruno-specific rules. Bruno stores collections as plain-text <code>.bru</code> files in the repo, so tests are reviewed and versioned like code.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
-<li>test-api</li>
+<li><code>test-api</code> (which requires <code>test-automation-guidelines</code>) — its API rules and the base Guardrails apply. If either is not available, tell the user which plugin to install.</li>
 </ul>
-<p>Apply the shared API principles from <code>test-api</code> first; the rules below are Bruno-specific additions.</p>
-<h2>Workflow</h2>
-<ol>
-<li>Confirm the collection layout and environments (<code>bruno.json</code>, <code>environments/</code>).</li>
-<li>Refer only to the reference file relevant to the task:<ul>
-<li>Collection and environment structure: <code>references/collections.md</code></li>
-<li>Assertions, scripting, and running: <code>references/scripting-and-assertions.md</code></li>
-</ul>
-</li>
-<li>Apply the principles and templates from that file.</li>
-</ol>
-<h2>Bruno Rules</h2>
+<h2>Rules</h2>
 <h3>Files and structure</h3>
 <ul>
-<li>Keep <code>.bru</code> files in version control and review them like code — never treat the collection as a throwaway export.</li>
-<li>One request per <code>.bru</code> file, named for the behaviour it verifies.</li>
-<li>Organise requests into folders by resource/feature (folders are plain directories on disk).</li>
+<li>Keep <code>.bru</code> files in version control and review them like code.</li>
+<li>One request per <code>.bru</code> file, named for the behaviour it verifies; folders by resource or feature.</li>
 </ul>
 <h3>Variables and environments</h3>
 <ul>
-<li>Reference the base URL and other config as variables (<code>{{baseUrl}}</code>), defined per environment under <code>environments/</code>.</li>
-<li>Store secrets as secret variables (<code>.env</code> / secret vars), never committed literals. Commit an example env with placeholders only.</li>
-<li>Use <code>{{process.env.VAR}}</code> or Bruno secret vars for credentials so they stay out of the committed <code>.bru</code>.</li>
+<li>Reference config as variables (<code>{{baseUrl}}</code>), defined per environment under <code>environments/</code>.</li>
+<li>Credentials via Bruno secret variables or <code>{{process.env.VAR}}</code>; commit only an example env with placeholders.</li>
 </ul>
 <h3>Assertions</h3>
 <ul>
-<li>Prefer the declarative <code>assert</code> block for status and simple field checks.</li>
-<li>Use the <code>tests</code> block with <code>expect</code> for schema/shape and richer logic.</li>
-<li>Assert status and key fields; avoid asserting volatile values (see <code>test-api</code> assertions guidance).</li>
+<li>Declarative <code>assert</code> block for status and simple field checks; the <code>tests</code> block with <code>expect</code> for schema and richer logic.</li>
 </ul>
 <h3>Scripting</h3>
 <ul>
-<li>Use <code>pre-request</code> scripts to obtain tokens or set up data, and <code>post-response</code> scripts for extraction/cleanup.</li>
-<li>Capture only the specific values later requests need (e.g. <code>bru.setVar('orderId', res.body.id)</code>); avoid leaking broad state.</li>
-<li>Keep scripts small and deterministic; do not add arbitrary waits.</li>
+<li><code>pre-request</code> scripts for tokens and setup data; <code>post-response</code> scripts for extraction and cleanup.</li>
+<li>Capture only the values later requests need (<code>bru.setVar("orderId", res.body.id)</code>).</li>
+</ul>
+<h3>Running</h3>
+<ul>
+<li><code>bru run &lt;folder&gt; --env &lt;name&gt;</code> in CI, with the environment chosen explicitly.</li>
 </ul>
 <h2>Anti-Patterns</h2>
 <ul>
-<li>Committing <code>.bru</code> files or environment files that contain real tokens or API keys.</li>
-<li>Hardcoded full URLs instead of <code>{{baseUrl}}</code>.</li>
-<li>Bloated <code>tests</code> scripts re-implementing assertions that <code>assert</code> handles declaratively.</li>
-<li>One <code>.bru</code> file exercising many endpoints.</li>
-<li>Relying on collection-runner order for tests that should be independent.</li>
+<li>Committed <code>.bru</code> or environment files containing real tokens or keys</li>
+<li>Hardcoded full URLs instead of <code>{{baseUrl}}</code></li>
+<li><code>tests</code> scripts re-implementing what <code>assert</code> does declaratively</li>
+<li>Relying on collection-runner order for tests that should be independent</li>
+</ul>
+<h2>References</h2>
+<p>Load only the one you need:</p>
+<ul>
+<li><a href="references/collections.md">references/collections.md</a> — collection and environment structure.</li>
+<li><a href="references/scripting-and-assertions.md">references/scripting-and-assertions.md</a> — assertions, scripting, and <code>bru run</code>.</li>
 </ul>
 </div></article></section>
       </article>

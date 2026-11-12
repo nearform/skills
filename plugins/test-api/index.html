@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-api <span class="version">v1.0.0</span></h1>
+      <h1>test-api <span class="version">v1.1.0</span></h1>
       <p class="description">Framework-agnostic best practices for testing HTTP/REST APIs: request design, assertions, auth, data setup, and environment handling. Use when writing or reviewing API tests, or as the shared base for tool-specific API testing skills (Bruno, Postman).</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,57 +33,40 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-api</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining automated tests for HTTP/REST APIs to keep them deterministic, isolated, and behaviour-focused. Acts as the shared base for tool-specific API testing skills (Bruno, Postman).</p></header><div class="content-body"><p>You are a test engineer writing automated tests against HTTP/REST APIs. This skill defines tool-agnostic principles for API testing. Tool-specific skills (<code>test-bruno</code>, <code>test-postman</code>) build on top of it.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-api</h3><p class="content-description">Use this skill when writing, fixing, or reviewing automated HTTP/REST API test code — status, headers, schema, auth, and test data. The shared base for test-bruno and test-postman.</p></header><div class="content-body"><p>You are a test engineer writing automated tests against HTTP/REST APIs. This skill holds the tool-agnostic API rules; <code>test-bruno</code> and <code>test-postman</code> add tool specifics on top.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
+<li><code>test-automation-guidelines</code> — its Guardrails (including no secrets, no fixed sleeps, independence) apply. If it is not available, tell the user which plugin to install.</li>
 </ul>
 <h2>Scope</h2>
 <ul>
-<li>Cover request/response behaviour at the API boundary: status codes, headers, body schema, and error handling.</li>
-<li>Do not use API tests as a substitute for unit tests (business logic) or end-to-end tests (full user journeys).</li>
-<li>Keep each test focused on one API behaviour or contract.</li>
-</ul>
-<h2>Workflow</h2>
-<ol>
-<li>Identify the endpoint under test and the behaviour to verify (happy path, validation error, auth failure, edge case).</li>
-<li>Refer only to the reference file relevant to the task:<ul>
-<li>Request design and structure: <code>references/request-design.md</code></li>
-<li>Assertions and response validation: <code>references/assertions.md</code></li>
-<li>Environments, auth, and test data: <code>references/environments-and-data.md</code></li>
-</ul>
-</li>
-<li>Apply the principles and templates from that file.</li>
-<li>Give recommendations or test code aligned with these principles and the specific tool in use.</li>
-</ol>
-<h2>Core Principles</h2>
-<ul>
-<li><strong>One behaviour per test</strong> — each test asserts a single, named API behaviour.</li>
-<li><strong>Deterministic</strong> — never depend on ambient state, execution order, or wall-clock timing; wait on real signals (response received), not fixed delays.</li>
-<li><strong>Isolated</strong> — create the data a test needs and clean it up; do not rely on data left by other tests or manual setup.</li>
-<li><strong>Behaviour, not implementation</strong> — assert the observable contract (status, headers, body shape/values), not internal implementation details.</li>
-<li><strong>Explicit environments</strong> — never hardcode base URLs, credentials, or secrets in requests; resolve them from environment/config.</li>
-<li><strong>Meaningful assertions</strong> — assert status, key response fields, and schema; avoid asserting volatile or unused fields.</li>
+<li>Request/response behaviour at the API boundary: status codes, headers, body schema, error handling.</li>
+<li>Not a substitute for unit tests (business logic), contract tests (<code>test-pact</code>), or E2E journeys.</li>
 </ul>
 <h2>Rules</h2>
 <ul>
-<li>Do not hardcode secrets, tokens, or environment URLs in requests or committed files.</li>
-<li>Do not chain tests through shared mutable state; pass only explicit, documented data between dependent steps.</li>
-<li>Do not assert on volatile values (timestamps, generated IDs) with exact matches — assert their presence, type, or format instead.</li>
-<li>Do not use arbitrary sleeps to "wait" for the API; assert on the response, and for async endpoints poll with a bounded timeout.</li>
-<li>Set an explicit request timeout so a hung endpoint fails fast instead of stalling the suite.</li>
-<li>Validate both success and failure paths (e.g. 4xx validation and auth errors), not only the happy path.</li>
+<li><strong>One API behaviour per test</strong>, named for what it verifies.</li>
+<li><strong>Assert the contract:</strong> status, key fields, and schema. Don't assert the whole body verbatim or fields the consumer doesn't use.</li>
+<li><strong>Volatile values</strong> (timestamps, generated IDs): assert presence, type, or format, never exact values.</li>
+<li><strong>Cover failure paths</strong>, not only the happy path: 4xx validation, 401/403 auth, 404, and conflict cases.</li>
+<li><strong>Each test sets up and cleans up its own data.</strong> Where steps must chain, pass only explicit, documented values (e.g. a created ID).</li>
+<li><strong>Async endpoints:</strong> poll with a bounded timeout and stop on failure states; set an explicit request timeout so a hung endpoint fails fast.</li>
+<li><strong>Environment-driven config:</strong> base URLs and credentials come from environment variables or the tool's secret store.</li>
 </ul>
 <h2>Anti-Patterns</h2>
 <ul>
-<li>Tests that pass only when run in a specific order.</li>
-<li>Environment URLs, API keys, or bearer tokens committed in request files.</li>
-<li>One giant test that exercises many endpoints and assertions.</li>
-<li>Asserting the entire response body verbatim, including volatile fields.</li>
-<li>Relying on data created by a previous test run rather than per-test setup.</li>
+<li>One giant test exercising many endpoints</li>
+<li>Asserting the entire response body, including volatile fields</li>
+<li>Relying on data left by a previous run or a manual setup step</li>
+<li>Tests that only pass in collection/runner order</li>
 </ul>
-<h2>Usage</h2>
-<p>This skill defines shared API testing principles. Apply it together with a tool-specific skill (<code>test-bruno</code> or <code>test-postman</code>) and with <code>test-automation-guidelines</code>.</p>
+<h2>References</h2>
+<p>Load only the one you need:</p>
+<ul>
+<li><a href="references/request-design.md">references/request-design.md</a> — request structure and naming.</li>
+<li><a href="references/assertions.md">references/assertions.md</a> — response validation and schema checks.</li>
+<li><a href="references/environments-and-data.md">references/environments-and-data.md</a> — environments, auth, and test data.</li>
+</ul>
 </div></article></section>
       </article>
 

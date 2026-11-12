@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-unit-guidelines <span class="version">v1.0.0</span></h1>
+      <h1>test-unit-guidelines <span class="version">v1.1.0</span></h1>
       <p class="description">Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span>
@@ -33,102 +33,74 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-unit-guidelines</h3><p class="content-description">Use this skill when writing, reviewing, refactoring, or maintaining unit tests in any framework — the isolated, in-process tests of a single function, class, or module. Covers AAA structure, behaviour-focused naming, isolation, mocking discipline, error and async assertions, parametrised cases, and meaningful coverage. Not for integration, contract, or end-to-end tests, which exercise real collaborators.</p></header><div class="content-body"><p>You are a software engineer ensuring the unit tests you write are behaviour-focused, isolated, and disciplined about test doubles.</p>
-<p>Use this skill when working with <strong>unit tests</strong> — the fast, isolated tests that cover a single unit of behaviour (a function, class, or module) apart from its slow or non-deterministic collaborators.</p>
-<p><strong>Reach for a unit test whenever the behaviour can be exercised without a real network, database, browser, filesystem, or clock.</strong></p>
-<p>Three symptoms tell you a unit test is doing its job, and each failure points at its own cause:</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-unit-guidelines</h3><p class="content-description">Use this skill when writing, fixing, or maintaining unit tests — isolated, in-process tests of one function, class, or module — in any framework. Covers structure, naming, mocking, and async/error assertions. Not for integration or E2E.</p></header><div class="content-body"><p>You are a software engineer writing unit tests that are behaviour-focused, isolated, and disciplined about test doubles.</p>
+<p>A unit test covers one unit of behaviour without a real network, database, browser, filesystem, or clock. Three symptoms say it is doing its job:</p>
 <ul>
-<li><strong>It runs in milliseconds.</strong> Slower means a real collaborator crept in — find it and replace it at the boundary.</li>
-<li><strong>It gives the same answer on every run, in any order.</strong> If it doesn't, something uncontrolled leaked in: usually the clock, randomness, or state shared with a neighbouring test.</li>
-<li><strong>Its name alone tells you what broke.</strong> If a failure sends you to the debugger to find out what happened, the test is covering more than one behaviour — split it.</li>
+<li><strong>It runs in milliseconds.</strong> Slower means a real collaborator crept in — replace it at the boundary.</li>
+<li><strong>It gives the same answer on every run, in any order.</strong> If not, the clock, randomness, or shared state leaked in.</li>
+<li><strong>Its name alone tells you what broke.</strong> If you need the debugger, it covers more than one behaviour — split it.</li>
+</ul>
+<h2>Requires</h2>
+<ul>
+<li><code>test-automation-guidelines</code> — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.</li>
 </ul>
 <h2>Scope</h2>
-<p>This skill owns the <strong>discipline</strong> of unit testing — how a test is structured, named, isolated, and what it should assert. Framework mechanics (mocking APIs, fake timers, parametrisation syntax) belong to a framework-specific skill such as <code>test-vitest</code>.</p>
-<p><strong>Unit tests only.</strong> Do not apply these rules to integration, contract, or end-to-end tests. Those exercise real collaborators — a live database, a browser, the HTTP stack — and these rules would mislead there: mocking every boundary would leave nothing under test, and nothing here covers the DOM, selectors, or page state that those layers turn on. If the behaviour needs a real collaborator to appear, stop and use the skill for that layer.</p>
-<hr />
-<h2>Core Rules</h2>
-<h3>Arrange–Act–Assert</h3>
-<p>Every test has three visible phases: set up the inputs (<strong>Arrange</strong>), invoke the unit once (<strong>Act</strong>), then assert on the result (<strong>Assert</strong>). One action per test.</p>
-<pre><code class="language-javascript">it("takes 10% off orders over 100", () =&gt; {
-  const order = { total: 200 };        // Arrange
-  const result = applyDiscount(order); // Act
-  expect(result.total).toBe(180);      // Assert
-});
-</code></pre>
-<h3>One reason to fail</h3>
-<p>A test names a single behaviour and asserts it. Multiple unrelated assertions in one test make a failure ambiguous — you can't tell what broke from the test name. If the name needs "and", split the test.</p>
-<h3>Name the behaviour, not the function</h3>
-<p>The <code>describe</code>/<code>it</code> pair should read as a sentence describing observable behaviour: <code>describe("applyDiscount")</code> → <code>it("takes 10% off orders over 100")</code>. Avoid names that restate the code (<code>it("calls computeRate")</code>) or that are vague (<code>it("works")</code>).</p>
-<h3>Test behaviour, not implementation</h3>
-<p>Assert on the unit's observable output — its return value, thrown errors, or the messages it sends to its collaborators. Never assert on private internals or on how the result was computed. Tests coupled to implementation break on every refactor even when behaviour is unchanged.</p>
-<p>Whether asserting <strong>that a collaborator was called</strong> is fair depends on which way the call runs. A message the unit sends <em>out</em> to a true external boundary — an email sender, a queue, a payment gateway — <em>is</em> the observable behaviour, so assert it on the mocked boundary. A value the unit reads <em>in</em> — a rate provider, a config lookup, a private helper — is only a means to the outcome; assert the outcome instead.</p>
-<h3>Keep tests independent</h3>
-<p>Each test creates its own data and shares <strong>nothing</strong> mutable with its neighbours — no module-level state reassigned across tests, no reliance on execution order. A test must pass in isolation, and pass when the suite is run in any order.</p>
-<h3>Keep tests deterministic</h3>
-<p>The same input produces the same result every time. Anything non-deterministic — the clock, randomness, the environment, the filesystem — must be controlled, never observed live. Never reach for a fixed delay; at the unit level there is nothing to wait for that you cannot control directly.</p>
-<hr />
-<h2>Test Doubles &amp; Mocking</h2>
-<p>Mocking is the easiest thing in unit testing to overdo. The rule: <strong>mock the boundary, not the logic.</strong></p>
+<p>This skill owns the <strong>discipline</strong> of unit testing. Framework mechanics (mocking APIs, fake timers, table syntax) belong to the tool skill, e.g. <code>test-vitest</code>.</p>
+<p><strong>Unit tests only.</strong> If the behaviour needs a real collaborator (database query, HTTP route, browser) to appear, it is an integration, contract, or E2E test — stop and use that layer's skill. Mocking every boundary there would leave nothing under test.</p>
+<h2>Rules</h2>
+<h3>Structure and naming</h3>
 <ul>
-<li><strong>Only mock what you don't own or can't control.</strong> The network, the filesystem, the database, the clock, randomness — replace those. Use the real thing for everything else. Mock your own logic and all you have proved is that your mock works.</li>
-<li><strong>Use the lightest stand-in that does the job.</strong> A plain stub for a dependency you pass in. A spy when you need to watch calls on something real. Replacing a whole module only when the whole module is a boundary. Never start with the heaviest option.</li>
-<li><strong>Put everything back.</strong> Every spy, mock, and frozen clock must be undone when the test ends, or it leaks into the tests that follow. Spies and mocks can be handled once in config; a frozen clock cannot — no mock-reset setting releases it, so release the clock per file in <code>afterEach</code>.</li>
-<li><strong>If you are mocking a lot, the design is the problem.</strong> When mock setup is most of the test, the unit depends on too much. Change the design — do not add more mocks.</li>
+<li><strong>Arrange–Act–Assert</strong>, with one action per test.</li>
+<li><strong>One reason to fail.</strong> If the name needs "and", split the test.</li>
+<li><strong>Name the behaviour, not the function:</strong> <code>describe("applyDiscount")</code> → <code>it("takes 10% off orders over 100")</code>, not <code>it("calls computeRate")</code> or <code>it("works")</code>.</li>
 </ul>
-<hr />
-<h2>Async &amp; Errors</h2>
+<h3>What to assert</h3>
 <ul>
-<li>Await the unit and assert on the resolved value; never leave a floating promise.</li>
-<li>Assert rejections directly, not via a <code>try</code>/<code>catch</code> whose assertion may never run.</li>
-<li>When assertions live inside a callback, guard with an expected-assertion count so a silently skipped assertion still fails the test.</li>
+<li>Assert the unit's observable output — return value, thrown error, or a message it sends out. Never private internals or how the result was computed.</li>
+<li>A call <strong>out</strong> to a true external boundary (email sender, queue, payment gateway) <em>is</em> behaviour — assert it on the mocked boundary. A value read <strong>in</strong> (rate provider, config, private helper) is a means to the outcome — assert the outcome instead.</li>
 </ul>
-<hr />
-<h2>Parametrise repetition</h2>
-<p>When the <strong>behaviour is identical</strong> and only the <strong>data</strong> varies, use the framework's table syntax instead of copy-pasting tests. Do not use it to merge different behaviours — branching inside a parametrised test means it is testing more than one thing. Include the boundary rows either side of a threshold.</p>
-<hr />
-<h2>Coverage that means something</h2>
-<p>Coverage measures which lines ran, not whether behaviour is correct. Chase <strong>branches and edge cases</strong> — boundaries, empty inputs, error paths — not a 100% number. A green coverage report over assertion-free tests is worthless.</p>
-<hr />
-<h2>When NOT to write a unit test</h2>
+<h3>Determinism</h3>
 <ul>
-<li><strong>Behaviour that only emerges from real collaborators</strong> — a query against a real database, a route through the HTTP stack. That's an integration or contract test; mocking every boundary would only test the mocks.</li>
-<li><strong>User-visible flows across the whole app</strong> — that's end-to-end territory.</li>
-<li><strong>Trivial code with no logic</strong> — a one-line getter or a pure re-export earns nothing from a test.</li>
+<li>Control the clock, randomness, environment, and filesystem; never observe them live. At unit level there is nothing to wait for that you cannot control, so never use a delay.</li>
 </ul>
-<hr />
-<h2>Principles reference</h2>
-<p>For worked good/bad examples of the rules above, see <code>references/principles.md</code>.</p>
-<hr />
+<h3>Test doubles — mock the boundary, not the logic</h3>
+<ul>
+<li>Only mock what you don't own or can't control (network, filesystem, database, clock, randomness). Use the real thing for everything else.</li>
+<li>Use the lightest stand-in: a stub for an injected dependency, a spy to watch something real, whole-module replacement only when the module is a boundary.</li>
+<li>Put everything back after each test: restore spies, clear call history, and reset any implementation a test set on a shared mock. Most frameworks treat these as separate settings, so check the config covers all three (see the tool skill). A frozen clock must be released per file in <code>afterEach</code>.</li>
+<li>If mock setup is most of the test, the unit depends on too much — change the design, not the mock count.</li>
+</ul>
+<h3>Async and errors</h3>
+<ul>
+<li>Await the unit; never leave a floating promise.</li>
+<li>Assert throws and rejections through the matcher, not a <code>try</code>/<code>catch</code> whose assertion may never run.</li>
+<li>When assertions live inside a callback, set an expected-assertion count so a skipped assertion fails the test.</li>
+</ul>
+<h3>Parametrise and cover</h3>
+<ul>
+<li>Use the framework's table syntax when only the <strong>data</strong> varies; never branch on a case field. Include the rows either side of a threshold.</li>
+<li>Chase branches and edge cases (boundaries, empty inputs, error paths), not a coverage percentage. Assertion-free coverage is worthless.</li>
+</ul>
+<h3>When not to write a unit test</h3>
+<ul>
+<li>Behaviour that only emerges from real collaborators — write an integration or contract test.</li>
+<li>User-visible flows across the app — E2E.</li>
+<li>Trivial code with no logic (one-line getters, re-exports).</li>
+</ul>
 <h2>Anti-Patterns</h2>
+<p>Each rule above, broken. The ones seen most often:</p>
 <ul>
-<li>Multiple actions or unrelated assertions in one test</li>
-<li>Asserting on private internals, or that a helper "was called", instead of on the outcome</li>
 <li>Mocking the unit under test or pure logic you own</li>
-<li>Leaving spies, mocks, or fake clocks unrestored between tests</li>
-<li>Shared mutable state or order-dependent tests</li>
-<li>Live clocks or unseeded randomness in assertions</li>
-<li>Floating promises / unawaited async assertions</li>
-<li>Asserting a thrown error without wrapping the call, so it escapes the matcher</li>
-<li>Assertions inside a callback with no expected-assertion count to prove they ran</li>
-<li>Parametrised tables that branch on a case field, merging behaviours</li>
-<li>Test names that restate the code (<code>it("calls x")</code>) or say nothing (<code>it("works")</code>)</li>
-<li>Chasing a coverage percentage with assertion-free tests</li>
+<li>Asserting that a helper "was called" instead of the outcome</li>
+<li>Spies, mocks, or fake clocks left unrestored</li>
+<li><code>expect(fn())</code> instead of wrapping the call, so the throw escapes the matcher</li>
+<li>Parametrised tables that branch on a case field</li>
 </ul>
-<hr />
-<h2>Review Checklist</h2>
+<h2>References</h2>
 <ul>
-<li>Keep one action per test, with a name that tells you what broke.</li>
-<li>Assert an observable outcome, never a private step.</li>
-<li>Build fresh data per test; share nothing mutable.</li>
-<li>Mock only real boundaries.</li>
-<li>Restore every spy, mock, and clock afterwards.</li>
-<li>Await every async assertion, and assert throws and rejections through the matcher.</li>
-<li>Vary only data in a parametrised table; never branch on a case field.</li>
-<li>Cover branches and edge cases, not just the happy path.</li>
+<li><a href="references/principles.md">references/principles.md</a> — worked good/bad examples for every rule above. Load when writing or reviewing a non-trivial test.</li>
+<li>Framework mechanics: <code>test-vitest</code> (Vitest).</li>
 </ul>
-<hr />
-<h2>Usage</h2>
-<p>Where a framework-specific unit testing skill exists — <code>test-vitest</code>, for example — apply it alongside this one. This skill stands on its own otherwise.</p>
 </div></article></section>
       </article>
 

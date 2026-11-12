@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-pact <span class="version">v1.0.1</span></h1>
+      <h1>test-pact <span class="version">v1.1.0</span></h1>
       <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Sherrylene Gauci</span>
@@ -33,31 +33,36 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-pact</h3><p class="content-description">Use this skill when writing, reviewing, refactoring, or maintaining Pact contract tests to ensure compatibility between the consumer and provider using Pact best practices.</p></header><div class="content-body"><p>You are a test engineer ensuring compatibility between a consumer and provider. You have been given a codebase that requires Pact contract tests.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-pact</h3><p class="content-description">Use this skill when writing, fixing, or reviewing Pact contract tests — consumer interactions and matchers, provider verification and states — to keep consumer and provider compatible.</p></header><div class="content-body"><p>You are a test engineer keeping a consumer and provider compatible with Pact contract tests.</p>
+<h2>Requires</h2>
+<ul>
+<li><code>test-automation-guidelines</code> — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.</li>
+</ul>
 <h2>Scope</h2>
 <ul>
-<li>Use Pact for contract tests between consumer and provider applications.</li>
-<li>Do not use Pact as a substitute for end-to-end tests or integration tests.</li>
-<li>Keep guidance specific to the type of contract tests required (consumer or provider tests)</li>
+<li>Contract tests between consumer and provider applications.</li>
+<li>Not a substitute for end-to-end or integration tests, and never for UI flows.</li>
 </ul>
-<h2>Workflow</h2>
-<ol>
-<li>Identify whether the task is adding consumer tests, provider tests, or both.</li>
-<li>Refer only to the needed reference file:<ul>
-<li>Consumer: <code>references/consumer.md</code></li>
-<li>Provider: <code>references/provider.md</code></li>
-</ul>
-</li>
-<li>Apply the relevant principles and examples from that file.</li>
-<li>Give recommendations or code updates aligned to Pact testing framework.</li>
-</ol>
-<h2>Contract Tests Anti-Patterns</h2>
+<h2>Rules</h2>
 <ul>
-<li>Using Pact as a stub without interaction verification</li>
-<li>Using Pact for tests that involve UI</li>
-<li>Broad tests with multiple interactions per test case</li>
-<li>Contracts that assert unused fields or provider internals</li>
-<li>Dynamically generated values without fixed examples</li>
+<li>Identify whether the task is consumer tests, provider verification, or both, and load only that reference.</li>
+<li>One interaction per test; assert only the fields the consumer actually uses.</li>
+<li>Use matchers for dynamic values, always with a fixed example.</li>
+<li>Name the provider state each interaction needs with <code>given</code>; the provider sets it up.</li>
+<li>Verify every interaction — Pact used as a stub without verification proves nothing.</li>
+</ul>
+<h2>Anti-Patterns</h2>
+<ul>
+<li>Pact used as a stub without interaction verification</li>
+<li>Pact for tests that involve UI</li>
+<li>Several interactions per test case</li>
+<li>Contracts asserting unused fields or provider internals</li>
+<li>Dynamic values without fixed examples</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li><a href="references/consumer.md">references/consumer.md</a> — consumer tests and matchers strategy.</li>
+<li><a href="references/provider.md">references/provider.md</a> — provider verification and states.</li>
 </ul>
 </div></article></section>
       </article>

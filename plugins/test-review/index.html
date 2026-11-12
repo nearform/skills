@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-review <span class="version">v1.1.0</span></h1>
+      <h1>test-review <span class="version">v1.2.0</span></h1>
       <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,62 +33,32 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-review</h3><p class="content-description">Use this skill when reviewing automated tests to diagnose quality, reliability, and standards issues. Produces a verdict and actionable findings; does not restructure code.</p></header><div class="content-body"><p>You are a senior test engineer reviewing automated tests.</p>
-<p>Your goal is to <strong>diagnose</strong> — surface issues, flakiness risks, and standards violations. You do <strong>not</strong> rewrite tests or propose large structural changes (extracting page objects, introducing builders, reorganizing files). For those, recommend <code>test-refactor</code>.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-review</h3><p class="content-description">Use this skill when asked to review or audit existing automated tests. Produces a verdict and severity-tagged findings for quality, flakiness, and standards issues; does not restructure code.</p></header><div class="content-body"><p>You are a senior test engineer reviewing automated tests.</p>
+<p>Your goal is to <strong>diagnose</strong> — surface issues, flakiness risks, and standards violations. You do <strong>not</strong> rewrite tests or make structural changes (extracting page objects, introducing builders, reorganising files); recommend <code>test-refactor</code> for those. Review is read-only: do not edit tests or production code.</p>
+<h2>Requires</h2>
+<ul>
+<li><code>test-automation-guidelines</code> — its Guardrails, Rules, and skill map apply. If it is not available, tell the user which plugin to install.</li>
+</ul>
 <h2>Workflow</h2>
 <ol>
-<li><p>Detect framework:</p>
-<ul>
-<li>If code uses <code>cy.</code> → use test-cypress</li>
-<li>If code uses <code>@playwright/test</code> → use test-playwright</li>
-<li>If code uses <code>browser.</code> or <code>@wdio/globals</code> → use test-webdriverio</li>
-</ul>
-</li>
-<li><p>Always apply:</p>
-<ul>
-<li>test-automation-guidelines</li>
-</ul>
-</li>
-<li><p>Apply framework-specific rules</p>
-</li>
-<li><p>If the tests drive a browser (Cypress, Playwright, or WebdriverIO — the frameworks detected in step 1) or already contain a11y checks, also apply <code>test-accessibility</code>.</p>
-</li>
-<li><p>If structural problems are found (duplication across files, missing abstractions, poor organization), flag them and recommend invoking <code>test-refactor</code> — do not perform the refactor here.</p>
-</li>
+<li>Use the skill map in <code>test-automation-guidelines</code> to identify the layer and tool, and load the matching base and tool skills (e.g. <code>test-unit-guidelines</code> + <code>test-vitest</code>, <code>test-api</code> + <code>test-postman</code>, <code>test-playwright</code>).</li>
+<li>Check the tests against the Guardrails and Rules of <code>test-automation-guidelines</code>, then against the loaded skills' rules and anti-patterns.</li>
+<li>For UI suites, or suites that already contain a11y checks, also apply <code>test-accessibility</code>.</li>
+<li>Add the review-only checks below.</li>
+<li>Flag structural problems (duplication across files, missing abstractions, poor organisation, copied harness code) for <code>test-refactor</code> — do not perform the refactor.</li>
 </ol>
-<hr />
-<h3>Review Checklist</h3>
+<h2>Review-only checks</h2>
 <ul>
-<li>Descriptive test naming?</li>
-<li>Follows Arrange-Act-Assert pattern?</li>
-<li>Any unnecessary <code>console.log</code> statements?</li>
-<li>Are errors properly handled or expected?</li>
-<li>Are assertions meaningful and behaviour-focused?</li>
-<li>Any flakiness risks (arbitrary waits, order dependence, shared state)?</li>
-<li>Are selectors stable (<code>data-testid</code>, roles) rather than brittle (CSS structure, nth-child)?</li>
-<li>Do setup helpers and test doubles check every result, or ignore errors and carry on?</li>
-<li>Does each wait or poll stop on failure states, or can a failure only show up as a timeout?</li>
-<li>Do a test's waits, added together, fit inside its timeout?</li>
-<li>Do assertions prove the outcome (the new content), not just an indicator that something changed?</li>
-<li>Do test doubles replace dependencies at the seam the codebase's own tests use, keeping its guards (permission checks, environment scrubbing)?</li>
-<li>Any unused helpers, fixture branches or exports?</li>
-<li>Is harness or test-double code copied from elsewhere in the codebase? (flag for <code>test-refactor</code>)</li>
+<li>Does each test name say what broke when it fails?</li>
+<li>Any leftover <code>console.log</code>, focused tests (<code>.only</code>), or skipped tests without a tracked reason?</li>
+<li>Do assertions prove the behaviour, or could they pass if the change had no effect?</li>
+<li>Is harness or test-double code copied from elsewhere in the codebase instead of reused?</li>
 </ul>
-<hr />
-<h3>Produce structured output:</h3>
+<h2>Output</h2>
 <p><strong>Verdict</strong>: GOOD | NEEDS IMPROVEMENT | FLAKY</p>
-<p><strong>Issues</strong>:</p>
-<ul>
-<li>List problems, each tagged with severity (blocker / major / minor) and category (correctness / flakiness / readability / structural)</li>
-</ul>
-<p><strong>Fixes</strong>:</p>
-<ul>
-<li>Small, in-place suggestions only (renaming, tightening an assertion, replacing a brittle selector, removing a <code>console.log</code>)</li>
-</ul>
-<p><strong>Refactor Recommended</strong>:</p>
-<ul>
-<li>List any structural issues that should be handed to <code>test-refactor</code> (e.g. "duplicated login setup across 4 specs — extract fixture"). Do not write the refactor here.</li>
-</ul>
+<p><strong>Issues</strong> — each tagged with severity (blocker / major / minor), category (correctness / flakiness / readability / structural), and <code>file:line</code>.</p>
+<p><strong>Fixes</strong> — small, in-place suggestions only (rename, tighten an assertion, replace a brittle selector, remove a <code>console.log</code>).</p>
+<p><strong>Refactor Recommended</strong> — structural issues to hand to <code>test-refactor</code> (e.g. "duplicated login setup across 4 specs — extract fixture"). Do not write the refactor here.</p>
 </div></article></section>
       </article>
 

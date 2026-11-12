@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-postman <span class="version">v1.0.0</span></h1>
+      <h1>test-postman <span class="version">v1.1.0</span></h1>
       <p class="description">Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,57 +33,49 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-postman</h3><p class="content-description">Use this skill when writing or reviewing Postman API tests to apply Postman-specific best practices for reliable, idiomatic tests using pm.* assertions, collections, environments, and Newman in CI.</p></header><div class="content-body"><p>Use this skill when working with Postman API tests. Postman stores collections and environments as JSON that can be exported, version-controlled, and run headlessly with Newman.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-postman</h3><p class="content-description">Use this skill when writing, fixing, or reviewing Postman test scripts — pm.test/pm.expect assertions, collection and environment structure, variables and secrets, and running collections in CI with the Postman CLI or Newman.</p></header><div class="content-body"><p>Postman-specific rules for test scripts and collections.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
-<li>test-api</li>
+<li><code>test-api</code> (which requires <code>test-automation-guidelines</code>) — its API rules and the base Guardrails apply. If either is not available, tell the user which plugin to install.</li>
 </ul>
-<p>Apply the shared API principles from <code>test-api</code> first; the rules below are Postman-specific additions.</p>
-<h2>Workflow</h2>
-<ol>
-<li>Confirm the collection and environment layout, and how they are exported/version-controlled.</li>
-<li>Refer only to the reference file relevant to the task:<ul>
-<li>Collection and environment structure: <code>references/collections.md</code></li>
-<li>Assertions, scripting, and Newman/CI: <code>references/scripting-and-assertions.md</code></li>
-</ul>
-</li>
-<li>Apply the principles and templates from that file.</li>
-</ol>
-<h2>Postman Rules</h2>
-<h3>Collections and structure</h3>
+<h2>Rules</h2>
+<h3>Collections in the repo</h3>
 <ul>
-<li>Export the collection and environment JSON into the repo and review changes in pull requests — do not keep tests only in a personal workspace.</li>
-<li>One request per behaviour, named for what it verifies; group into folders by resource/feature.</li>
-<li>Keep the exported JSON stable (avoid churn from unrelated UI reorders) so diffs stay reviewable.</li>
+<li>Keep collections and environments in version control and review changes in PRs, never only in a personal workspace. Follow the repo's existing format: Postman's Git-native collection files if present, otherwise exported collection JSON.</li>
+<li>One request per behaviour, named for what it verifies; folders by resource or feature. Keep exports stable (no unrelated reorder churn) so diffs stay reviewable.</li>
 </ul>
 <h3>Variables and environments</h3>
 <ul>
-<li>Reference the base URL and config as variables (<code>{{baseUrl}}</code>), defined per environment.</li>
-<li>Store credentials as <strong>secret</strong>-typed variables (or Postman Vault), never as committed initial values.</li>
-<li>Scope variables intentionally: environment for config, collection for shared defaults, and <code>pm.variables</code> for request-local temporary values.</li>
+<li>Config as variables (<code>{{baseUrl}}</code>) per environment. Credentials as <strong>secret</strong>-typed variables or Postman Vault, never as committed initial values.</li>
+<li>Scope intentionally: environment for config, collection for shared defaults, <code>pm.variables</code> for request-local values.</li>
 </ul>
-<h3>Assertions (<code>pm.test</code>)</h3>
+<h3>Assertions</h3>
 <ul>
-<li>Assert behaviour inside <code>pm.test(...)</code> blocks with clear names.</li>
-<li>Use <code>pm.response.to.have.status(...)</code> and <code>pm.expect(...)</code> for status, fields, and schema.</li>
-<li>Use <code>pm.response.to.have.jsonSchema(schema)</code> for structural validation instead of many manual field checks.</li>
-<li>Assert presence/type/format for volatile values (IDs, timestamps), not exact matches.</li>
-<li>For a lightweight latency guard, assert <code>pm.response.responseTime</code> against a generous upper bound (a smoke check, not a load test).</li>
+<li>Assert inside named <code>pm.test(...)</code> blocks with <code>pm.response.to.have.status(...)</code> and <code>pm.expect(...)</code>.</li>
+<li>Prefer <code>pm.response.to.have.jsonSchema(schema)</code> over many manual field checks.</li>
+<li><code>pm.response.responseTime</code> against a generous bound is a smoke check only, not a load test.</li>
 </ul>
 <h3>Scripting</h3>
 <ul>
-<li>Use pre-request scripts to fetch tokens and generate unique data; use test scripts for assertions and extraction.</li>
-<li>Persist only the specific values later requests need via <code>pm.environment.set(...)</code> / <code>pm.collectionVariables.set(...)</code>.</li>
-<li>Keep scripts deterministic — no <code>setTimeout</code> waits; rely on the response.</li>
+<li>Pre-request scripts fetch tokens and generate unique data; test scripts assert and extract.</li>
+<li>Persist only values later requests need (<code>pm.collectionVariables.set(...)</code>). No <code>setTimeout</code> waits.</li>
+</ul>
+<h3>Running in CI</h3>
+<ul>
+<li>Use the runner the project already uses — the Postman CLI (<code>postman collection run</code>) or Newman — with the environment selected explicitly.</li>
 </ul>
 <h2>Anti-Patterns</h2>
 <ul>
-<li>Committing environment JSON containing real tokens or API keys.</li>
-<li>Hardcoded full URLs instead of <code>{{baseUrl}}</code>.</li>
-<li>A single request with dozens of unrelated <code>pm.test</code> assertions.</li>
-<li>Tests that only pass when run in a fixed collection order.</li>
-<li>Tests kept solely in a personal workspace, never exported or reviewed.</li>
+<li>Committed environment files containing real tokens or keys</li>
+<li>Hardcoded full URLs instead of <code>{{baseUrl}}</code></li>
+<li>One request with dozens of unrelated <code>pm.test</code> assertions</li>
+<li>Tests that only pass in a fixed collection order</li>
+</ul>
+<h2>References</h2>
+<p>Load only the one you need:</p>
+<ul>
+<li><a href="references/collections.md">references/collections.md</a> — collection and environment structure.</li>
+<li><a href="references/scripting-and-assertions.md">references/scripting-and-assertions.md</a> — assertions, scripting, and CI runs.</li>
 </ul>
 </div></article></section>
       </article>

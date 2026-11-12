@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-accessibility <span class="version">v1.0.1</span></h1>
+      <h1>test-accessibility <span class="version">v1.1.0</span></h1>
       <p class="description">Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,127 +33,39 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-accessibility</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining accessibility (a11y) checks in automated tests, or when adding automated accessibility scanning (axe-core) to an existing Cypress, Playwright, or WebdriverIO suite.</p></header><div class="content-body"><p>You are a test engineer ensuring automated tests catch accessibility regressions and encourage accessible selector strategy.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-accessibility</h3><p class="content-description">Use this skill when adding, writing, or reviewing automated accessibility (a11y) checks — axe-core scanning and accessible selectors — in a Cypress, Playwright, or WebdriverIO suite.</p></header><div class="content-body"><p>You are a test engineer making automated tests catch accessibility regressions.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
+<li><code>test-automation-guidelines</code> — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.</li>
+<li>The framework skill: <code>test-cypress</code>, <code>test-playwright</code>, or <code>test-webdriverio</code>. This skill adds to it; it does not replace it.</li>
 </ul>
-<h2>Scope</h2>
-<ul>
-<li>Apply alongside a framework-specific testing skill (<code>test-cypress</code>, <code>test-playwright</code>, <code>test-webdriverio</code>) — this skill does not replace them.</li>
-<li>Covers two complementary areas:<ol>
-<li><strong>Automated scanning</strong> — running <code>axe-core</code> against pages/components to catch WCAG violations.</li>
-<li><strong>Accessible-first selectors</strong> — using accessibility roles and labels as the primary test selector strategy, which doubles as a manual accessibility signal.</li>
-</ol>
-</li>
-</ul>
-<hr />
 <h2>Workflow</h2>
 <ol>
-<li>Detect framework in the file under test/review:<ul>
-<li><code>cy.</code> → use the Cypress section below (<code>cypress-axe</code>)</li>
-<li><code>@playwright/test</code> → use the Playwright section below (<code>@axe-core/playwright</code>)</li>
-<li><code>browser.</code> / <code>@wdio/globals</code> → use the WebdriverIO section below (<code>@axe-core/webdriverio</code>)</li>
-</ul>
-</li>
-<li>Ensure automated scans run on key states: initial page load, after navigation, and after interactions that change the DOM materially (modals, accordions, forms with validation errors).</li>
-<li>Fail builds on <code>critical</code> and <code>serious</code> violations by default; track <code>moderate</code>/<code>minor</code> separately rather than silently ignoring them.</li>
-<li>Additionally assert accessible names/roles where practical (see <code>plugins/test-automation-guidelines/skills/test-automation-guidelines/references/principles.md</code>) — this forces pages to expose proper accessible names, which is itself an accessibility check.</li>
+<li>Detect the framework and load only its reference: <a href="references/cypress.md">Cypress</a> (<code>cypress-axe</code>), <a href="references/playwright.md">Playwright</a> (<code>@axe-core/playwright</code>), or <a href="references/webdriverio.md">WebdriverIO</a> (<code>@axe-core/webdriverio</code>).</li>
+<li>If the project has no axe integration yet, propose adding it (Guardrail 6) rather than installing it unprompted.</li>
+<li>Scan key states: initial load, after navigation, and after interactions that change the DOM materially (modals, accordions, validation errors). Scope post-interaction scans to the changed region.</li>
+<li>Pin the WCAG level with tags (<code>wcag2a</code>, <code>wcag2aa</code>, <code>wcag21aa</code>, <code>wcag22aa</code> — match the project's conformance target).</li>
+<li>Fail on <code>critical</code> and <code>serious</code> violations; log and track <code>moderate</code>/<code>minor</code> rather than ignoring them.</li>
 </ol>
-<hr />
-<h3>Cypress (<code>cypress-axe</code>)</h3>
-<pre><code class="language-javascript">import "cypress-axe";
-
-beforeEach(() =&gt; {
-  cy.visit("/checkout");
-  cy.injectAxe();
-});
-
-it("has no detectable accessibility violations on load", () =&gt; {
-  cy.checkA11y(null, {
-    includedImpacts: ["critical", "serious"],
-  });
-});
-
-it("has no violations after opening the modal", () =&gt; {
-  cy.get('[data-testid="open-modal"]').click();
-  cy.checkA11y('[role="dialog"]', {
-    includedImpacts: ["critical", "serious"],
-  });
-});
-</code></pre>
+<h2>Selector and Markup Rules</h2>
 <ul>
-<li>Call <code>cy.injectAxe()</code> after each <code>cy.visit()</code> / full-page reload — the injected script does not survive navigation.</li>
-<li>Scope <code>cy.checkA11y(selector)</code> to the changed region after an interaction instead of re-scanning the whole page.</li>
+<li>Keep the house <code>data-testid</code> convention. Where practical, additionally assert a role/accessible-name query (<code>getByRole</code>, <code>findByRole</code>) — it exercises what assistive tech sees.</li>
+<li>If an element can only be selected by CSS structure or <code>nth-child</code>, flag the missing role, label, or landmark.</li>
+<li>Interactive elements must be real controls (<code>&lt;button&gt;</code>, <code>&lt;a href&gt;</code>), not <code>&lt;div onClick&gt;</code>.</li>
+<li>Opening a modal moves focus into it; closing it returns focus to the trigger.</li>
 </ul>
-<hr />
-<h3>Playwright (<code>@axe-core/playwright</code>)</h3>
-<pre><code class="language-javascript">import { test, expect } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-
-test("checkout page has no critical/serious a11y violations", async ({
-  page,
-}) =&gt; {
-  await page.goto("/checkout");
-
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa"])
-    .analyze();
-
-  const blocking = results.violations.filter((v) =&gt;
-    ["critical", "serious"].includes(v.impact),
-  );
-  expect(blocking).toEqual([]);
-});
-</code></pre>
-<ul>
-<li>Use <code>.include(selector)</code> / <code>.exclude(selector)</code> to scope a scan to a changed region instead of the full page.</li>
-<li>Use <code>.withTags([...])</code> to pin the WCAG level under test (e.g. <code>wcag2a</code>, <code>wcag2aa</code>) rather than scanning every rule unconditionally.</li>
-<li>Filter <code>results.violations</code> by <code>impact</code> before asserting (per the default in step 3) — asserting the raw array is empty fails the build on <code>moderate</code>/<code>minor</code> issues too. Log the filtered-out violations instead of discarding them.</li>
-<li>Snapshot the failing violations in assertion failures — they carry the rule id, impact, and offending selectors needed for triage.</li>
-</ul>
-<hr />
-<h3>WebdriverIO (<code>@axe-core/webdriverio</code>)</h3>
-<pre><code class="language-javascript">import AxeBuilder from "@axe-core/webdriverio";
-
-it("has no accessibility violations", async () =&gt; {
-  await browser.url("/checkout");
-
-  const results = await new AxeBuilder({ client: browser })
-    .withTags(["wcag2a", "wcag2aa"])
-    .analyze();
-
-  const blocking = results.violations.filter((v) =&gt;
-    ["critical", "serious"].includes(v.impact),
-  );
-  expect(blocking).toEqual([]);
-});
-</code></pre>
-<ul>
-<li>Same scoping/tagging/filtering approach as Playwright — <code>include</code>/<code>exclude</code>, <code>withTags</code>, and filtering by <code>impact</code> keep scans intentional and consistent with the step 3 default.</li>
-</ul>
-<hr />
-<h2>Selector &amp; Markup Rules</h2>
-<ul>
-<li><code>test-cypress</code> and <code>test-playwright</code> prefer <code>data-testid</code>/<code>getByTestId</code> as the house selector convention — keep using it. Where practical, <em>additionally</em> assert an accessible-name/role selector alongside it (<code>page.getByRole("button", { name: "Submit" })</code>, <code>cy.findByRole(...)</code> via <code>@testing-library/cypress</code>) rather than replacing the test id — this exercises the same accessible name the tool exposes to assistive tech without abandoning the house convention.</li>
-<li>If a test can only select an element via CSS structure or <code>nth-child</code>, treat that as a signal the markup is missing a semantic role, label, or landmark — flag it rather than only reaching for a test id.</li>
-<li>Verify interactive elements are real controls (<code>&lt;button&gt;</code>, <code>&lt;a href&gt;</code>) rather than <code>&lt;div onClick&gt;</code> — this affects both selector stability and keyboard/screen-reader access.</li>
-<li>Verify focus management for dynamic UI: opening a modal should move focus into it; closing it should return focus to the trigger.</li>
-</ul>
-<hr />
 <h2>Triage</h2>
 <ul>
-<li><strong>Critical / Serious</strong> — treat as blocking, same severity as a functional bug.</li>
-<li><strong>Moderate / Minor</strong> — log and track; do not let them silently accumulate unaddressed.</li>
-<li>Categorise each violation by WCAG success criterion (from the axe result's <code>tags</code>) so fixes can be prioritised by conformance level (A vs AA).</li>
+<li><strong>Critical / Serious</strong> — blocking, same severity as a functional bug.</li>
+<li><strong>Moderate / Minor</strong> — log and track; don't let them accumulate silently.</li>
+<li>Group violations by WCAG success criterion (from the axe result's <code>tags</code>) to prioritise A before AA.</li>
 </ul>
-<hr />
 <h2>Anti-Patterns</h2>
 <ul>
-<li>Running a full-page scan only once at the end of a long flow instead of after each meaningful state change.</li>
-<li>Suppressing or disabling axe rules broadly (e.g. disabling a whole rule set) instead of fixing the underlying markup or scoping the exclusion narrowly with justification.</li>
-<li>Asserting only <code>results.violations.length === 0</code> without surfacing which rules failed, making failures hard to triage.</li>
-<li>Relying solely on automated scanning — axe-core catches a subset of WCAG issues (roughly programmatically detectable ones); it does not replace keyboard-navigation and screen-reader checks for critical flows.</li>
+<li>One full-page scan at the end of a long flow instead of after each meaningful state change</li>
+<li>Disabling axe rules broadly instead of fixing markup or scoping a justified exclusion</li>
+<li>Assertions that hide which rules failed (e.g. only checking <code>violations.length === 0</code>)</li>
+<li>Treating axe as complete coverage — it catches only programmatically detectable issues; keyboard and screen-reader checks are still needed for critical flows</li>
 </ul>
 </div></article></section>
       </article>

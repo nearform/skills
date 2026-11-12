@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-cypress <span class="version">v1.0.0</span></h1>
+      <h1>test-cypress <span class="version">v1.1.0</span></h1>
       <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,93 +33,52 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-cypress</h3><p class="content-description">Use this skill when writing or reviewing Cypress tests to apply Cypress-specific best practices for reliable, idiomatic test code.</p></header><div class="content-body"><p>Use this skill when working with Cypress tests.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-cypress</h3><p class="content-description">Use this skill when writing, fixing, or reviewing Cypress e2e or component tests — command chaining, selectors, cy.intercept network control, cy.session auth, and waiting without cy.wait(ms).</p></header><div class="content-body"><p>Cypress-specific rules. Base principles are not restated here.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
+<li><code>test-automation-guidelines</code> — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.</li>
+<li>For UI suites, also <code>test-accessibility</code> (<code>cypress-axe</code>).</li>
 </ul>
-<h2>See Also</h2>
+<h2>Rules</h2>
+<h3>Command model</h3>
 <ul>
-<li><code>test-accessibility</code> — apply when the suite should include automated a11y scanning (<code>cypress-axe</code>) or when reviewing/writing accessible selector strategy.</li>
+<li>Chain Cypress commands; do not use <code>async</code>/<code>await</code>. Keep <code>cy.then()</code> for the rare case that needs a plain value.</li>
 </ul>
-<hr />
-<h2>Cypress Rules</h2>
-<h3>Command Model</h3>
-<ul>
-<li>Use Cypress command chaining</li>
-<li>Do not use async/await</li>
-<li>Avoid excessive use of <code>cy.then()</code></li>
-</ul>
-<hr />
 <h3>Selectors</h3>
-<p>Prefer stable, intentional selectors (attributes or accessibility hooks) as your primary choice. Text-based selectors are brittle — they can break with copy changes, translations, or small wording edits — so treat them as a fallback only when no stable attributes exist.</p>
-<p><strong>Primary (preferred):</strong></p>
-<pre><code class="language-javascript">cy.get('[data-testid="..."]');
-cy.get("#elementId");
-</code></pre>
-<p><strong>Fallback (use only if no stable attributes are available):</strong></p>
-<pre><code class="language-javascript">cy.contains("Submit"); // text selector - brittle
-</code></pre>
-<hr />
-<h3>Waiting</h3>
-<p>Do not use:</p>
-<pre><code class="language-javascript">cy.wait(1000);
-</code></pre>
-<p>Use:</p>
 <ul>
-<li><code>cy.wait('@alias')</code></li>
-<li><code>.should(...)</code></li>
-<li>DOM assertions</li>
+<li>Primary: <code>cy.get('[data-testid="…"]')</code>, or a role/label query (<code>cy.findByRole</code> via <code>@testing-library/cypress</code>).</li>
+<li>Avoid CSS classes, <code>nth-child</code>, and DOM structure. <code>cy.contains("Submit")</code> is a fallback only — copy changes break it.</li>
 </ul>
-<hr />
-<h3>Network Control</h3>
+<h3>Waiting and timeouts</h3>
 <ul>
-<li>Use <code>cy.intercept()</code> for spying and stubbing</li>
-<li>Prefer stubbing for deterministic tests</li>
-<li>Always use aliases for intercepted requests</li>
+<li>Never <code>cy.wait(1000)</code>. Wait on <code>cy.wait("@alias")</code>, <code>.should(...)</code> retries, or DOM state.</li>
+<li>Set <code>{ timeout }</code> on the specific command that waits for server work instead of raising <code>defaultCommandTimeout</code> globally. Chained alias waits must fit within the spec's budget (<code>requestTimeout</code> + <code>responseTimeout</code> per alias).</li>
+<li>When waiting on an alias, assert its status so a failed request fails with the cause: <code>cy.wait("@save").its("response.statusCode").should("eq", 200)</code>.</li>
 </ul>
-<pre><code class="language-javascript">cy.intercept("GET", "/api/...", { fixture: "user.json" }).as("getUsers");
-cy.wait("@getUsers");
-</code></pre>
-<hr />
-<h3>Authentication</h3>
+<h3>Network and test doubles</h3>
 <ul>
-<li>Prefer programmatic login</li>
-<li>Use <code>cy.session()</code></li>
-<li>Avoid UI login in every test</li>
+<li><code>cy.intercept()</code> for spying and stubbing; always alias it. Prefer stubs for determinism; use <code>{ fixture: "user.json" }</code> for bodies.</li>
 </ul>
-<pre><code class="language-javascript">cy.session("user", () =&gt; {
-  cy.login();
-});
+<pre><code class="language-javascript">cy.intercept("POST", "/api/checkout").as("checkout");
+cy.get('[data-testid="pay"]').click();
+cy.wait("@checkout").its("response.statusCode").should("eq", 201);
 </code></pre>
-<hr />
-<h3>State Management</h3>
+<h3>Auth and state</h3>
 <ul>
-<li>Use <code>Cypress.env</code> for configuration and static data</li>
-<li>Do not use <code>Cypress.env</code> to share mutable state between tests</li>
-<li>Reset cookies/localStorage when required</li>
+<li>Log in programmatically and cache with <code>cy.session()</code>; don't drive the login UI in every test.</li>
+<li><code>Cypress.env</code> is for configuration, never mutable cross-test state. Reset cookies/localStorage where needed.</li>
 </ul>
-<hr />
-<h3>Assertions</h3>
-<pre><code class="language-javascript">cy.get('[data-testid="cart-count"]').should("have.text", "1");
-</code></pre>
-<hr />
-<h3>Custom Commands &amp; Fixtures</h3>
+<h3>Config and CI</h3>
 <ul>
-<li>Use custom commands sparingly for repetitive actions</li>
-<li>Use <code>cy.fixture()</code> to manage large data sets</li>
+<li>Use custom commands sparingly, for genuinely repeated actions. <code>cy.fixture()</code> for large data sets.</li>
 </ul>
-<hr />
-<h3>API Waiting Pattern</h3>
-<pre><code class="language-javascript">cy.intercept("POST", "/checkout").as("checkout");
-cy.wait("@checkout");
-</code></pre>
-<hr />
-<h3>Anti-Patterns</h3>
+<h2>Anti-Patterns</h2>
 <ul>
-<li>Mixing async/await with Cypress</li>
-<li>Overusing <code>cy.then()</code></li>
+<li>Mixing <code>async</code>/<code>await</code> with Cypress commands, or overusing <code>cy.then()</code></li>
+<li><code>cy.wait(&lt;ms&gt;)</code></li>
+<li>Intercepts without aliases, or alias waits that never check the response</li>
 <li>UI login in every test</li>
+<li>Raising <code>defaultCommandTimeout</code> globally to hide a slow wait</li>
 </ul>
 </div></article></section>
       </article>

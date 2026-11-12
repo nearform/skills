@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-k6 <span class="version">v1.0.0</span></h1>
+      <h1>test-k6 <span class="version">v1.1.0</span></h1>
       <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Sherrylene Gauci</span>
@@ -33,34 +33,39 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-k6</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining k6 performance tests to validate system behaviour under load using k6 best practices.</p></header><div class="content-body"><p>You are a performance test engineer ensuring that the system behaves reliably under load. You have been given a codebase that requires k6 performance tests.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-k6</h3><p class="content-description">Use this skill when writing, fixing, or reviewing k6 performance or load tests — load profiles (smoke, load, stress, spike, soak), scenarios and executors, checks, and thresholds.</p></header><div class="content-body"><p>You are a performance test engineer making sure the system behaves reliably under load.</p>
+<h2>Requires</h2>
+<ul>
+<li><code>test-automation-guidelines</code> — its Guardrails apply (think-time <code>sleep()</code> models users and is allowed; it is not waiting for state). If it is not available, tell the user which plugin to install.</li>
+</ul>
 <h2>Scope</h2>
 <ul>
-<li>Use k6 for performance tests across the standard profiles (smoke, average-load, stress, spike, breakpoint, soak — see <code>references/scenarios.md</code>).</li>
-<li>Do not use k6 as a substitute for functional, end-to-end, or contract tests.</li>
-<li>Keep test profile guidance specific to the type of performance test required.</li>
+<li>Performance tests across standard profiles: smoke, average-load, stress, spike, breakpoint, soak.</li>
+<li>Not a substitute for functional, end-to-end, or contract tests.</li>
 </ul>
-<h2>Workflow</h2>
-<ol>
-<li>Identify the goal of the test: which load profile is needed (see <code>references/scenarios.md</code>) and which metrics or thresholds define success.</li>
-<li>Refer only to the needed reference file:<ul>
-<li>Scenarios and load profiles: <code>references/scenarios.md</code></li>
-<li>Metrics, checks, and thresholds: <code>references/thresholds.md</code></li>
-</ul>
-</li>
-<li>Apply the relevant principles and examples from that file.</li>
-<li>Give recommendations or code updates aligned to k6 best practices.</li>
-</ol>
-<h2>Performance Test Anti-Patterns</h2>
+<h2>Rules</h2>
 <ul>
-<li>Running tests without defined thresholds</li>
-<li>Relying on checks for pass/fail — a test with passing checks but no thresholds always exits 0, giving false confidence</li>
-<li>Using <code>sleep()</code> as the only think-time strategy with no relation to real user behaviour</li>
-<li>Hardcoding environment URLs, credentials, or tokens instead of using environment variables and/or secrets</li>
-<li>Mixing unrelated endpoints into a single scenario, making bottlenecks hard to debug</li>
-<li>Treating a smoke test (1–2 VUs) as evidence that the system scales successfully</li>
-<li>Ignoring <code>http_req_failed</code> and asserting only on response time</li>
-<li>Running load tests against shared environments without coordinating with other teams</li>
+<li>Start from the goal: which profile, and which metrics and thresholds define success.</li>
+<li><strong>Thresholds decide pass/fail.</strong> Checks alone never fail the run; define thresholds on latency percentiles <strong>and</strong> <code>http_req_failed</code>.</li>
+<li>Use named <code>scenarios</code> with executors when one test needs several profiles; arrival-rate executors when you need a target request rate.</li>
+<li>Model think-time on real user behaviour, not a fixed <code>sleep()</code> everywhere.</li>
+<li>One user journey per scenario so bottlenecks stay attributable.</li>
+<li>Base URLs, credentials, and tokens from <code>__ENV</code> or secrets, never hardcoded.</li>
+<li>Coordinate before running load against shared environments.</li>
+</ul>
+<h2>Anti-Patterns</h2>
+<ul>
+<li>No thresholds, or relying on checks for pass/fail (the run exits 0)</li>
+<li>Asserting only on response time and ignoring <code>http_req_failed</code></li>
+<li>Treating a smoke test (1–2 VUs) as evidence that the system scales</li>
+<li>Mixing unrelated endpoints in one scenario</li>
+<li>Unannounced load runs against shared environments</li>
+</ul>
+<h2>References</h2>
+<p>Load only the one you need:</p>
+<ul>
+<li><a href="references/scenarios.md">references/scenarios.md</a> — load profiles, scenarios, executors.</li>
+<li><a href="references/thresholds.md">references/thresholds.md</a> — metrics, checks, thresholds, custom metrics.</li>
 </ul>
 </div></article></section>
       </article>

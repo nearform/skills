@@ -20,7 +20,7 @@
 
   <header class="plugin-hero">
     <div class="container">
-      <h1>test-webdriverio <span class="version">v1.0.0</span></h1>
+      <h1>test-webdriverio <span class="version">v1.1.0</span></h1>
       <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
       <div class="plugin-meta">
         <span class="category">testing</span><span class="author">Greg Duckworth</span>
@@ -33,37 +33,44 @@
     <div class="layout">
       <article class="plugin-contents">
         <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
-        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-webdriverio</h3><p class="content-description">Use this skill when writing, reviewing, or maintaining WebdriverIO web and mobile tests.</p></header><div class="content-body"><p>You are a test engineer ensuring maintainable and flake-free WebdriverIO end-to-end tests.</p>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-webdriverio</h3><p class="content-description">Use this skill when writing, fixing, or reviewing WebdriverIO tests — browser e2e, or iOS/Android mobile via Appium — including selectors, waiting, page objects, and wdio.conf.</p></header><div class="content-body"><p>WebdriverIO-specific rules for web and mobile tests. Base principles are not restated here.</p>
 <h2>Requires</h2>
 <ul>
-<li>test-automation-guidelines</li>
+<li><code>test-automation-guidelines</code> — its Guardrails and Rules apply. If it is not available, tell the user which plugin to install.</li>
+<li>For web UI suites, also <code>test-accessibility</code> (<code>@axe-core/webdriverio</code>).</li>
 </ul>
-<h2>See Also</h2>
+<h2>Rules</h2>
+<h3>Async model</h3>
 <ul>
-<li><code>test-accessibility</code> — apply when the suite should include automated a11y scanning (<code>@axe-core/webdriverio</code>) or when reviewing/writing accessible selector strategy.</li>
+<li><code>await</code> every <code>$</code>, <code>$$</code>, <code>browser</code>, and <code>expect</code> call.</li>
 </ul>
-<h2>Scope</h2>
+<h3>Selectors</h3>
 <ul>
-<li>Use WebdriverIO for browser-based or mobile end-to-end tests.</li>
-<li>Keep guidance specific to the area under test.</li>
+<li>Web: <code>$('[data-testid="…"]')</code> or a role/label attribute selector. Mobile: accessibility id (<code>$("~login-button")</code>).</li>
+<li>Avoid XPath and DOM-structure selectors; text selectors (<code>$("button=Submit")</code>) are a fallback only.</li>
 </ul>
-<h2>Workflow</h2>
-<ol>
-<li>Identify whether the task is web tests, mobile tests, or both.</li>
-<li>Refer only to the needed reference file:<ul>
-<li>Web: <code>references/web.md</code></li>
-<li>Mobile: <code>references/mobile.md</code></li>
+<h3>Waiting and timeouts</h3>
+<ul>
+<li>Never <code>browser.pause(ms)</code>. Use <code>waitForDisplayed</code>/<code>waitForClickable</code> or WebdriverIO's auto-retrying <code>expect(...)</code> matchers.</li>
+<li>Give waits on server work an explicit <code>timeout</code> rather than raising <code>waitforTimeout</code> globally; chained waits must fit within the framework's test timeout (<code>mochaOpts.timeout</code> or equivalent).</li>
+<li>Use <code>browser.waitUntil</code> with a <code>timeoutMsg</code> that states the condition, and stop on failure states too.</li>
 </ul>
-</li>
-<li>Apply the relevant principles and examples from that file.</li>
-<li>Give recommendations or code updates aligned to WebdriverIO best practices.</li>
-</ol>
+<h3>Structure</h3>
+<ul>
+<li>Page objects expose elements as getters and actions as methods; query an element once per action, not repeatedly.</li>
+</ul>
 <h2>Anti-Patterns</h2>
 <ul>
 <li><code>browser.pause</code> usage</li>
-<li>Using brittle test selectors such as xpath</li>
+<li>XPath or other brittle selectors</li>
 <li>Excessive or repeated element queries</li>
 <li>Tight coupling between tests and implementation details</li>
+</ul>
+<h2>References</h2>
+<p>Load only the one you need:</p>
+<ul>
+<li><a href="references/web.md">references/web.md</a> — browser selectors, waiting, assertions, page objects.</li>
+<li><a href="references/mobile.md">references/mobile.md</a> — Appium selectors (iOS predicate/class chain, Android UiAutomator), gestures, mobile page objects.</li>
 </ul>
 </div></article></section>
       </article>
