@@ -62,7 +62,7 @@
       "name": "test-automation-guidelines",
       "source": "./plugins/test-automation-guidelines",
       "description": "Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "Greg Duckworth"
       },
@@ -465,6 +465,23 @@
         "backlog"
       ],
       "category": "product"
+    },
+    {
+      "name": "test-pyramid",
+      "source": "./plugins/test-pyramid",
+      "description": "Analyse automated tests across frameworks and repositories to map the test pyramid. Finds duplicated coverage within and across layers, tests that can move down the pyramid, and coverage gaps to guide test strategy.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Greg Duckworth"
+      },
+      "keywords": [
+        "testing",
+        "test-pyramid",
+        "coverage",
+        "strategy",
+        "duplication"
+      ],
+      "category": "testing"
     }
   ]
 }

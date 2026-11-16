@@ -3,7 +3,7 @@ name: test-automation-guidelines
 description: Use this skill first for any automated-test task — writing, fixing, or maintaining tests at any layer. Sets the shared guardrails and principles, and maps each test type to the skill that owns its rules.
 metadata:
   author: Greg Duckworth
-  version: 1.2.0
+  version: 1.3.0
   tags:
     - category/test-automation
     - domain/engineering
@@ -39,7 +39,7 @@ Load the base skill for the layer, then the tool skill. Detect the tool from con
 | HTTP API | `test-api` | `test-bruno` (`.bru`), `test-postman` (collection JSON, `pm.`) |
 | Contract | — | `test-pact` (`@pact-foundation/*`) |
 | Performance | — | `test-k6` (`k6/http`) |
-| Process | — | `test-review` (diagnose), `test-refactor` (restructure), `test-jira-cases` (manual cases from Jira) |
+| Process | — | `test-review` (diagnose), `test-refactor` (restructure), `test-pyramid` (map layers, duplication, push-down across suites), `test-jira-cases` (manual cases from Jira) |
 
 ## Core Principles
 

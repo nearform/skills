@@ -1,0 +1,16 @@
+{
+  "name": "test-pyramid",
+  "description": "Analyse automated tests across frameworks and repositories to map the test pyramid. Finds duplicated coverage within and across layers, tests that can move down the pyramid, and coverage gaps to guide test strategy.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Greg Duckworth"
+  },
+  "keywords": [
+    "testing",
+    "test-pyramid",
+    "coverage",
+    "strategy",
+    "duplication"
+  ],
+  "category": "testing"
+}
