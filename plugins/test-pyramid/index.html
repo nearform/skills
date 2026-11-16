@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test-pyramid — Nearform Plugins</title>
+  <meta name="description" content="Analyse automated tests across frameworks and repositories to map the test pyramid. Finds duplicated coverage within and across layers, tests that can move down" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/NF_Symbol_Reverse.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bitter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="../../">Plugins</a><span class="sep">/</span><span>test-pyramid</span>
+    </nav>
+  </div>
+
+  <header class="plugin-hero">
+    <div class="container">
+      <h1>test-pyramid <span class="version">v1.0.0</span></h1>
+      <p class="description">Analyse automated tests across frameworks and repositories to map the test pyramid. Finds duplicated coverage within and across layers, tests that can move down the pyramid, and coverage gaps to guide test strategy.</p>
+      <div class="plugin-meta">
+        <span class="category">testing</span><span class="author">Greg Duckworth</span>
+      </div>
+      <div class="keywords"><span class="keyword">testing</span><span class="keyword">test-pyramid</span><span class="keyword">coverage</span><span class="keyword">strategy</span><span class="keyword">duplication</span></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="layout">
+      <article class="plugin-contents">
+        <nav class="content-tabs" role="tablist"><button role="tab" data-tab="skills" aria-selected="true" aria-controls="panel-skills">Skills <span class="count">(1)</span></button></nav>
+        <section role="tabpanel" id="panel-skills" data-tab="skills"><article class="content-item"><header><h3>test-pyramid</h3><p class="content-description">Use this skill to map the test pyramid across frameworks and repositories — inventory tests by layer, find behaviours tested more than once (within or across layers), tests to move down the pyramid, and coverage gaps — to guide test strategy.</p></header><div class="content-body"><p>You are a senior test engineer assessing a test estate as a whole. Tests are often split across frameworks (Vitest, Playwright, Postman, Pact, k6, …) and repositories, so no one sees the overall shape. Your job is to build that picture and turn it into decisions: where coverage is duplicated, which tests belong lower in the pyramid, and where behaviour is untested.</p>
+<p>This skill is <strong>analysis only</strong>. Do not edit, move, delete, or skip tests, and do not change production code. Moving a test is a follow-up task for the layer's skill (e.g. <code>test-unit-guidelines</code> + <code>test-vitest</code>) and <code>test-refactor</code>.</p>
+<h2>Requires</h2>
+<ul>
+<li><code>test-automation-guidelines</code> — its Guardrails and skill map apply. If it is not available, tell the user which plugin to install.</li>
+</ul>
+<h2>Inputs</h2>
+<p>Before starting, establish (ask only for what you cannot find):</p>
+<ol>
+<li><strong>Scope</strong> — every repository or path holding tests for the system: unit and integration tests beside the code, separate E2E/QA repos, API collections, contract and performance suites. A partial scope gives a partial pyramid; record what was excluded.</li>
+<li><strong>Behaviour source</strong> — what defines "a behaviour" here: routes/endpoints, features or user stories, modules, Gherkin features, or Jira epics. Default to public entry points (API routes, UI pages/journeys, exported modules).</li>
+<li><strong>Optional evidence</strong> — CI test reports (JUnit XML, Playwright/Cypress JSON), timings, flaky-test history, and coverage reports (lcov, Istanbul, JaCoCo, coverage.py). Without timings, runtime claims are estimates and must be labelled UNVERIFIED.</li>
+</ol>
+<h2>Workflow</h2>
+<h3>1. Inventory</h3>
+<p>For each repository in scope, find the test suites and count tests per suite. Detect the framework from config files, dependencies, and file patterns (see <a href="references/layer-signals.md">references/layer-signals.md</a>). Count test cases (<code>it</code>/<code>test</code>/<code>Scenario</code>/request-with-assertions), not files. Record how each suite runs in CI (job, trigger, duration if known).</p>
+<p>For large estates, inventory everything mechanically (file globs, grep counts), then read in priority order: E2E → API/integration → contract → unit. The upper layers are fewer, slower, and where duplication and push-down wins concentrate. State which suites were read in full and which were sampled.</p>
+<h3>2. Classify by layer</h3>
+<p>Assign each test (or suite, when uniform) to one layer by <strong>what it actually exercises</strong>, not by its folder name or framework:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Exercises</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Unit</td>
+<td>One function/class/module in-process; collaborators replaced</td>
+</tr>
+<tr>
+<td>Component</td>
+<td>One UI component or service in isolation, rendered or started in-process</td>
+</tr>
+<tr>
+<td>Contract</td>
+<td>The agreed shape of an interface between consumer and provider</td>
+</tr>
+<tr>
+<td>Integration / API</td>
+<td>Real collaborators across a boundary — database, HTTP, queue — without the full deployed system</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>The deployed system through its user-facing interface (browser, device, or public API as a user journey)</td>
+</tr>
+</tbody></table>
+<p>Flag misclassified suites, e.g. a "unit" test that starts a database, or an "E2E" test that only calls one endpoint. Non-functional suites (performance, accessibility, security) sit beside the pyramid: inventory them, but do not count them in its shape.</p>
+<h3>3. Map tests to behaviours</h3>
+<p>Seed the <strong>coverage matrix</strong> rows from the behaviour source established in Inputs (routes, journeys, features, modules), with layers as columns. Then, for each test, record the behaviour it proves (the outcome it asserts, not its title) and the production code it reaches, and attach a reference in the matching cell. Add a row for any tested behaviour the source missed. Keep rows with no tests, and mark each empty cell as either <em>untested</em> (the relevant suites were inspected) or <em>not inspected</em> (out of scope, unreachable, or not sampled). Normalise wording so that the same behaviour is matched across frameworks and repos (e.g. "rejects expired card" in a Playwright spec, a Postman request, and a Vitest test).</p>
+<h3>4. Analyse</h3>
+<p><strong>Pyramid shape</strong> — test count and, if known, runtime per layer. Name the shape: pyramid, ice-cream cone (E2E-heavy), hourglass (thin integration layer), or inverted. Shape alone is not a defect; tie it to cost (runtime, flakiness) and risk.</p>
+<p><strong>Duplication</strong> — a behaviour asserted more than once, at one layer or across layers. Classify each:</p>
+<ul>
+<li><em>Redundant</em> — a higher-layer test re-proves logic a lower layer already proves (e.g. ten E2E validation-message checks when the validator has unit tests). Recommend removing or slimming the higher one.</li>
+<li><em>Complementary</em> — each layer proves a different risk (unit proves the rule; one E2E proves it is wired to the UI). Keep both; say so.</li>
+<li><em>Same-layer</em> — near-identical tests within one layer or across repos. Recommend consolidation via <code>test-refactor</code>.</li>
+</ul>
+<p><strong>Push-down candidates</strong> — a test belongs lower when what it proves does not need the layer it runs at. Signals:</p>
+<ul>
+<li>E2E test asserting business rules, calculations, validation, or formatting → unit.</li>
+<li>E2E test that drives the UI only to reach one API call and checks the response → API/integration.</li>
+<li>Many E2E variants of one journey differing only by data → one E2E + parametrised unit/API tests.</li>
+<li>Integration test whose real collaborator is irrelevant to the assertion → unit with a test double.</li>
+<li>Cross-service integration test asserting only request/response shape → contract test.</li>
+</ul>
+<p>For each candidate give the target layer, what stays at the original layer (often nothing, sometimes one smoke path), and the expected saving.</p>
+<p><strong>Gaps</strong> — behaviours with no test at any layer, behaviours covered <em>only</em> at E2E, and high-risk areas (auth, payments, data integrity) with thin coverage. If coverage reports exist, cross-check them; line coverage does not prove behaviour is asserted.</p>
+<h3>5. Prioritise</h3>
+<p>Rank recommendations by value ÷ effort. Value: runtime saved, flakiness removed, risk covered. Effort: tests touched, harness or doubles that must exist first. Put quick wins (pure redundant E2E duplicates of existing unit tests) first.</p>
+<h2>Rules</h2>
+<ul>
+<li>Classify by behaviour exercised, not by directory, file name, or framework.</li>
+<li>Never recommend deleting a test unless another retained test — at the same or a different layer — proves the same behaviour; cite that test.</li>
+<li>Keep at least one test per critical user journey at E2E; the aim is the right layer, not zero E2E.</li>
+<li>Quantify: counts, runtimes, and savings come from the inventory or CI data. Mark estimates as estimates and anything not checked as UNVERIFIED.</li>
+<li>Be explicit about sampling and about repositories or suites out of reach.</li>
+<li>Report coverage per behaviour, not per file. A file-by-file list is not a pyramid.</li>
+</ul>
+<h2>Output</h2>
+<p>Use <a href="references/report-template.md">references/report-template.md</a>. Summary:</p>
+<ol>
+<li><strong>Scope &amp; method</strong> — repos and suites analysed, read-in-full vs sampled, evidence used, exclusions.</li>
+<li><strong>Pyramid</strong> — table of count and runtime per layer, the named shape, and non-functional suites listed separately.</li>
+<li><strong>Coverage matrix</strong> — behaviours × layers (top behaviours if the estate is large; full matrix as an appendix or file if requested).</li>
+<li><strong>Duplication</strong> — redundant / complementary / same-layer, each with test references (<code>repo:path:line</code>).</li>
+<li><strong>Push-down candidates</strong> — from → to, what stays, expected saving.</li>
+<li><strong>Gaps</strong> — untested, E2E-only, and thin high-risk behaviours.</li>
+<li><strong>Prioritised recommendations</strong> — ordered list naming the skill to carry out each (<code>test-refactor</code>, <code>test-unit-guidelines</code>, <code>test-api</code>, <code>test-pact</code>, …).</li>
+</ol>
+</div></article></section>
+      </article>
+
+      <aside>
+        <div class="side-card">
+          <h3>Install</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin install test-pyramid@nearform-skills</code><button class="copy-btn" data-copy="/plugin install test-pyramid@nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Open File → Cursor Settings → Plugins → enable test-pyramid</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin install test-pyramid@nearform-skills</code><button class="copy-btn" data-copy="copilot plugin install test-pyramid@nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Stay up to date</h3>
+          <div class="side-block"><span class="platform-label">Claude Code</span><pre><code>/plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="/plugin marketplace update nearform-skills">Copy</button></pre></div><div class="side-block"><span class="platform-label">Cursor</span><p class="platform">Cursor refreshes the marketplace automatically. Force-refresh from Settings → Plugins.</p></div><div class="side-block"><span class="platform-label">Copilot CLI</span><pre><code>copilot plugin marketplace update nearform-skills</code><button class="copy-btn" data-copy="copilot plugin marketplace update nearform-skills">Copy</button></pre></div>
+        </div>
+
+        <div class="side-card">
+          <h3>Source</h3>
+          <a href="https://github.com/nearform/skills/tree/main/plugins/test-pyramid">View on GitHub →</a>
+        </div>
+      </aside>
+    </div>
+
+    
+    <section>
+      <h2>More in testing <span class="count">(17)</span></h2>
+      <div class="related-grid">
+        <a class="plugin-card" href="../test-automation-guidelines/">
+          <h3>test-automation-guidelines</h3>
+          <p class="description">Core principles for writing deterministic, reliable, and maintainable automated tests across frameworks. Use when writing, reviewing, or maintaining automated tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-unit-guidelines/">
+          <h3>test-unit-guidelines</h3>
+          <p class="description">Core discipline for unit tests across frameworks: Arrange-Act-Assert structure, behaviour-focused naming, isolation, mocking discipline, and meaningful coverage. Use when writing, reviewing, or maintaining unit tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-vitest/">
+          <h3>test-vitest</h3>
+          <p class="description">Vitest-specific conventions for unit tests: test doubles, fake timers, async assertions, parametrisation, and config. Use when writing or reviewing Vitest tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Jacopo Martinelli &amp; Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-jira-cases/">
+          <h3>test-jira-cases</h3>
+          <p class="description">Generate reviewer-ready test cases from Jira tickets using Jira MCP. Use when a Jira issue, story, or epic needs coverage drafted for user review.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bdd/">
+          <h3>test-bdd</h3>
+          <p class="description">Behaviour-Driven Development practices for declarative Gherkin and thin, well-structured step definitions. Use when writing or reviewing BDD/Cucumber feature files and step definitions, delegating framework mechanics.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-cypress/">
+          <h3>test-cypress</h3>
+          <p class="description">Cypress-specific best practices for reliable, idiomatic end-to-end tests. Use when writing or reviewing Cypress tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-k6/">
+          <h3>test-k6</h3>
+          <p class="description">k6-specific best practices for performance tests, including load, stress, spike, and soak testing. Use when writing or reviewing k6 performance tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-pact/">
+          <h3>test-pact</h3>
+          <p class="description">Pact-specific best practices for consumer and provider contract tests. Use when writing, reviewing, or refactoring Pact tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-playwright/">
+          <h3>test-playwright</h3>
+          <p class="description">Playwright-specific best practices for reliable, parallel-safe end-to-end tests. Use when writing or reviewing Playwright tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-review/">
+          <h3>test-review</h3>
+          <p class="description">Review automated tests against core and framework-specific testing standards. Diagnoses issues and produces a verdict; recommends test-refactor for structural changes. Detects the framework used and applies the matching framework&#39;s review patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-refactor/">
+          <h3>test-refactor</h3>
+          <p class="description">Refactor automated tests to improve maintainability, readability, and organization without changing behaviour. Detects the framework used and applies the matching framework&#39;s refactoring patterns.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-webdriverio/">
+          <h3>test-webdriverio</h3>
+          <p class="description">WebdriverIO-specific best practices for stable and maintainable tests. Use when writing or reviewing WebdriverIO tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-accessibility/">
+          <h3>test-accessibility</h3>
+          <p class="description">Accessibility (a11y) testing best practices for automated tests — automated axe-core scanning, WCAG success criteria, and accessible selector strategy. Use when writing, reviewing, or maintaining accessibility checks in Cypress, Playwright, or WebdriverIO test suites.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-e2e/">
+          <h3>test-e2e</h3>
+          <p class="description">An e2e test engineer that detects the repo&#39;s framework and applies the Nearform e2e testing skills to author, review, and refactor end-to-end tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Sherrylene Gauci</span></div>
+        </a>
+        <a class="plugin-card" href="../test-api/">
+          <h3>test-api</h3>
+          <p class="description">Framework-agnostic best practices for testing HTTP/REST APIs: request design, assertions, auth, data setup, and environment handling. Use when writing or reviewing API tests, or as the shared base for tool-specific API testing skills (Bruno, Postman).</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-bruno/">
+          <h3>test-bruno</h3>
+          <p class="description">Bruno-specific best practices for API tests: .bru files, collections, environments, assertions, and scripting. Use when writing or reviewing Bruno API tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a>
+        <a class="plugin-card" href="../test-postman/">
+          <h3>test-postman</h3>
+          <p class="description">Postman-specific best practices for API tests: collections, environments, pm.* assertions, Newman, and CI. Use when writing or reviewing Postman API tests.</p>
+          <div class="plugin-meta"><span class="category">testing</span><span class="author">Greg Duckworth</span></div>
+        </a></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container vertical-alignment">
+      <picture>
+        <source srcset="../../assets/NF_Symbol_Reverse.svg" media="(prefers-color-scheme: dark)" />
+        <img src="../../assets/NF_Symbol_Color.svg" alt="Nearform Symbol" />
+      </picture>
+      <div>
+        Maintained by the Nearform AI Practice ·
+        <a href="https://github.com/nearform/skills/issues">Report an issue</a> ·
+        <a href="https://github.com/nearform/skills">Source</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("click", e => {
+      const tab = e.target.closest(".content-tabs [role='tab']");
+      if (tab) {
+        e.preventDefault();
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".content-tabs [role='tab']").forEach(b =>
+          b.setAttribute("aria-selected", b.dataset.tab === target ? "true" : "false")
+        );
+        document.querySelectorAll("[role='tabpanel']").forEach(p =>
+          p.toggleAttribute("hidden", p.dataset.tab !== target)
+        );
+        return;
+      }
+      const btn = e.target.closest(".copy-btn");
+      if (!btn) return;
+      e.preventDefault();
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }).catch((err) => {
+        console.warn('Clipboard copy failed:', err);
+      });
+    });
+  </script>
+</body>
+</html>
